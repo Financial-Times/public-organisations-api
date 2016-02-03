@@ -57,7 +57,7 @@ type neoReadStruct struct {
 		Types     []string
 		PrefLabel string
 	}
-	IndustryClassification struct {
+	Ind struct {
 		ID        string
 		Types     []string
 		PrefLabel string
@@ -94,19 +94,23 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
 				MATCH (o:Organisation{uuid:{uuid}})
 				OPTIONAL MATCH (o)<-[:HAS_ORGANISATION]-(m:Membership)
 				OPTIONAL MATCH (m)-[:HAS_MEMBER]->(p:Person)
-				OPTIONAL MATCH (p)<-[rel:MENTIONS]-(c:Content)
+				OPTIONAL MATCH (p)<-[rel:MENTIONS]-(poc:Content)-[mo:MENTIONS]->(o)
 				WITH    o,
 				{ id:p.uuid, types:labels(p), prefLabel:p.prefLabel} as p,
-				{ id:m.uuid, prefLabel:m.prefLabel, changeEvents:[{startedAt:m.inceptionDate}, {endedAt:m.terminationDate}], annCount:COUNT(c) } as m ORDER BY m.annCount DESC
+				{ id:m.uuid, prefLabel:m.prefLabel, changeEvents:[{startedAt:m.inceptionDate}, {endedAt:m.terminationDate}], annCount:COUNT(poc) } as m ORDER BY m.annCount DESC LIMIT 20
 				WITH o, collect({m:m, p:p}) as pm
 				OPTIONAL MATCH (o)-[:SUB_ORGANISATION_OF]->(parent:Organisation)
 				OPTIONAL MATCH (o)<-[:SUB_ORGANISATION_OF]-(sub:Organisation)
+				OPTIONAL MATCH (soc:Content)-[mo:MENTIONS]->(sub)
 				WITH o, pm,
 				{ id:parent.uuid, types:labels(parent), prefLabel:parent.prefLabel} as parent,
-				{ id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel} as sub
-				WITH o, pm, parent, collect(sub) as sub
-				WITH pm, parent, sub, { id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases, leicode:o.leiCode} as o
-				return collect ({o:o, parent:parent, sub:sub, pm:pm}) as rs
+				{ id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel, annCount:COUNT(soc) } as sub ORDER BY sub.annCount DESC LIMIT 10
+				WITH o, pm, parent, collect(sub) as subs
+				OPTIONAL MATCH (o)-[:HAS_CLASSIFICATION]->(ind:IndustryClassification)
+				WITH o, pm, parent, subs,
+				{ id:ind.uuid, types:labels(ind), prefLabel:ind.prefLabel} as ind
+				WITH pm, parent, subs, ind, { id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases, leicode:o.leiCode} as o
+				return collect ({o:o, ind:ind, parent:parent, subs:subs, pm:pm}) as rs
 							`,
 		Parameters: neoism.Props{"uuid": uuid},
 		Result:     &results,
@@ -142,15 +146,16 @@ func neoReadStructToOrganisation(neo neoReadStruct) Organisation {
 		public.Labels = &neo.O.Labels
 	}
 
-	if neo.IndustryClassification.Types != nil {
+	if neo.Ind.ID != "" {
 		public.IndustryClassification = &IndustryClassification{}
 		public.IndustryClassification.Thing = &Thing{}
-		public.IndustryClassification.ID = mapper.IDURL(neo.IndustryClassification.ID)
-		public.IndustryClassification.APIURL = mapper.APIURL(neo.IndustryClassification.ID, neo.IndustryClassification.Types)
-		public.IndustryClassification.PrefLabel = neo.IndustryClassification.PrefLabel
+		public.IndustryClassification.ID = mapper.IDURL(neo.Ind.ID)
+		public.IndustryClassification.APIURL = mapper.APIURL(neo.Ind.ID, neo.Ind.Types)
+		public.IndustryClassification.PrefLabel = neo.Ind.PrefLabel
 	}
+	log.Infof("IndustryClassification=%v", public.IndustryClassification)
 
-	if neo.Parent.Types != nil {
+	if neo.Parent.ID != "" {
 		public.Parent = &Parent{}
 		public.Parent.Thing = &Thing{}
 		public.Parent.ID = mapper.IDURL(neo.Parent.ID)

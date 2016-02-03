@@ -34,8 +34,8 @@ type Organisation struct {
 	Types                  []string                `json:"types"`
 	LEICode                string                  `json:"leiCode,omitempty"`
 	Labels                 *[]string               `json:"labels,omitempty"`
-	IndustryClassification *IndustryClassification `json:"industryClassification"` //this is a pointer so that the struct is omitted if empty
-	Parent                 *Parent                 `json:"parentOrganisation"`
+	IndustryClassification *IndustryClassification `json:"industryClassification,omitempty"` //this is a pointer so that the struct is omitted if empty
+	Parent                 *Parent                 `json:"parentOrganisation,omitempty"`
 	Subsidiaries           []Subsidiary            `json:"subsidiaries,omitempty"`
 	Memberships            []Membership            `json:"memberships,omitempty"`
 }
