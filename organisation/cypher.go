@@ -48,6 +48,7 @@ type neoReadStruct struct {
 	O struct {
 		ID        string
 		Types     []string
+		LEICode   string
 		PrefLabel string
 		Labels    []string
 	}
@@ -99,7 +100,7 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
 				{ id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel} as sub
 				WITH o, m, p, parent, collect(sub) as sub
 				WITH o, parent, sub, collect({m:m, p:p}) as m
-				WITH m, parent, sub, { id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases} as o
+				WITH m, parent, sub, { id:o.uuid, types:labels(o), leiCode: o.leiCode, prefLabel:o.prefLabel, labels:o.aliases} as o
 				RETURN collect ({o:o, m:m, parent:parent, sub:sub}) as rs
 							`,
 		Parameters: neoism.Props{"uuid": uuid},
@@ -130,6 +131,7 @@ func neoReadStructToOrganisation(neo neoReadStruct) Organisation {
 	public.ID = mapper.IDURL(neo.O.ID)
 	public.APIURL = mapper.APIURL(neo.O.ID, neo.O.Types)
 	public.Types = mapper.TypeURIs(neo.O.Types)
+	public.LEICode = neo.O.LEICode
 	public.PrefLabel = neo.O.PrefLabel
 	if len(neo.O.Labels) > 0 {
 		public.Labels = &neo.O.Labels
@@ -149,9 +151,6 @@ func neoReadStructToOrganisation(neo neoReadStruct) Organisation {
 			membership.Person.APIURL = mapper.APIURL(neoMem.P.ID, neoMem.P.Types)
 			membership.Person.Types = mapper.TypeURIs(neoMem.P.Types)
 			membership.Person.PrefLabel = neoMem.P.PrefLabel
-			if len(neoMem.P.Labels) > 0 {
-				membership.Person.Labels = &neoMem.P.Labels
-			}
 			if a, b := changeEvent(neoMem.M.ChangeEvents); a == true {
 				membership.ChangeEvents = b
 			}

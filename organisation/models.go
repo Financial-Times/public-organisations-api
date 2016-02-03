@@ -31,12 +31,13 @@ public class Organisation extends Thing {
 */
 type Organisation struct {
 	*Thing
-	Types        []string        `json:"types"`
-	LEICode      []string        `json:"leiCode,omitempty"`
-	Labels       *[]string       `json:"labels,omitempty"`
-	Parent       *Organisation   `json:"parentOrganisation,omitempty"`
-	Subsidiaries []*Organisation `json:"subsidiaries,omitempty"`
-	Memberships  []Membership    `json:"memberships,omitempty"`
+	Types                  []string               `json:"types"`
+	LEICode                string                 `json:"leiCode,omitempty"`
+	Labels                 *[]string              `json:"labels,omitempty"`
+	IndustryClassification IndustryClassification `json:"industryClassification,omitempty"`
+	Parent                 *Organisation          `json:"parentOrganisation,omitempty"`
+	Subsidiaries           []*Organisation        `json:"subsidiaries,omitempty"`
+	Memberships            []Membership           `json:"memberships,omitempty"`
 }
 
 // Membership represents the relationship between an organisation and a person
@@ -58,8 +59,13 @@ type Membership struct {
 // Person simplified representation used in Organisation API
 type Person struct {
 	*Thing
-	Types  []string  `json:"types"`
-	Labels *[]string `json:"labels,omitempty"`
+	Types []string `json:"types"`
+}
+
+// IndustryClassification represents the type of Organisation, e.g. a Bank
+type IndustryClassification struct {
+	*Thing
+	Types []string `json:"types"`
 }
 
 // ChangeEvent represent when something started or ended
