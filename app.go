@@ -44,7 +44,7 @@ func runServer(neoURL string, port string) {
 	if err != nil {
 		log.Fatalf("Error connecting to neo4j %s", err)
 	}
-	organisation.OrganisationDriver = organisation.NewCypherDriver(db)
+	//organisation.OrganisationDriver = organisation.NewCypherDriver(db)
 
 	r := mux.NewRouter()
 
@@ -54,8 +54,13 @@ func runServer(neoURL string, port string) {
 	r.HandleFunc("/ping", organisation.Ping)
 	r.HandleFunc("/__ping", organisation.Ping)
 
+	// The top one of these feels more correct, but the lower one matches what we have in Dropwizard,
+	// so it's what apps expect currently same as ping, the content of build-info needs more definition
+	r.HandleFunc("/__build-info", organisation.BuildInfoHandler)
+	r.HandleFunc("/build-info", organisation.BuildInfoHandler)
+
 	// Then API specific ones:
-	r.HandleFunc("/organisations/{uuid}", organisation.GetOrganisation).Methods("GET")
+	//r.HandleFunc("/organisation/{uuid}", organisation.GetOrganisation).Methods("GET")
 
 	if err := http.ListenAndServe(":"+port,
 		httphandlers.HTTPMetricsHandler(metrics.DefaultRegistry,
