@@ -39,6 +39,11 @@ func Ping(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "pong")
 }
 
+// BuildInfoHandler - This is a stop gap and will be added to when we can define what we should display here
+func BuildInfoHandler(w http.ResponseWriter, req *http.Request) {
+	fmt.Fprintf(w, "build-info")
+}
+
 // GetOrganisation is the public API
 func GetOrganisation(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
