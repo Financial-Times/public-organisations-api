@@ -35,8 +35,8 @@ type Organisation struct {
 	LEICode                string                 `json:"leiCode,omitempty"`
 	Labels                 *[]string              `json:"labels,omitempty"`
 	IndustryClassification IndustryClassification `json:"industryClassification,omitempty"`
-	Parent                 *Organisation          `json:"parentOrganisation,omitempty"`
-	Subsidiaries           []*Organisation        `json:"subsidiaries,omitempty"`
+	Parent                 Parent                 `json:"parentOrganisation,omitempty"`
+	Subsidiaries           []Subsidiary           `json:"subsidiaries,omitempty"`
 	Memberships            []Membership           `json:"memberships,omitempty"`
 }
 
@@ -58,6 +58,18 @@ type Membership struct {
 
 // Person simplified representation used in Organisation API
 type Person struct {
+	*Thing
+	Types []string `json:"types"`
+}
+
+// Parent is a simplified representation of a parent organisation, used in Organisation API
+type Parent struct {
+	*Thing
+	Types []string `json:"types"`
+}
+
+// Subsidiary is a simplified representation of a subsidiary organisation, used in Organisation API
+type Subsidiary struct {
 	*Thing
 	Types []string `json:"types"`
 }

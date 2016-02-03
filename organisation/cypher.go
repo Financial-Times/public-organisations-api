@@ -80,7 +80,6 @@ type neoReadStruct struct {
 }
 
 func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool, err error) {
-	log.Infof("Entered READ for uuid=%s", uuid)
 	organisation = Organisation{}
 	results := []struct {
 		Rs []neoReadStruct
@@ -136,6 +135,14 @@ func neoReadStructToOrganisation(neo neoReadStruct) Organisation {
 	if len(neo.O.Labels) > 0 {
 		public.Labels = &neo.O.Labels
 	}
+	log.Infof("Parent=%s", neo.Parent)
+
+	public.Parent = Parent{}
+	public.Parent.Thing = &Thing{}
+	public.Parent.ID = mapper.IDURL(neo.Parent.ID)
+	public.Parent.APIURL = mapper.APIURL(neo.Parent.ID, neo.Parent.Types)
+	public.Parent.Types = mapper.TypeURIs(neo.Parent.Types)
+	public.Parent.PrefLabel = neo.Parent.PrefLabel
 
 	log.Info("LENGTH of memberships:", len(neo.M))
 	if len(neo.M) == 1 && (neo.M[0].M.ID == "") {
