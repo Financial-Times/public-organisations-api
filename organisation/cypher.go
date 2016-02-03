@@ -97,14 +97,15 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
 				OPTIONAL MATCH (p)<-[rel:MENTIONS]-(poc:Content)-[mo:MENTIONS]->(o)
 				WITH    o,
 				{ id:p.uuid, types:labels(p), prefLabel:p.prefLabel} as p,
-				{ id:m.uuid, prefLabel:m.prefLabel, changeEvents:[{startedAt:m.inceptionDate}, {endedAt:m.terminationDate}], annCount:COUNT(poc) } as m ORDER BY m.annCount DESC LIMIT 20
+				{ id:m.uuid, prefLabel:m.prefLabel, changeEvents:[{startedAt:m.inceptionDate}, {endedAt:m.terminationDate}], annCount:COUNT(poc) } as m
+					ORDER BY m.annCount DESC LIMIT 1000
 				WITH o, collect({m:m, p:p}) as pm
 				OPTIONAL MATCH (o)-[:SUB_ORGANISATION_OF]->(parent:Organisation)
 				OPTIONAL MATCH (o)<-[:SUB_ORGANISATION_OF]-(sub:Organisation)
 				OPTIONAL MATCH (soc:Content)-[mo:MENTIONS]->(sub)
 				WITH o, pm,
 				{ id:parent.uuid, types:labels(parent), prefLabel:parent.prefLabel} as parent,
-				{ id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel, annCount:COUNT(soc) } as sub ORDER BY sub.annCount DESC LIMIT 10
+				{ id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel, annCount:COUNT(soc) } as sub ORDER BY sub.annCount DESC LIMIT 200
 				WITH o, pm, parent, collect(sub) as subs
 				OPTIONAL MATCH (o)-[:HAS_CLASSIFICATION]->(ind:IndustryClassification)
 				WITH o, pm, parent, subs,
