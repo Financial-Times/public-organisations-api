@@ -54,7 +54,6 @@ func GetOrganisation(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "uuid required", http.StatusBadRequest)
 		return
 	}
-	log.Infof("About to call READ	")
 	organisation, found, err := OrganisationDriver.Read(uuid)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
