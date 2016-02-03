@@ -62,7 +62,7 @@ type neoReadStruct struct {
 		Types     []string
 		PrefLabel string
 	}
-	Sub []struct {
+	Subs []struct {
 		ID        string
 		Types     []string
 		PrefLabel string
@@ -164,11 +164,11 @@ func neoReadStructToOrganisation(neo neoReadStruct) Organisation {
 		public.Parent.PrefLabel = neo.Parent.PrefLabel
 	}
 
-	if len(neo.Sub) == 1 && neo.Sub[0].ID == "" {
+	if len(neo.Subs) == 1 && neo.Subs[0].ID == "" {
 		public.Subsidiaries = make([]Subsidiary, 0, 0)
 	} else {
-		public.Subsidiaries = make([]Subsidiary, len(neo.Sub))
-		for idx, neoSub := range neo.Sub {
+		public.Subsidiaries = make([]Subsidiary, len(neo.Subs))
+		for idx, neoSub := range neo.Subs {
 			subsidiary := Subsidiary{}
 			subsidiary.Thing = &Thing{}
 			subsidiary.ID = mapper.IDURL(neoSub.ID)
