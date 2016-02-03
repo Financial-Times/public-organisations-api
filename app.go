@@ -44,7 +44,7 @@ func runServer(neoURL string, port string) {
 	if err != nil {
 		log.Fatalf("Error connecting to neo4j %s", err)
 	}
-	//organisation.OrganisationDriver = organisation.NewCypherDriver(db)
+	organisation.OrganisationDriver = organisation.NewCypherDriver(db)
 
 	r := mux.NewRouter()
 
@@ -55,7 +55,7 @@ func runServer(neoURL string, port string) {
 	r.HandleFunc("/__ping", organisation.Ping)
 
 	// Then API specific ones:
-	//r.HandleFunc("/organisation/{uuid}", organisation.GetOrganisation).Methods("GET")
+	r.HandleFunc("/organisations/{uuid}", organisation.GetOrganisation).Methods("GET")
 
 	if err := http.ListenAndServe(":"+port,
 		httphandlers.HTTPMetricsHandler(metrics.DefaultRegistry,

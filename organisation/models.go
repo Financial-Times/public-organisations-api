@@ -16,25 +16,30 @@ type Thing struct {
 	PrefLabel string `json:"prefLabel,omitempty"`
 }
 
-// Person is the structure used for the people API
-/* The following is currently defined in Java (e4b93668e32)
+// Organisation is the structure used for the people API
+/* The following is currently defined in Java (e4b93668e32) but I think we should be removing profile
 @JsonInclude(NON_EMPTY)
-public class Person extends Thing {
+public class Organisation extends Thing {
+
     public List<String> labels = new ArrayList<>();
     public String profile;
+    public Thing industryClassification;
+    public Thing parentOrganisation;
+    public List<Thing> subsidiaries = new ArrayList<>();
     public List<Membership> memberships = new ArrayList<>();
 }
 */
-type Person struct {
+type Organisation struct {
 	*Thing
-	Types       []string     `json:"types"`
-	Labels      *[]string    `json:"labels,omitempty"`
-	Memberships []Membership `json:"memberships,omitempty"`
-	Salutation  string       `json:"salutation,omitempty"`
-	BirthYear   string       `json:"birthYear,omitempty"`
+	Types        []string        `json:"types"`
+	LEICode      []string        `json:"leiCode,omitempty"`
+	Labels       *[]string       `json:"labels,omitempty"`
+	Parent       *Organisation   `json:"parentOrganisation,omitempty"`
+	Subsidiaries []*Organisation `json:"subsidiaries,omitempty"`
+	Memberships  []Membership    `json:"memberships,omitempty"`
 }
 
-// Membership represents the relationship between a person and their roles associated with an organisation
+// Membership represents the relationship between an organisation and a person
 /*
 @JsonInclude(Include.NON_EMPTY)
 public class Membership {
@@ -46,28 +51,15 @@ public class Membership {
 */
 type Membership struct {
 	Title        string         `json:"title,omitempty"`
-	Organisation Organisation   `json:"organisation"`
-	Roles        []Role         `json:"roles"`
+	Person       Person         `json:"person"`
 	ChangeEvents *[]ChangeEvent `json:"changeEvents,omitempty"`
 }
 
-// Organisation simplified representation used in Person API
-type Organisation struct {
+// Person simplified representation used in Organisation API
+type Person struct {
 	*Thing
 	Types  []string  `json:"types"`
 	Labels *[]string `json:"labels,omitempty"`
-}
-
-// Role represents the capacity or funciton that a person performs for an organisation
-/*
-@JsonInclude(Include.NON_EMPTY)
-public class MembershipRole extends Thing {
-    public List<ChangeEvent> changeEvents = new ArrayList();
-}
-*/
-type Role struct {
-	*Thing
-	ChangeEvents *[]ChangeEvent `json:"changeEvents,omitempty"`
 }
 
 // ChangeEvent represent when something started or ended

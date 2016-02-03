@@ -1,6 +1,10 @@
 package organisation
 
 import (
+	"errors"
+	"fmt"
+
+	"github.com/Financial-Times/neo-model-utils-go/mapper"
 	log "github.com/Sirupsen/logrus"
 	"github.com/jmcvetta/neoism"
 )
@@ -41,11 +45,21 @@ type neoChangeEvent struct {
 }
 
 type neoReadStruct struct {
-	P struct {
+	O struct {
 		ID        string
 		Types     []string
 		PrefLabel string
 		Labels    []string
+	}
+	Parent struct {
+		ID        string
+		Types     []string
+		PrefLabel string
+	}
+	Sub []struct {
+		ID        string
+		Types     []string
+		PrefLabel string
 	}
 	M []struct {
 		M struct {
@@ -55,41 +69,38 @@ type neoReadStruct struct {
 			Title        string
 			ChangeEvents []neoChangeEvent
 		}
-		O struct {
+		P struct {
 			ID        string
 			Types     []string
 			PrefLabel string
 			Labels    []string
 		}
-		R []struct {
-			ID           string
-			Types        []string
-			PrefLabel    string
-			ChangeEvents []neoChangeEvent
-		}
 	}
 }
 
 func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool, err error) {
-	/*person = Person{}
+	log.Infof("Entered READ for uuid=%s", uuid)
+	organisation = Organisation{}
 	results := []struct {
 		Rs []neoReadStruct
 	}{}
 	query := &neoism.CypherQuery{
 		Statement: `
-							MATCH (p:Person{uuid:{uuid}})
-							OPTIONAL MATCH (p)<-[:HAS_MEMBER]-(m:Membership)
-							OPTIONAL MATCH (m)-[:HAS_ORGANISATION]->(o:Organisation)
-							OPTIONAL MATCH (o)<-[rel:MENTIONS]-(c:Content)
-							OPTIONAL MATCH (m)-[rr:HAS_ROLE]->(r:Role)
-							WITH    p,
-							{ id:o.uuid, types:labels(o), prefLabel:o.prefLabel, annCount:COUNT(c)} as o,
-							{ id:m.uuid, types:labels(m), prefLabel:m.prefLabel, title:m.title, changeEvents:[{startedAt:m.inceptionDate}, {endedAt:m.terminationDate}] } as m,
-							{ id:r.uuid, types:labels(r), prefLabel:r.prefLabel, changeEvents:[{startedAt:rr.inceptionDate}, {endedAt:rr.terminationDate}] } as r
-							WITH p, m, o, collect(r) as r ORDER BY o.annCount DESC
-							WITH p, collect({m:m, o:o, r:r}) as m
-							WITH m, { id:p.uuid, types:labels(p), prefLabel:p.prefLabel, labels:p.aliases} as p
-							RETURN collect ({p:p, m:m}) as rs
+				MATCH (o:Organisation{uuid:"d4de7285-0881-34aa-a2b3-a73c8245bac2"})
+				OPTIONAL MATCH (o)<-[:HAS_ORGANISATION]-(m:Membership)
+				OPTIONAL MATCH (m)-[:HAS_MEMBER]->(p:Person)
+				OPTIONAL MATCH (p)<-[rel:MENTIONS]-(c:Content)
+				OPTIONAL MATCH (o)-[:SUB_ORGANISATION_OF]->(parent:Organisation)
+				OPTIONAL MATCH (o)<-[:SUB_ORGANISATION_OF]-(sub:Organisation)
+				WITH    o,
+				{ id:p.uuid, types:labels(p), prefLabel:p.prefLabel, annCount:COUNT(c)} as p,
+				{ id:m.uuid, types:labels(m), prefLabel:m.prefLabel, title:m.title, changeEvents:[{startedAt:m.inceptionDate}, {endedAt:m.terminationDate}] } as m,
+				{ id:parent.uuid, types:labels(parent), prefLabel:parent.prefLabel} as parent,
+				{ id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel} as sub
+				WITH o, m, p, parent, collect(sub) as sub
+				WITH o, parent, sub, collect({m:m, p:p}) as m
+				WITH m, parent, sub, { id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases} as o
+				RETURN collect ({o:o, m:m, parent:parent, sub:sub}) as rs
 							`,
 		Parameters: neoism.Props{"uuid": uuid},
 		Result:     &results,
@@ -97,32 +108,31 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
 	err = pcw.db.Cypher(query)
 	if err != nil {
 		log.Errorf("Error looking up uuid %s with query %s from neoism: %+v\n", uuid, query.Statement, err)
-		return Person{}, false, fmt.Errorf("Error accessing Person datastore for uuid: %s", uuid)
+		return Organisation{}, false, fmt.Errorf("Error accessing Organisation datastore for uuid: %s", uuid)
 	}
-	log.Debugf("CypherResult ReadPeople for uuid: %s was: %+v", uuid, results)
+	log.Debugf("CypherResult ReadOrganisation for uuid: %s was: %+v", uuid, results)
 	if (len(results)) == 0 || len(results[0].Rs) == 0 {
-		return Person{}, false, nil
+		return Organisation{}, false, nil
 	} else if len(results) != 1 && len(results[0].Rs) != 1 {
-		errMsg := fmt.Sprintf("Multiple people found with the same uuid:%s !", uuid)
+		errMsg := fmt.Sprintf("Multiple organisations found with the same uuid:%s !", uuid)
 		log.Error(errMsg)
-		return Person{}, true, errors.New(errMsg)
+		return Organisation{}, true, errors.New(errMsg)
 	}
-	person = neoReadStructToPerson(results[0].Rs[0])
-	log.Debugf("Returning %v", person)
-	return person, true, nil*/
-	public := Organisation{}
-	return public, true, nil
+	organisation = neoReadStructToOrganisation(results[0].Rs[0])
+	log.Debugf("Returning %v", organisation)
+	return organisation, true, nil
 }
 
 func neoReadStructToOrganisation(neo neoReadStruct) Organisation {
-	/*public := Person{}
+	//TODO map parent, map subsidiaries, find out why we only get two memberships here compared to 17 off PROD graphDB...
+	public := Organisation{}
 	public.Thing = &Thing{}
-	public.ID = mapper.IDURL(neo.P.ID)
-	public.APIURL = mapper.APIURL(neo.P.ID, neo.P.Types)
-	public.Types = mapper.TypeURIs(neo.P.Types)
-	public.PrefLabel = neo.P.PrefLabel
-	if len(neo.P.Labels) > 0 {
-		public.Labels = &neo.P.Labels
+	public.ID = mapper.IDURL(neo.O.ID)
+	public.APIURL = mapper.APIURL(neo.O.ID, neo.O.Types)
+	public.Types = mapper.TypeURIs(neo.O.Types)
+	public.PrefLabel = neo.O.PrefLabel
+	if len(neo.O.Labels) > 0 {
+		public.Labels = &neo.O.Labels
 	}
 
 	log.Info("LENGTH of memberships:", len(neo.M))
@@ -133,37 +143,22 @@ func neoReadStructToOrganisation(neo neoReadStruct) Organisation {
 		for mIdx, neoMem := range neo.M {
 			membership := Membership{}
 			membership.Title = neoMem.M.PrefLabel
-			membership.Organisation = Organisation{}
-			membership.Organisation.Thing = &Thing{}
-			membership.Organisation.ID = mapper.IDURL(neoMem.O.ID)
-			membership.Organisation.APIURL = mapper.APIURL(neoMem.O.ID, neoMem.O.Types)
-			membership.Organisation.Types = mapper.TypeURIs(neoMem.O.Types)
-			membership.Organisation.PrefLabel = neoMem.O.PrefLabel
-			if len(neoMem.O.Labels) > 0 {
-				membership.Organisation.Labels = &neoMem.O.Labels
+			membership.Person = Person{}
+			membership.Person.Thing = &Thing{}
+			membership.Person.ID = mapper.IDURL(neoMem.P.ID)
+			membership.Person.APIURL = mapper.APIURL(neoMem.P.ID, neoMem.P.Types)
+			membership.Person.Types = mapper.TypeURIs(neoMem.P.Types)
+			membership.Person.PrefLabel = neoMem.P.PrefLabel
+			if len(neoMem.P.Labels) > 0 {
+				membership.Person.Labels = &neoMem.P.Labels
 			}
 			if a, b := changeEvent(neoMem.M.ChangeEvents); a == true {
 				membership.ChangeEvents = b
 			}
-			membership.Roles = make([]Role, len(neoMem.R))
-			for rIdx, neoRole := range neoMem.R {
-				role := Role{}
-				role.Thing = &Thing{}
-				role.ID = mapper.IDURL(neoRole.ID)
-				role.APIURL = mapper.APIURL(neoRole.ID, neoRole.Types)
-				role.PrefLabel = neoRole.PrefLabel
-				if a, b := changeEvent(neoRole.ChangeEvents); a == true {
-					membership.ChangeEvents = b
-				}
-
-				membership.Roles[rIdx] = role
-			}
 			public.Memberships[mIdx] = membership
 		}
 	}
-	log.Debugf("neoReadStructToPerson neo: %+v result: %+v", neo, public)
-	return public */
-	public := Organisation{}
+	log.Debugf("neoReadStructToOrganisation neo: %+v result: %+v", neo, public)
 	return public
 }
 

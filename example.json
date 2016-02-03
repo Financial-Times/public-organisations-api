@@ -1,0 +1,257 @@
+{
+   "id":"http://api.ft.com/things/d4de7285-0881-34aa-a2b3-a73c8245bac2",
+   "apiUrl":"http://api.ft.com/organisations/d4de7285-0881-34aa-a2b3-a73c8245bac2",
+   "prefLabel":"Boots UK Ltd.",
+   "types":[
+      "http://www.ft.com/ontology/organisation/Organisation"
+   ],
+   "leiCode":"213800OVIPM8E2PYWN69",
+   "labels":[
+      "Boots UK Ltd.",
+      "BOOTS UK LTD",
+      "Boots UK",
+      "Boots UK Ltd",
+      "Boots.com",
+      "Boots",
+      "Boots UK Limited"
+   ],
+   "profile":"<body><p>Boots UK Ltd is a member of Alliance Boots, an international pharmacy-led health and beauty group. They have close to 2,500 stores from local community pharmacies to large destination health and beauty stores. The company has combined its two retail businesses in the UK, Alliance Pharmacy and Boots, and developed a multi-format strategy focused on giving its customers more of what they want and need. The stores offer destination shopping with a wide range of products including all Boots leading brands and their flagship stores also offer beauty halls with beauty consultants and premium cosmetics. The company was founded in 1969 and is headquartered in Nottingham, GB.</p></body>",
+   "parentOrganisation":{
+      "id":"http://api.ft.com/things/69977fe9-d8d5-3363-b90a-ad916bdde9c0",
+      "apiUrl":"http://api.ft.com/organisations/69977fe9-d8d5-3363-b90a-ad916bdde9c0",
+      "prefLabel":"Alliance Boots GmbH",
+      "types":[
+         "http://www.ft.com/ontology/organisation/Organisation"
+      ]
+   },
+   "subsidiaries":[
+      {
+         "id":"http://api.ft.com/things/85f270b8-dbb9-3714-9340-c387e6fce7e0",
+         "apiUrl":"http://api.ft.com/organisations/85f270b8-dbb9-3714-9340-c387e6fce7e0",
+         "prefLabel":"Burrows & Close Ltd.",
+         "types":[
+            "http://www.ft.com/ontology/organisation/Organisation"
+         ]
+      },
+      {
+         "id":"http://api.ft.com/things/65227887-3fd9-3b3d-a017-acdc6f68a3c8",
+         "apiUrl":"http://api.ft.com/organisations/65227887-3fd9-3b3d-a017-acdc6f68a3c8",
+         "prefLabel":"Burrells Ltd.",
+         "types":[
+            "http://www.ft.com/ontology/organisation/Organisation"
+         ]
+      }
+   ],
+   "memberships":[
+      {
+         "title":"Chief Operating Officer",
+         "person":{
+            "id":"http://api.ft.com/things/36112841-af8d-3743-b15d-eb12b1d75436",
+            "apiUrl":"http://api.ft.com/people/36112841-af8d-3743-b15d-eb12b1d75436",
+            "prefLabel":"Simon Roberts",
+            "types":[
+               "http://www.ft.com/ontology/person/Person"
+            ]
+         }
+      },
+      {
+         "title":"Director-Human Resources",
+         "person":{
+            "id":"http://api.ft.com/things/ebfd03c7-bff7-321f-8a93-7be99f961ce3",
+            "apiUrl":"http://api.ft.com/people/ebfd03c7-bff7-321f-8a93-7be99f961ce3",
+            "prefLabel":"Stephen James Lehane",
+            "types":[
+               "http://www.ft.com/ontology/person/Person"
+            ]
+         }
+      },
+      {
+         "title":"Director-Health & Beauty International Markrting",
+         "person":{
+            "id":"http://api.ft.com/things/48a6323e-6b02-32cd-ae41-31fe8b789c57",
+            "apiUrl":"http://api.ft.com/people/48a6323e-6b02-32cd-ae41-31fe8b789c57",
+            "prefLabel":"Elizabeth Fagan",
+            "types":[
+               "http://www.ft.com/ontology/person/Person"
+            ]
+         },
+         "changeEvents":[
+            {
+               "startedAt":"1983-01-01T00:00:00Z"
+            }
+         ]
+      },
+      {
+         "title":"Finance Director",
+         "person":{
+            "id":"http://api.ft.com/things/d1f5885a-6921-3a63-baf1-341469b5140e",
+            "apiUrl":"http://api.ft.com/people/d1f5885a-6921-3a63-baf1-341469b5140e",
+            "prefLabel":"Paul Fussey",
+            "types":[
+               "http://www.ft.com/ontology/person/Person"
+            ]
+         }
+      },
+      {
+         "title":"Merchandise Controller",
+         "person":{
+            "id":"http://api.ft.com/things/616e1ae8-b078-3a12-b609-254d1b118968",
+            "apiUrl":"http://api.ft.com/people/616e1ae8-b078-3a12-b609-254d1b118968",
+            "prefLabel":"Colin Glass",
+            "types":[
+               "http://www.ft.com/ontology/person/Person"
+            ]
+         },
+         "changeEvents":[
+            {
+               "startedAt":"1978-01-01T00:00:00Z"
+            },
+            {
+               "endedAt":"1988-01-01T00:00:00Z"
+            }
+         ]
+      },
+      {
+         "title":"Marketing Director",
+         "person":{
+            "id":"http://api.ft.com/things/cc108adb-0b5c-39c7-a4c1-fed1c58335ad",
+            "apiUrl":"http://api.ft.com/people/cc108adb-0b5c-39c7-a4c1-fed1c58335ad",
+            "prefLabel":"Andy Ferguson",
+            "types":[
+               "http://www.ft.com/ontology/person/Person"
+            ]
+         },
+         "changeEvents":[
+            {
+               "startedAt":"2013-10-09T00:00:00Z"
+            }
+         ]
+      },
+      {
+         "title":"Director-Information Technology",
+         "person":{
+            "id":"http://api.ft.com/things/d2f40650-dbfe-376d-80b5-a6df378c7e37",
+            "apiUrl":"http://api.ft.com/people/d2f40650-dbfe-376d-80b5-a6df378c7e37",
+            "prefLabel":"Andy Haywood",
+            "types":[
+               "http://www.ft.com/ontology/person/Person"
+            ]
+         }
+      },
+      {
+         "title":"Managing Director-Alliance Healthcare",
+         "person":{
+            "id":"http://api.ft.com/things/25e34ca7-c4d7-3c4a-a15c-f1c8ef6fa0f1",
+            "apiUrl":"http://api.ft.com/people/25e34ca7-c4d7-3c4a-a15c-f1c8ef6fa0f1",
+            "prefLabel":"Jeremy Main",
+            "types":[
+               "http://www.ft.com/ontology/person/Person"
+            ]
+         }
+      },
+      {
+         "title":"Principal",
+         "person":{
+            "id":"http://api.ft.com/things/8ef662b1-d40b-3cb0-bfc1-af71fbf12e98",
+            "apiUrl":"http://api.ft.com/people/8ef662b1-d40b-3cb0-bfc1-af71fbf12e98",
+            "prefLabel":"Andrew Tasker",
+            "types":[
+               "http://www.ft.com/ontology/person/Person"
+            ]
+         }
+      },
+      {
+         "title":"Trading Director",
+         "person":{
+            "id":"http://api.ft.com/things/ef4fed62-9c10-3bc1-9abb-0c98ce661349",
+            "apiUrl":"http://api.ft.com/people/ef4fed62-9c10-3bc1-9abb-0c98ce661349",
+            "prefLabel":"Annie Louise Murphy",
+            "types":[
+               "http://www.ft.com/ontology/person/Person"
+            ]
+         },
+         "changeEvents":[
+            {
+               "startedAt":"2011-10-01T00:00:00Z"
+            }
+         ]
+      },
+      {
+         "title":"Chief Executive Officer-North America Region",
+         "person":{
+            "id":"http://api.ft.com/things/933f31ff-4f11-3a1c-b1cf-ab97cb228078",
+            "apiUrl":"http://api.ft.com/people/933f31ff-4f11-3a1c-b1cf-ab97cb228078",
+            "prefLabel":"Stephen J. Lloyd",
+            "types":[
+               "http://www.ft.com/ontology/person/Person"
+            ]
+         }
+      },
+      {
+         "title":"Financial Director",
+         "person":{
+            "id":"http://api.ft.com/things/fdfa9d4d-5af9-32c5-a1b7-3a8d8f83d711",
+            "apiUrl":"http://api.ft.com/people/fdfa9d4d-5af9-32c5-a1b7-3a8d8f83d711",
+            "prefLabel":"Robin Andrew John Sibson",
+            "types":[
+               "http://www.ft.com/ontology/person/Person"
+            ]
+         }
+      },
+      {
+         "title":"Multichannel Director",
+         "person":{
+            "id":"http://api.ft.com/things/d19fa534-5f2e-3db9-9c0a-719f76734d98",
+            "apiUrl":"http://api.ft.com/people/d19fa534-5f2e-3db9-9c0a-719f76734d98",
+            "prefLabel":"Brian Linnington",
+            "types":[
+               "http://www.ft.com/ontology/person/Person"
+            ]
+         }
+      },
+      {
+         "title":"Principal",
+         "person":{
+            "id":"http://api.ft.com/things/215a45f3-8a37-3aa1-9f21-99dc5a4f4029",
+            "apiUrl":"http://api.ft.com/people/215a45f3-8a37-3aa1-9f21-99dc5a4f4029",
+            "prefLabel":"James Bushby",
+            "types":[
+               "http://www.ft.com/ontology/person/Person"
+            ]
+         }
+      },
+      {
+         "title":"Director",
+         "person":{
+            "id":"http://api.ft.com/things/918a500f-c4c5-336e-998a-fff0be8e7698",
+            "apiUrl":"http://api.ft.com/people/918a500f-c4c5-336e-998a-fff0be8e7698",
+            "prefLabel":"Colin Raymond Grimsdell",
+            "types":[
+               "http://www.ft.com/ontology/person/Person"
+            ]
+         }
+      },
+      {
+         "title":"Director",
+         "person":{
+            "id":"http://api.ft.com/things/1fbda53b-f32d-334d-90a2-90fa04ee33b2",
+            "apiUrl":"http://api.ft.com/people/1fbda53b-f32d-334d-90a2-90fa04ee33b2",
+            "prefLabel":"Richard John Holmes",
+            "types":[
+               "http://www.ft.com/ontology/person/Person"
+            ]
+         }
+      },
+      {
+         "title":"Director",
+         "person":{
+            "id":"http://api.ft.com/things/b04dc2fd-45c1-39fe-a652-9f7c0afedbae",
+            "apiUrl":"http://api.ft.com/people/b04dc2fd-45c1-39fe-a652-9f7c0afedbae",
+            "prefLabel":"Ken Murphy",
+            "types":[
+               "http://www.ft.com/ontology/person/Person"
+            ]
+         }
+      }
+   ]
+}
