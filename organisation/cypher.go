@@ -142,18 +142,22 @@ func neoReadStructToOrganisation(neo neoReadStruct) Organisation {
 		public.Labels = &neo.O.Labels
 	}
 
-	public.IndustryClassification = IndustryClassification{}
-	public.IndustryClassification.Thing = &Thing{}
-	public.IndustryClassification.ID = mapper.IDURL(neo.IndustryClassification.ID)
-	public.IndustryClassification.APIURL = mapper.APIURL(neo.IndustryClassification.ID, neo.IndustryClassification.Types)
-	public.IndustryClassification.PrefLabel = neo.IndustryClassification.PrefLabel
+	if neo.IndustryClassification.Types != nil {
+		public.IndustryClassification = &IndustryClassification{}
+		public.IndustryClassification.Thing = &Thing{}
+		public.IndustryClassification.ID = mapper.IDURL(neo.IndustryClassification.ID)
+		public.IndustryClassification.APIURL = mapper.APIURL(neo.IndustryClassification.ID, neo.IndustryClassification.Types)
+		public.IndustryClassification.PrefLabel = neo.IndustryClassification.PrefLabel
+	}
 
-	public.Parent = Parent{}
-	public.Parent.Thing = &Thing{}
-	public.Parent.ID = mapper.IDURL(neo.Parent.ID)
-	public.Parent.APIURL = mapper.APIURL(neo.Parent.ID, neo.Parent.Types)
-	public.Parent.Types = mapper.TypeURIs(neo.Parent.Types)
-	public.Parent.PrefLabel = neo.Parent.PrefLabel
+	if neo.Parent.Types != nil {
+		public.Parent = &Parent{}
+		public.Parent.Thing = &Thing{}
+		public.Parent.ID = mapper.IDURL(neo.Parent.ID)
+		public.Parent.APIURL = mapper.APIURL(neo.Parent.ID, neo.Parent.Types)
+		public.Parent.Types = mapper.TypeURIs(neo.Parent.Types)
+		public.Parent.PrefLabel = neo.Parent.PrefLabel
+	}
 
 	if len(neo.Sub) == 1 && neo.Sub[0].ID == "" {
 		public.Subsidiaries = make([]Subsidiary, 0, 0)

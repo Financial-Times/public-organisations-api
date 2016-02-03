@@ -31,13 +31,13 @@ public class Organisation extends Thing {
 */
 type Organisation struct {
 	*Thing
-	Types                  []string               `json:"types"`
-	LEICode                string                 `json:"leiCode,omitempty"`
-	Labels                 *[]string              `json:"labels,omitempty"`
-	IndustryClassification IndustryClassification `json:"industryClassification,omitempty"`
-	Parent                 Parent                 `json:"parentOrganisation,omitempty"`
-	Subsidiaries           []Subsidiary           `json:"subsidiaries,omitempty"`
-	Memberships            []Membership           `json:"memberships,omitempty"`
+	Types                  []string                `json:"types"`
+	LEICode                string                  `json:"leiCode,omitempty"`
+	Labels                 *[]string               `json:"labels,omitempty"`
+	IndustryClassification *IndustryClassification `json:"industryClassification"` //this is a pointer so that the struct is omitted if empty
+	Parent                 *Parent                 `json:"parentOrganisation"`
+	Subsidiaries           []Subsidiary            `json:"subsidiaries,omitempty"`
+	Memberships            []Membership            `json:"memberships,omitempty"`
 }
 
 // Membership represents the relationship between an organisation and a person
@@ -59,25 +59,25 @@ type Membership struct {
 // Person simplified representation used in Organisation API
 type Person struct {
 	*Thing
-	Types []string `json:"types"`
+	Types []string `json:"types,omitempty"`
 }
 
 // Parent is a simplified representation of a parent organisation, used in Organisation API
 type Parent struct {
 	*Thing
-	Types []string `json:"types"`
+	Types []string `json:"types,omitempty"`
 }
 
 // Subsidiary is a simplified representation of a subsidiary organisation, used in Organisation API
 type Subsidiary struct {
 	*Thing
-	Types []string `json:"types"`
+	Types []string `json:"types,omitempty"`
 }
 
 // IndustryClassification represents the type of Organisation, e.g. a Bank
 type IndustryClassification struct {
 	*Thing
-	Types []string `json:"types"`
+	Types []string `json:"types,omitempty"`
 }
 
 // ChangeEvent represent when something started or ended
