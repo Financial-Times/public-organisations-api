@@ -1,0 +1,11 @@
+{
+  "uuid": "d8bbba91-8a87-4dee-bd1a-f79e8139e5c9",
+  "isBoardRole": false,
+  "prefLabel": "Penguinologist",
+  "identifiers": [
+    {
+      "authority": "http://api.ft.com/system/FACTSET",
+      "identifierValue": "STR"
+    }
+  ]
+}

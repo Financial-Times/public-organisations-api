@@ -1,0 +1,15 @@
+{
+  "uuid": "84cec0e1-a866-47bd-9444-d74873b69786",
+  "name": "Scott Newton",
+  "salutation": "Dr.",
+  "identifiers": [
+    {
+      "authority": "http://api.ft.com/system/FACTSET-PPL",
+      "identifierValue": "SCOTTN-1"
+    }
+  ],
+  "aliases": [
+    "Scott Newton",
+    "Mr Cypher"
+  ]
+}
