@@ -7,7 +7,7 @@ import (
 	"github.com/Financial-Times/base-ft-rw-app-go"
 	"github.com/Financial-Times/go-fthealth/v1a"
 	"github.com/Financial-Times/http-handlers-go"
-	"github.com/Financial-Times/public-organisation-api/organisation"
+	"github.com/Financial-Times/public-organisations-api/organisations"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
@@ -17,24 +17,37 @@ import (
 )
 
 func main() {
-	log.SetLevel(log.InfoLevel)
-	log.Infof("Application started with args %s", os.Args)
-
-	app := cli.App("public-organisation-api-neo4j", "A public RESTful API for accessing organisation in neo4j")
+	log.Infof("Application starting with args %s", os.Args)
+	app := cli.App("public-organisations-api-neo4j", "A public RESTful API for accessing organisations in neo4j")
 	neoURL := app.StringOpt("neo-url", "http://localhost:7474/db/data", "neo4j endpoint URL")
 	//neoURL := app.StringOpt("neo-url", "http://ftper58827-law1b-eu-t:8080/db/data", "neo4j endpoint URL")
 	port := app.StringOpt("port", "8080", "Port to listen on")
+	env := app.StringOpt("env", "local", "environment this app is running in")
 	graphiteTCPAddress := app.StringOpt("graphiteTCPAddress", "",
 		"Graphite TCP address, e.g. graphite.ft.com:2003. Leave as default if you do NOT want to output to graphite (e.g. if running locally)")
 	graphitePrefix := app.StringOpt("graphitePrefix", "",
-		"Prefix to use. Should start with content, include the environment, and the host name. e.g. content.test.public.organisation.api.ftaps59382-law1a-eu-t")
+		"Prefix to use. Should start with content, include the environment, and the host name. e.g. content.test.public.organisations.api.ftaps59382-law1a-eu-t")
 	logMetrics := app.BoolOpt("logMetrics", false, "Whether to log metrics. Set to true if running locally and you want metrics output")
 
 	app.Action = func() {
 		baseftrwapp.OutputMetricsIfRequired(*graphiteTCPAddress, *graphitePrefix, *logMetrics)
-		log.Infof("public-organisation-api will listen on port: %s, connecting to: %s", *port, *neoURL)
+
+		if *env != "local" {
+			f, err := os.OpenFile("/var/log/apps/public-organisations-api-go-app.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
+			if err == nil {
+				log.SetOutput(f)
+				log.SetFormatter(&log.TextFormatter{})
+			} else {
+				log.Fatalf("Failed to initialise log file, %v", err)
+			}
+			defer f.Close()
+		}
+
+		log.Infof("public-organisations-api will listen on port: %s, connecting to: %s", *port, *neoURL)
 		runServer(*neoURL, *port)
 	}
+	log.SetLevel(log.InfoLevel)
+	log.Infof("Application started with args %s", os.Args)
 	app.Run(os.Args)
 }
 
@@ -45,27 +58,32 @@ func runServer(neoURL string, port string) {
 		log.Fatalf("Error connecting to neo4j %s", err)
 	}
 
-	organisation.OrganisationDriver = organisation.NewCypherDriver(db)
+	organisations.OrganisationDriver = organisations.NewCypherDriver(db)
 
-	r := mux.NewRouter()
+	servicesRouter := mux.NewRouter()
 
 	// Healthchecks and standards first
-	r.HandleFunc("/__health", v1a.Handler("OrganisationReadWriteNeo4j Healthchecks",
-		"Checks for accessing neo4j", organisation.HealthCheck()))
-	r.HandleFunc("/ping", organisation.Ping)
-	r.HandleFunc("/__ping", organisation.Ping)
+	servicesRouter.HandleFunc("/__health", v1a.Handler("PublicOrganisationsRead Healthchecks",
+		"Checks for accessing neo4j", organisations.HealthCheck()))
+	servicesRouter.HandleFunc("/ping", organisations.Ping)
+	servicesRouter.HandleFunc("/__ping", organisations.Ping)
+
+	// Then API specific ones:
+	servicesRouter.HandleFunc("/organisations/{uuid}", organisations.GetOrganisation).Methods("GET")
+
+	var monitoringRouter http.Handler = servicesRouter
+	monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(log.StandardLogger(), monitoringRouter)
+	monitoringRouter = httphandlers.HTTPMetricsHandler(metrics.DefaultRegistry, monitoringRouter)
 
 	// The top one of these feels more correct, but the lower one matches what we have in Dropwizard,
 	// so it's what apps expect currently same as ping, the content of build-info needs more definition
-	r.HandleFunc("/__build-info", organisation.BuildInfoHandler)
-	r.HandleFunc("/build-info", organisation.BuildInfoHandler)
+	//using http router here to be able to catch "/"
+	http.HandleFunc("/__build-info", organisations.BuildInfoHandler)
+	http.HandleFunc("/build-info", organisations.BuildInfoHandler)
+	http.Handle("/", monitoringRouter)
 
-	// Then API specific ones:
-	r.HandleFunc("/organisations/{uuid}", organisation.GetOrganisation).Methods("GET")
-
-	if err := http.ListenAndServe(":"+port,
-		httphandlers.HTTPMetricsHandler(metrics.DefaultRegistry,
-			httphandlers.TransactionAwareRequestLoggingHandler(log.StandardLogger(), r))); err != nil {
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		log.Fatalf("Unable to start server: %v", err)
 	}
+
 }

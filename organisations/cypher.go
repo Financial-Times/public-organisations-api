@@ -1,4 +1,4 @@
-package organisation
+package organisations
 
 import (
 	"errors"
@@ -80,7 +80,6 @@ type neoReadStruct struct {
 }
 
 func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool, err error) {
-	log.Infof("Entered READ for uuid=%s", uuid)
 	organisation = Organisation{}
 	results := []struct {
 		Rs []neoReadStruct
