@@ -1,6 +1,6 @@
 {
   "uuid": "3e844449-b27f-40d4-b696-2ce9b6137133",
-  "properName": "Google, Inc.",
+  "properName": "Super, Inc.",
   "identifiers": [
     {
       "authority": "http://api.ft.com/system/FACTSET-EDM",
@@ -12,15 +12,15 @@
     }
   ],
   "parentOrganisation": "f9694ba7-eab0-4ce0-8e01-ff64bccb813c",
-  "shortName": "Google",
-  "legalName": "Google Inc.",
-  "hiddenLabel": "GOOGLE INC",
+  "shortName": "Super",
+  "legalName": "Super Inc.",
+  "hiddenLabel": "SUPER INC",
   "type": "Organisation",
   "aliases": [
-    "Google",
-    "Google Incorporated",
-    "Google, Inc.",
-    "Google Inc.",
-    "Google Inc"
+    "Super",
+    "Super Incorporated",
+    "Super, Inc.",
+    "Super Inc.",
+    "Super Inc"
   ]
 }
