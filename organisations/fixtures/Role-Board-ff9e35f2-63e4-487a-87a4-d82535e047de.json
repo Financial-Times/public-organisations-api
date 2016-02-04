@@ -1,0 +1,11 @@
+{
+  "uuid": "ff9e35f2-63e4-487a-87a4-d82535e047de",
+  "isBoardRole": true,
+  "prefLabel": "Writer/Wizard/Mall Santa/Rasputin Impersonator",
+  "identifiers": [
+    {
+      "authority": "http://api.ft.com/system/FACTSET",
+      "identifierValue": "STR"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "uuid": "84cec0e1-a866-47bd-9444-d74873b69786",
+  "name": "Nicky Wrightson",
+  "salutation": "Ms.",
+  "identifiers": [
+    {
+      "authority": "http://api.ft.com/system/FACTSET-PPL",
+      "identifierValue": "NICKYW-1"
+    }
+  ],
+  "aliases": [
+    "Nicky Wrightson",
+    "nicky.wrightson"
+  ]
+}

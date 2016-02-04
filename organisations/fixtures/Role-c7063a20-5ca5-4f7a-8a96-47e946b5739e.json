@@ -1,0 +1,11 @@
+{
+  "uuid": "c7063a20-5ca5-4f7a-8a96-47e946b5739e",
+  "isBoardRole": false,
+  "prefLabel": "Namer of Clouds",
+  "identifiers": [
+    {
+      "authority": "http://api.ft.com/system/FACTSET",
+      "identifierValue": "STR"
+    }
+  ]
+}

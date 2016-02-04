@@ -88,19 +88,25 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
 		Statement: `
 				MATCH (o:Organisation{uuid:{uuid}})
 				OPTIONAL MATCH (o)<-[:HAS_ORGANISATION]-(m:Membership)
-				OPTIONAL MATCH (m)-[:HAS_MEMBER]->(p:Person)
-				OPTIONAL MATCH (p)<-[rel:MENTIONS]-(c:Content)
-				OPTIONAL MATCH (o)-[:SUB_ORGANISATION_OF]->(parent:Organisation)
-				OPTIONAL MATCH (o)<-[:SUB_ORGANISATION_OF]-(sub:Organisation)
-				WITH    o,
-				{ id:p.uuid, types:labels(p), prefLabel:p.prefLabel, annCount:COUNT(c)} as p,
-				{ id:m.uuid, types:labels(m), prefLabel:m.prefLabel, title:m.title, changeEvents:[{startedAt:m.inceptionDate}, {endedAt:m.terminationDate}] } as m,
-				{ id:parent.uuid, types:labels(parent), prefLabel:parent.prefLabel} as parent,
-				{ id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel} as sub
-				WITH o, m, p, parent, collect(sub) as sub
-				WITH o, parent, sub, collect({m:m, p:p}) as m
-				WITH m, parent, sub, { id:o.uuid, types:labels(o), leiCode: o.leiCode, prefLabel:o.prefLabel, labels:o.aliases} as o
-				RETURN collect ({o:o, m:m, parent:parent, sub:sub}) as rs
+		    OPTIONAL MATCH (m)-[:HAS_MEMBER]->(p:Person)
+		    OPTIONAL MATCH (p)<-[:MENTIONS]-(poc:Content)-[:MENTIONS]->(o)
+		    WITH    o,
+		    { id:p.uuid, types:labels(p), prefLabel:p.prefLabel} as p,
+		    { id:m.uuid, prefLabel:m.prefLabel, changeEvents:[{startedAt:m.inceptionDate}, {endedAt:m.terminationDate}], annCount:COUNT(poc) } as m ORDER BY m.annCount DESC LIMIT 1000
+		    WITH o, collect({m:m, p:p}) as pm
+		    OPTIONAL MATCH (o)-[:HAS_CLASSIFICATION]->(ind:IndustryClassification)
+		    WITH o, pm,
+		    { id:ind.uuid, types:labels(ind), prefLabel:ind.prefLabel} as ind
+		    WITH o, pm, ind
+		    OPTIONAL MATCH (o)-[:SUB_ORGANISATION_OF]->(parent:Organisation)
+		    OPTIONAL MATCH (o)<-[:SUB_ORGANISATION_OF]-(sub:Organisation)
+		    OPTIONAL MATCH (soc:Content)-[ms:MENTIONS]->(sub)
+		    WITH o, pm, ind,
+		    { id:parent.uuid, types:labels(parent), prefLabel:parent.prefLabel} as parent,
+		    { id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel, annCount:COUNT(ms) } as sub ORDER BY sub.annCount DESC
+		    WITH o, pm, ind, parent, collect(sub) as sub
+		       WITH pm, ind, parent, sub, { id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases, leicode:o.leiCode} as o
+		    return collect ({o:o, parent:parent, ind:ind, sub:sub, pm:pm}) as rs
 							`,
 		Parameters: neoism.Props{"uuid": uuid},
 		Result:     &results,

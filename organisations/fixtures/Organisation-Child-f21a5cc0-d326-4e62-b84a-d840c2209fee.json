@@ -1,0 +1,27 @@
+{
+  "uuid": "f21a5cc0-d326-4e62-b84a-d840c2209fee",
+  "properName": "Awesome, Inc.",
+  "identifiers": [
+    {
+      "authority": "http://api.ft.com/system/FACTSET-EDM",
+      "identifierValue": "003JLG-E"
+    },
+    {
+      "authority": "http://api.ft.com/system/LEI",
+      "identifierValue": "7ZW8QJWVPR4P1J1KQY45"
+    }
+  ],
+  "parentOrganisation": "3e844449-b27f-40d4-b696-2ce9b6137133",
+  "shortName": "Awesome",
+  "legalName": "Awesome Inc.",
+  "hiddenLabel": "AWESOME INC",
+  "type": "Organisation",
+  "aliases": [
+    "Awesome",
+    "Awesome Incorporated",
+    "Awesome, Inc.",
+    "Awesome Inc.",
+    "Awesome Inc",
+    "Everything is Awesome"
+  ]
+}
