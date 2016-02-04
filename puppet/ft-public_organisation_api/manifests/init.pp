@@ -4,7 +4,7 @@ class public_organisation_api {
 
   class { "go_service_profile" :
     service_module => $module_name,
-    service_name => 'public-organisation-api',
+    service_name => 'public-organisations-api',
     configParameters => $configParameters
   }
 
