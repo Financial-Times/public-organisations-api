@@ -108,9 +108,9 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
 	   OPTIONAL MATCH (soc:Content)-[ms:MENTIONS]->(sub)
 	   WITH o, pm, ind,
 	   { id:parent.uuid, types:labels(parent), prefLabel:parent.prefLabel} as parent,
-	   { id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel, annCount:COUNT(ms) } as sub ORDER BY sub.annCount DESC 
-	   WITH o, pm, ind, parent, collect(sub) as sub 
-	      WITH pm, ind, parent, sub, { id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases, leicode:o.leiCode} as o 
+	   { id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel, annCount:COUNT(ms) } as sub ORDER BY sub.annCount DESC
+	   WITH o, pm, ind, parent, collect(sub) as sub
+	      WITH pm, ind, parent, sub, { id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases, leicode:o.leiCode} as o
 	   return collect ({o:o, parent:parent, ind:ind, sub:sub, pm:pm}) as rs
 							`,
 		Parameters: neoism.Props{"uuid": uuid},
@@ -206,7 +206,7 @@ func neoReadStructToOrganisation(neo neoReadStruct) Organisation {
 
 func changeEvent(neoChgEvts []neoChangeEvent) (bool, *[]ChangeEvent) {
 	var results []ChangeEvent
-	if neoChgEvts[0].StartedAt == "" && neoChgEvts[0].EndedAt == "" {
+	if neoChgEvts[0].StartedAt == "" && neoChgEvts[1].EndedAt == "" {
 		results = make([]ChangeEvent, 0, 0)
 		return false, &results
 	}
