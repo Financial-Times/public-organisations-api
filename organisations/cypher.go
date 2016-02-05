@@ -57,12 +57,17 @@ type neoReadStruct struct {
 		Types     []string
 		PrefLabel string
 	}
+	Ind struct {
+		ID        string
+		Types     []string
+		PrefLabel string
+	}
 	Sub []struct {
 		ID        string
 		Types     []string
 		PrefLabel string
 	}
-	M []struct {
+	PM []struct {
 		M struct {
 			ID           string
 			Types        []string
@@ -87,26 +92,26 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
 	query := &neoism.CypherQuery{
 		Statement: `
 				MATCH (o:Organisation{uuid:{uuid}})
-				OPTIONAL MATCH (o)<-[:HAS_ORGANISATION]-(m:Membership)
-		    OPTIONAL MATCH (m)-[:HAS_MEMBER]->(p:Person)
-		    OPTIONAL MATCH (p)<-[:MENTIONS]-(poc:Content)-[:MENTIONS]->(o)
-		    WITH    o,
-		    { id:p.uuid, types:labels(p), prefLabel:p.prefLabel} as p,
-		    { id:m.uuid, prefLabel:m.prefLabel, changeEvents:[{startedAt:m.inceptionDate}, {endedAt:m.terminationDate}], annCount:COUNT(poc) } as m ORDER BY m.annCount DESC LIMIT 1000
-		    WITH o, collect({m:m, p:p}) as pm
-		    OPTIONAL MATCH (o)-[:HAS_CLASSIFICATION]->(ind:IndustryClassification)
-		    WITH o, pm,
-		    { id:ind.uuid, types:labels(ind), prefLabel:ind.prefLabel} as ind
-		    WITH o, pm, ind
-		    OPTIONAL MATCH (o)-[:SUB_ORGANISATION_OF]->(parent:Organisation)
-		    OPTIONAL MATCH (o)<-[:SUB_ORGANISATION_OF]-(sub:Organisation)
-		    OPTIONAL MATCH (soc:Content)-[ms:MENTIONS]->(sub)
-		    WITH o, pm, ind,
-		    { id:parent.uuid, types:labels(parent), prefLabel:parent.prefLabel} as parent,
-		    { id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel, annCount:COUNT(ms) } as sub ORDER BY sub.annCount DESC
-		    WITH o, pm, ind, parent, collect(sub) as sub
-		       WITH pm, ind, parent, sub, { id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases, leicode:o.leiCode} as o
-		    return collect ({o:o, parent:parent, ind:ind, sub:sub, pm:pm}) as rs
+	   OPTIONAL MATCH (o)<-[:HAS_ORGANISATION]-(m:Membership)
+	   OPTIONAL MATCH (m)-[:HAS_MEMBER]->(p:Person)
+	   OPTIONAL MATCH (p)<-[:MENTIONS]-(poc:Content)-[:MENTIONS]->(o)
+	   WITH    o,
+	   { id:p.uuid, types:labels(p), prefLabel:p.prefLabel} as p,
+	   { id:m.uuid, prefLabel:m.prefLabel, changeEvents:[{startedAt:m.inceptionDate}, {endedAt:m.terminationDate}], annCount:COUNT(poc) } as m ORDER BY m.annCount DESC LIMIT 1000
+	   WITH o, collect({m:m, p:p}) as pm
+	   OPTIONAL MATCH (o)-[:HAS_CLASSIFICATION]->(ind:IndustryClassification)
+	   WITH o, pm,
+	   { id:ind.uuid, types:labels(ind), prefLabel:ind.prefLabel} as ind
+	   WITH o, pm, ind
+	   OPTIONAL MATCH (o)-[:SUB_ORGANISATION_OF]->(parent:Organisation)
+	   OPTIONAL MATCH (o)<-[:SUB_ORGANISATION_OF]-(sub:Organisation)
+	   OPTIONAL MATCH (soc:Content)-[ms:MENTIONS]->(sub)
+	   WITH o, pm, ind,
+	   { id:parent.uuid, types:labels(parent), prefLabel:parent.prefLabel} as parent,
+	   { id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel, annCount:COUNT(ms) } as sub ORDER BY sub.annCount DESC 
+	   WITH o, pm, ind, parent, collect(sub) as sub 
+	      WITH pm, ind, parent, sub, { id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases, leicode:o.leiCode} as o 
+	   return collect ({o:o, parent:parent, ind:ind, sub:sub, pm:pm}) as rs
 							`,
 		Parameters: neoism.Props{"uuid": uuid},
 		Result:     &results,
@@ -130,7 +135,7 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
 }
 
 func neoReadStructToOrganisation(neo neoReadStruct) Organisation {
-	//TODO map parent, map subsidiaries, find out why we only get two memberships here compared to 17 off PROD graphDB...
+	//TODO find out why we only get two memberships here compared to 17 off PROD graphDB... also, performance of e.g. Barclays
 	public := Organisation{}
 	public.Thing = &Thing{}
 	public.ID = mapper.IDURL(neo.O.ID)
@@ -142,12 +147,45 @@ func neoReadStructToOrganisation(neo neoReadStruct) Organisation {
 		public.Labels = &neo.O.Labels
 	}
 
-	log.Info("LENGTH of memberships:", len(neo.M))
-	if len(neo.M) == 1 && (neo.M[0].M.ID == "") {
+	if neo.Ind.ID != "" {
+		public.IndustryClassification = &IndustryClassification{}
+		public.IndustryClassification.Thing = &Thing{}
+		public.IndustryClassification.ID = mapper.IDURL(neo.Ind.ID)
+		public.IndustryClassification.APIURL = mapper.APIURL(neo.Ind.ID, neo.Ind.Types)
+		public.IndustryClassification.PrefLabel = neo.Ind.PrefLabel
+	}
+	log.Infof("IndustryClassification=%v", public.IndustryClassification)
+
+	if neo.Parent.ID != "" {
+		public.Parent = &Parent{}
+		public.Parent.Thing = &Thing{}
+		public.Parent.ID = mapper.IDURL(neo.Parent.ID)
+		public.Parent.APIURL = mapper.APIURL(neo.Parent.ID, neo.Parent.Types)
+		public.Parent.Types = mapper.TypeURIs(neo.Parent.Types)
+		public.Parent.PrefLabel = neo.Parent.PrefLabel
+	}
+
+	if len(neo.Sub) == 1 && neo.Sub[0].ID == "" {
+		public.Subsidiaries = make([]Subsidiary, 0, 0)
+	} else {
+		public.Subsidiaries = make([]Subsidiary, len(neo.Sub))
+		for idx, neoSub := range neo.Sub {
+			subsidiary := Subsidiary{}
+			subsidiary.Thing = &Thing{}
+			subsidiary.ID = mapper.IDURL(neoSub.ID)
+			subsidiary.APIURL = mapper.APIURL(neoSub.ID, neoSub.Types)
+			subsidiary.Types = mapper.TypeURIs(neoSub.Types)
+			subsidiary.PrefLabel = neoSub.PrefLabel
+			public.Subsidiaries[idx] = subsidiary
+		}
+	}
+
+	log.Info("LENGTH of memberships:", len(neo.PM))
+	if len(neo.PM) == 1 && (neo.PM[0].M.ID == "") {
 		public.Memberships = make([]Membership, 0, 0)
 	} else {
-		public.Memberships = make([]Membership, len(neo.M))
-		for mIdx, neoMem := range neo.M {
+		public.Memberships = make([]Membership, len(neo.PM))
+		for mIdx, neoMem := range neo.PM {
 			membership := Membership{}
 			membership.Title = neoMem.M.PrefLabel
 			membership.Person = Person{}

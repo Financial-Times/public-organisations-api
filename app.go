@@ -20,7 +20,7 @@ func main() {
 	log.Infof("Application starting with args %s", os.Args)
 	app := cli.App("public-organisations-api-neo4j", "A public RESTful API for accessing organisations in neo4j")
 	neoURL := app.StringOpt("neo-url", "http://localhost:7474/db/data", "neo4j endpoint URL")
-	//neoURL := app.StringOpt("neo-url", "http://ftper58827-law1b-eu-t:8080/db/data", "neo4j endpoint URL")
+	//neoURL := app.StringOpt("neo-url", "http://ftper60304-law1a-eu-t:8080/db/data", "neo4j endpoint URL")
 	port := app.StringOpt("port", "8080", "Port to listen on")
 	env := app.StringOpt("env", "local", "environment this app is running in")
 	graphiteTCPAddress := app.StringOpt("graphiteTCPAddress", "",
@@ -36,7 +36,7 @@ func main() {
 			f, err := os.OpenFile("/var/log/apps/public-organisations-api-go-app.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
 			if err == nil {
 				log.SetOutput(f)
-				log.SetFormatter(&log.TextFormatter{})
+
 			} else {
 				log.Fatalf("Failed to initialise log file, %v", err)
 			}
@@ -46,6 +46,7 @@ func main() {
 		log.Infof("public-organisations-api will listen on port: %s, connecting to: %s", *port, *neoURL)
 		runServer(*neoURL, *port)
 	}
+	log.SetFormatter(&log.TextFormatter{})
 	log.SetLevel(log.InfoLevel)
 	log.Infof("Application started with args %s", os.Args)
 	app.Run(os.Args)
