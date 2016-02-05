@@ -39,6 +39,21 @@ func TestNeoReadStructToOrganisationMultipleMemberships(t *testing.T) {
 	assert.NoError(err)
 	assert.True(found)
 	assert.NotNil(org)
+
+	assert.Equal("http://api.ft.com/things/3e844449-b27f-40d4-b696-2ce9b6137133", org.ID)
+	assert.Equal("http://api.ft.com/organisations/3e844449-b27f-40d4-b696-2ce9b6137133", org.APIURL)
+	assert.Equal("Super, Inc.", org.PrefLabel)
+//	assert.Len(org.Subsidiaries, 1)
+//	assert.Equal((*org.Parent).ID, "f9694ba7-eab0-4ce0-8e01-ff64bccb813c")
+	assertListContainsAll(assert, org.Types, "http://www.ft.com/ontology/organisation/Organisation")
+	assertListContainsAll(assert, *org.Labels, "Super", "Super Incorporated", "Super, Inc.", "Super Inc.", "Super Inc")
+}
+
+func assertListContainsAll(assert *assert.Assertions, list interface{}, items ...interface{}) {
+	assert.Len(list, len(items))
+	for _, item := range items {
+		assert.Contains(list, item)
+	}
 }
 
 func writeBigOrg(assert *assert.Assertions, peopleRW baseftrwapp.Service, organisationRW baseftrwapp.Service, membershipsRW baseftrwapp.Service, rolesRW baseftrwapp.Service) {
