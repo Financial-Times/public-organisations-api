@@ -3,7 +3,8 @@
   "prefLabel": "Controller of Awesomeness",
   "personUuid": "fa2ae871-ef77-49c8-a030-8d90eae6cf18",
   "organisationUuid": "3e844449-b27f-40d4-b696-2ce9b6137133",
-  "terminationDate": "2012-01-01T00:00:00.000Z",
+  "inceptionDate": "2009-12-11T00:00:00.000Z",
+  "terminationDate": "2012-05-01T00:00:00.000Z",
   "identifiers": [
     {
       "authority": "http://api.ft.com/system/FACTSET",
@@ -13,8 +14,8 @@
   "membershipRoles": [
     {
       "roleUuid": "c7063a20-5ca5-4f7a-8a96-47e946b5739e",
-      "inceptionDate": "2010-12-11T00:00:00.000Z",
-      "terminationDate": "2012-01-01T00:00:00.000Z"
+      "inceptionDate": "2009-12-11T00:00:00.000Z",
+      "terminationDate": "2012-05-02T00:00:00.000Z"
     }
   ]
 }

@@ -12,12 +12,12 @@
   "membershipRoles": [
     {
       "roleUuid": "c7063a20-5ca5-4f7a-8a96-47e946b5739e",
-      "inceptionDate": "2010-12-11T00:00:00.000Z",
-      "terminationDate": "2012-01-01T00:00:00.000Z"
+      "inceptionDate": "2010-11-11T00:00:00.000Z",
+      "terminationDate": "2012-02-02T00:00:00.000Z"
     },
     {
       "roleUuid": "d8bbba91-8a87-4dee-bd1a-f79e8139e5c9",
-      "inceptionDate": "2012-01-01T00:00:00.000Z"
+      "inceptionDate": "2012-02-03T00:00:00.000Z"
     }
   ]
 }
