@@ -154,7 +154,6 @@ func neoReadStructToOrganisation(neo neoReadStruct) Organisation {
 		public.IndustryClassification.APIURL = mapper.APIURL(neo.Ind.ID, neo.Ind.Types)
 		public.IndustryClassification.PrefLabel = neo.Ind.PrefLabel
 	}
-	log.Infof("IndustryClassification=%v", public.IndustryClassification)
 
 	if neo.Parent.ID != "" {
 		public.Parent = &Parent{}
@@ -180,7 +179,6 @@ func neoReadStructToOrganisation(neo neoReadStruct) Organisation {
 		}
 	}
 
-	log.Info("LENGTH of memberships:", len(neo.PM))
 	if len(neo.PM) == 1 && (neo.PM[0].M.ID == "") {
 		public.Memberships = make([]Membership, 0, 0)
 	} else {
