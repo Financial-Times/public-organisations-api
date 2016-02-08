@@ -42,11 +42,27 @@ func TestNeoReadStructToOrganisationMultipleMemberships(t *testing.T) {
 
 	assert.Equal("http://api.ft.com/things/3e844449-b27f-40d4-b696-2ce9b6137133", org.ID)
 	assert.Equal("http://api.ft.com/organisations/3e844449-b27f-40d4-b696-2ce9b6137133", org.APIURL)
+	assertListContainsAll(assert, org.Types, "http://www.ft.com/ontology/organisation/Organisation")
 	assert.Equal("Super, Inc.", org.PrefLabel)
-//	assert.Len(org.Subsidiaries, 1)
-//	assert.Equal((*org.Parent).ID, "f9694ba7-eab0-4ce0-8e01-ff64bccb813c")
+
+	subsidiary := Subsidiary{}
+	subsidiary.Thing = &Thing{}
+	subsidiary.ID = "http://api.ft.com/things/f21a5cc0-d326-4e62-b84a-d840c2209fee"
+	subsidiary.APIURL = "http://api.ft.com/organisations/f21a5cc0-d326-4e62-b84a-d840c2209fee"
+	subsidiary.Types = []string{"http://www.ft.com/ontology/organisation/Organisation"}
+	subsidiary.PrefLabel = "Awesome, Inc."
+
+	assertSubsidiaries(assert, org.Subsidiaries, subsidiary)
+	assert.Equal((*org.Parent).ID, "http://api.ft.com/things/f9694ba7-eab0-4ce0-8e01-ff64bccb813c")
 	assertListContainsAll(assert, org.Types, "http://www.ft.com/ontology/organisation/Organisation")
 	assertListContainsAll(assert, *org.Labels, "Super", "Super Incorporated", "Super, Inc.", "Super Inc.", "Super Inc")
+}
+
+func assertSubsidiaries(assert *assert.Assertions, actual []Subsidiary, items ...Subsidiary) {
+	assert.Len(actual, len(items))
+	for _, item := range items {
+		assert.Contains(actual, item)
+	}
 }
 
 func assertListContainsAll(assert *assert.Assertions, list interface{}, items ...interface{}) {
