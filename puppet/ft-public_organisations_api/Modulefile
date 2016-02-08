@@ -1,4 +1,4 @@
-name    'ft-public_organisation_api'
+name    'ft-public_organisations_api'
 version '0.0.0'
 source 'git@github.com:Financial-Times/public-organisations-api.git'
 author 'ft'
