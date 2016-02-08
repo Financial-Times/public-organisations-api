@@ -1,4 +1,4 @@
-class public_organisation_api {
+class public_organisations_api {
 
   $configParameters = hiera('configParameters','')
 
