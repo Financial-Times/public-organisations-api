@@ -19,8 +19,8 @@ import (
 func main() {
 	log.Infof("Application starting with args %s", os.Args)
 	app := cli.App("public-organisations-api-neo4j", "A public RESTful API for accessing organisations in neo4j")
-	neoURL := app.StringOpt("neo-url", "http://localhost:7474/db/data", "neo4j endpoint URL")
-	//neoURL := app.StringOpt("neo-url", "http://ftper60304-law1a-eu-t:8080/db/data", "neo4j endpoint URL")
+	//neoURL := app.StringOpt("neo-url", "http://localhost:7474/db/data", "neo4j endpoint URL")
+	neoURL := app.StringOpt("neo-url", "http://ftper60304-law1a-eu-t:8080/db/data", "neo4j endpoint URL")
 	port := app.StringOpt("port", "8080", "Port to listen on")
 	env := app.StringOpt("env", "local", "environment this app is running in")
 	graphiteTCPAddress := app.StringOpt("graphiteTCPAddress", "",
@@ -44,7 +44,7 @@ func main() {
 		}
 
 		log.Infof("public-organisations-api will listen on port: %s, connecting to: %s", *port, *neoURL)
-		runServer(*neoURL, *port)
+		runServer(*neoURL, *port, *env)
 	}
 	log.SetFormatter(&log.TextFormatter{})
 	log.SetLevel(log.InfoLevel)
@@ -52,14 +52,14 @@ func main() {
 	app.Run(os.Args)
 }
 
-func runServer(neoURL string, port string) {
+func runServer(neoURL string, port string, env string) {
 	db, err := neoism.Connect(neoURL)
 	db.Session.Client = &http.Client{Transport: &http.Transport{MaxIdleConnsPerHost: 100}}
 	if err != nil {
 		log.Fatalf("Error connecting to neo4j %s", err)
 	}
 
-	organisations.OrganisationDriver = organisations.NewCypherDriver(db)
+	organisations.OrganisationDriver = organisations.NewCypherDriver(db, env)
 
 	servicesRouter := mux.NewRouter()
 

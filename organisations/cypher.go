@@ -18,12 +18,13 @@ type Driver interface {
 
 // CypherDriver struct
 type CypherDriver struct {
-	db *neoism.Database
+	db  *neoism.Database
+	env string
 }
 
 //NewCypherDriver instantiate driver
-func NewCypherDriver(db *neoism.Database) CypherDriver {
-	return CypherDriver{db}
+func NewCypherDriver(db *neoism.Database, env string) CypherDriver {
+	return CypherDriver{db, env}
 }
 
 // CheckConnectivity tests neo4j by running a simple cypher query
@@ -130,17 +131,17 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
 		log.Error(errMsg)
 		return Organisation{}, true, errors.New(errMsg)
 	}
-	organisation = neoReadStructToOrganisation(results[0].Rs[0])
+	organisation = neoReadStructToOrganisation(results[0].Rs[0], pcw.env)
 	log.Debugf("Returning %v", organisation)
 	return organisation, true, nil
 }
 
-func neoReadStructToOrganisation(neo neoReadStruct) Organisation {
+func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 	//TODO find out why we only get two memberships here compared to 17 off PROD graphDB... also, performance of e.g. Barclays
 	public := Organisation{}
 	public.Thing = &Thing{}
 	public.ID = mapper.IDURL(neo.O.ID)
-	public.APIURL = mapper.APIURL(neo.O.ID, neo.O.Types)
+	public.APIURL = mapper.APIURL(neo.O.ID, neo.O.Types, env)
 	public.Types = mapper.TypeURIs(neo.O.Types)
 	public.LEICode = neo.O.LEICode
 	public.PrefLabel = neo.O.PrefLabel
@@ -152,7 +153,7 @@ func neoReadStructToOrganisation(neo neoReadStruct) Organisation {
 		public.IndustryClassification = &IndustryClassification{}
 		public.IndustryClassification.Thing = &Thing{}
 		public.IndustryClassification.ID = mapper.IDURL(neo.Ind.ID)
-		public.IndustryClassification.APIURL = mapper.APIURL(neo.Ind.ID, neo.Ind.Types)
+		public.IndustryClassification.APIURL = mapper.APIURL(neo.Ind.ID, neo.Ind.Types, env)
 		public.IndustryClassification.PrefLabel = neo.Ind.PrefLabel
 	}
 
@@ -160,7 +161,7 @@ func neoReadStructToOrganisation(neo neoReadStruct) Organisation {
 		public.Parent = &Parent{}
 		public.Parent.Thing = &Thing{}
 		public.Parent.ID = mapper.IDURL(neo.Parent.ID)
-		public.Parent.APIURL = mapper.APIURL(neo.Parent.ID, neo.Parent.Types)
+		public.Parent.APIURL = mapper.APIURL(neo.Parent.ID, neo.Parent.Types, env)
 		public.Parent.Types = mapper.TypeURIs(neo.Parent.Types)
 		public.Parent.PrefLabel = neo.Parent.PrefLabel
 	}
@@ -173,7 +174,7 @@ func neoReadStructToOrganisation(neo neoReadStruct) Organisation {
 			subsidiary := Subsidiary{}
 			subsidiary.Thing = &Thing{}
 			subsidiary.ID = mapper.IDURL(neoSub.ID)
-			subsidiary.APIURL = mapper.APIURL(neoSub.ID, neoSub.Types)
+			subsidiary.APIURL = mapper.APIURL(neoSub.ID, neoSub.Types, env)
 			subsidiary.Types = mapper.TypeURIs(neoSub.Types)
 			subsidiary.PrefLabel = neoSub.PrefLabel
 			public.Subsidiaries[idx] = subsidiary
@@ -190,7 +191,7 @@ func neoReadStructToOrganisation(neo neoReadStruct) Organisation {
 			membership.Person = Person{}
 			membership.Person.Thing = &Thing{}
 			membership.Person.ID = mapper.IDURL(neoMem.P.ID)
-			membership.Person.APIURL = mapper.APIURL(neoMem.P.ID, neoMem.P.Types)
+			membership.Person.APIURL = mapper.APIURL(neoMem.P.ID, neoMem.P.Types, env)
 			membership.Person.Types = mapper.TypeURIs(neoMem.P.Types)
 			membership.Person.PrefLabel = neoMem.P.PrefLabel
 			if a, b := changeEvent(neoMem.M.ChangeEvents); a == true {

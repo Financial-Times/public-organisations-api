@@ -20,8 +20,21 @@ import (
 
 // TestNeoReadStructToPersonMandatoryFields checks that madatory fields are set even if they are empty or nil / null
 func TestNeoReadStructToOrganisationMandatoryFields(t *testing.T) {
-	t.SkipNow()
-	// Todo implement
+	expected := `{"id":"http://api.ft.com/things/","apiUrl":"http://api.ft.com/things/","types":null}`
+	organisation := neoReadStructToOrganisation(neoReadStruct{}, "prod")
+	organisationJSON, err := json.Marshal(organisation)
+	assert := assert.New(t)
+	assert.NoError(err, "Unable to marshal Organisation to JSON")
+	assert.Equal(expected, string(organisationJSON))
+}
+
+func TestNeoReadStructToOrganisationEnvIsTest(t *testing.T) {
+	expected := `{"id":"http://api.ft.com/things/","apiUrl":"http://test.api.ft.com/things/","types":null}`
+	organisation := neoReadStructToOrganisation(neoReadStruct{}, "test")
+	organisationJSON, err := json.Marshal(organisation)
+	assert := assert.New(t)
+	assert.NoError(err, "Unable to marshal Organisation to JSON")
+	assert.Equal(expected, string(organisationJSON))
 }
 
 func TestNeoReadStructToOrganisationMultipleMemberships(t *testing.T) {
@@ -35,7 +48,7 @@ func TestNeoReadStructToOrganisationMultipleMemberships(t *testing.T) {
 	defer cleanDB(db, t, assert)
 	defer deleteAllViaService(assert, peopleRW, organisationRW, membershipsRW, rolesRW)
 
-	undertest := NewCypherDriver(db)
+	undertest := NewCypherDriver(db, "prod")
 	org, found, err := undertest.Read("3e844449-b27f-40d4-b696-2ce9b6137133")
 	assert.NoError(err)
 	assert.True(found)
@@ -55,6 +68,7 @@ func TestNeoReadStructToOrganisationMultipleMemberships(t *testing.T) {
 
 	assertSubsidiaries(assert, org.Subsidiaries, subsidiary)
 	assert.Equal((*org.Parent).ID, "http://api.ft.com/things/f9694ba7-eab0-4ce0-8e01-ff64bccb813c")
+
 	assertListContainsAll(assert, org.Types, "http://www.ft.com/ontology/organisation/Organisation")
 	assertListContainsAll(assert, *org.Labels, "Super", "Super Incorporated", "Super, Inc.", "Super Inc.", "Super Inc")
 	assertListContainsAll(assert, org.Memberships,
