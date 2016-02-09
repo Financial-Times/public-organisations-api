@@ -10,11 +10,14 @@ import (
 	"github.com/Financial-Times/public-organisations-api/organisations"
 	"github.com/Financial-Times/public-people-api/people"
 
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"github.com/jawher/mow.cli"
 	"github.com/jmcvetta/neoism"
 	"github.com/rcrowley/go-metrics"
+	"strconv"
+	"time"
 )
 
 func main() {
@@ -29,6 +32,12 @@ func main() {
 	graphitePrefix := app.StringOpt("graphitePrefix", "",
 		"Prefix to use. Should start with content, include the environment, and the host name. e.g. content.test.public.organisations.api.ftaps59382-law1a-eu-t")
 	logMetrics := app.BoolOpt("logMetrics", false, "Whether to log metrics. Set to true if running locally and you want metrics output")
+	cacheDuration := app.StringOpt("cache-duration", "1h", "Duration Get requests should be cached for. e.g. 2h45m would set the max-age value to '7440' seconds")
+
+	duration, durationErr := time.ParseDuration((*cacheDuration))
+	if durationErr != nil {
+		log.Fatalf("Failed to initialise log file, %v", durationErr)
+	}
 
 	app.Action = func() {
 		baseftrwapp.OutputMetricsIfRequired(*graphiteTCPAddress, *graphitePrefix, *logMetrics)
@@ -45,7 +54,7 @@ func main() {
 		}
 
 		log.Infof("public-organisations-api will listen on port: %s, connecting to: %s", *port, *neoURL)
-		runServer(*neoURL, *port)
+		runServer(*neoURL, *port, duration)
 	}
 	log.SetFormatter(&log.TextFormatter{})
 	log.SetLevel(log.InfoLevel)
@@ -53,7 +62,7 @@ func main() {
 	app.Run(os.Args)
 }
 
-func runServer(neoURL string, port string) {
+func runServer(neoURL string, port string, cacheDuration time.Duration) {
 	db, err := neoism.Connect(neoURL)
 	db.Session.Client = &http.Client{Transport: &http.Transport{MaxIdleConnsPerHost: 100}}
 	if err != nil {
@@ -61,6 +70,7 @@ func runServer(neoURL string, port string) {
 	}
 
 	organisations.OrganisationDriver = organisations.NewCypherDriver(db)
+	organisations.CacheControlHeader = fmt.Sprintf("max-age=%s, public", strconv.FormatFloat(cacheDuration.Seconds(), 'f', 0, 64))
 
 	servicesRouter := mux.NewRouter()
 
