@@ -12,6 +12,7 @@ import (
 
 // OrganisationDriver for cypher queries
 var OrganisationDriver Driver
+var CacheControlHeader string
 
 // HealthCheck does something
 func HealthCheck() v1a.Check {
@@ -67,7 +68,7 @@ func GetOrganisation(w http.ResponseWriter, r *http.Request) {
 	}
 	Jason, _ := json.Marshal(organisation)
 	log.Debugf("Organisation(uuid:%s): %s\n", Jason)
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Header().Set("Cache-Control", CacheControlHeader)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(organisation)
 }
