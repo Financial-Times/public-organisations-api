@@ -3,11 +3,9 @@ package organisations
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
-
 	"github.com/Financial-Times/go-fthealth/v1a"
-	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
+	"net/http"
 )
 
 // OrganisationDriver for cypher queries
@@ -72,9 +70,12 @@ func GetOrganisation(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"message":"Organisation not found."}`))
 		return
 	}
-	Jason, _ := json.Marshal(organisation)
-	log.Debugf("Organisation(uuid:%s): %s\n", Jason)
+
 	w.Header().Set("Cache-Control", CacheControlHeader)
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(organisation)
+	err = json.NewEncoder(w).Encode(organisation)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"message":"Organisation could not be marshelled, err=` + err.Error() + `"}`))
+	}
 }
