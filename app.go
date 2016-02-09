@@ -9,18 +9,21 @@ import (
 	"github.com/Financial-Times/http-handlers-go"
 	"github.com/Financial-Times/public-organisations-api/organisations"
 
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"github.com/jawher/mow.cli"
 	"github.com/jmcvetta/neoism"
 	"github.com/rcrowley/go-metrics"
+	"strconv"
+	"time"
 )
 
 func main() {
 	log.Infof("Application starting with args %s", os.Args)
 	app := cli.App("public-organisations-api-neo4j", "A public RESTful API for accessing organisations in neo4j")
-	//neoURL := app.StringOpt("neo-url", "http://localhost:7474/db/data", "neo4j endpoint URL")
-	neoURL := app.StringOpt("neo-url", "http://ftper60304-law1a-eu-t:8080/db/data", "neo4j endpoint URL")
+	neoURL := app.StringOpt("neo-url", "http://localhost:7474/db/data", "neo4j endpoint URL")
+	//neoURL := app.StringOpt("neo-url", "http://ftper60304-law1a-eu-t:8080/db/data", "neo4j endpoint URL")
 	port := app.StringOpt("port", "8080", "Port to listen on")
 	env := app.StringOpt("env", "local", "environment this app is running in")
 	graphiteTCPAddress := app.StringOpt("graphiteTCPAddress", "",
@@ -28,6 +31,12 @@ func main() {
 	graphitePrefix := app.StringOpt("graphitePrefix", "",
 		"Prefix to use. Should start with content, include the environment, and the host name. e.g. content.test.public.organisations.api.ftaps59382-law1a-eu-t")
 	logMetrics := app.BoolOpt("logMetrics", false, "Whether to log metrics. Set to true if running locally and you want metrics output")
+	cacheDuration := app.StringOpt("cache-duration", "1h", "Duration Get requests should be cached for. e.g. 2h45m would set the max-age value to '7440' seconds")
+
+	duration, durationErr := time.ParseDuration((*cacheDuration))
+	if durationErr != nil {
+		log.Fatalf("Failed to initialise log file, %v", durationErr)
+	}
 
 	app.Action = func() {
 		baseftrwapp.OutputMetricsIfRequired(*graphiteTCPAddress, *graphitePrefix, *logMetrics)
@@ -44,7 +53,9 @@ func main() {
 		}
 
 		log.Infof("public-organisations-api will listen on port: %s, connecting to: %s", *port, *neoURL)
-		runServer(*neoURL, *port, *env)
+
+		runServer(*neoURL, *port, duration, *env)
+
 	}
 	log.SetFormatter(&log.TextFormatter{})
 	log.SetLevel(log.InfoLevel)
@@ -52,7 +63,7 @@ func main() {
 	app.Run(os.Args)
 }
 
-func runServer(neoURL string, port string, env string) {
+func runServer(neoURL string, port string, cacheDuration time.Duration, env string) {
 	db, err := neoism.Connect(neoURL)
 	db.Session.Client = &http.Client{Transport: &http.Transport{MaxIdleConnsPerHost: 100}}
 	if err != nil {
@@ -60,6 +71,7 @@ func runServer(neoURL string, port string, env string) {
 	}
 
 	organisations.OrganisationDriver = organisations.NewCypherDriver(db, env)
+	organisations.CacheControlHeader = fmt.Sprintf("max-age=%s, public", strconv.FormatFloat(cacheDuration.Seconds(), 'f', 0, 64))
 
 	servicesRouter := mux.NewRouter()
 
@@ -71,6 +83,8 @@ func runServer(neoURL string, port string, env string) {
 
 	// Then API specific ones:
 	servicesRouter.HandleFunc("/organisations/{uuid}", organisations.GetOrganisation).Methods("GET")
+
+	servicesRouter.HandleFunc("/organisations/{uuid}", organisations.MethodNotAllowedHandler)
 
 	var monitoringRouter http.Handler = servicesRouter
 	monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(log.StandardLogger(), monitoringRouter)

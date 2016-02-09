@@ -12,6 +12,7 @@ import (
 
 // OrganisationDriver for cypher queries
 var OrganisationDriver Driver
+var CacheControlHeader string
 
 // HealthCheck does something
 func HealthCheck() v1a.Check {
@@ -44,6 +45,12 @@ func BuildInfoHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "build-info")
 }
 
+// MethodNotAllowedHandler does stuff
+func MethodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusMethodNotAllowed)
+	return
+}
+
 // GetOrganisation is the public API
 func GetOrganisation(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -67,7 +74,7 @@ func GetOrganisation(w http.ResponseWriter, r *http.Request) {
 	}
 	Jason, _ := json.Marshal(organisation)
 	log.Debugf("Organisation(uuid:%s): %s\n", Jason)
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Header().Set("Cache-Control", CacheControlHeader)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(organisation)
 }
