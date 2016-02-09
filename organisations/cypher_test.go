@@ -3,6 +3,9 @@ package organisations
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"testing"
+
 	"github.com/Financial-Times/base-ft-rw-app-go"
 	"github.com/Financial-Times/memberships-rw-neo4j/memberships"
 	"github.com/Financial-Times/neo-utils-go"
@@ -11,8 +14,6 @@ import (
 	"github.com/Financial-Times/roles-rw-neo4j/roles"
 	"github.com/jmcvetta/neoism"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
 )
 
 // TODO Add Test cases for more of the mapping functions and perhaps mock out back end (although ? if mocking neoism is of value)
@@ -57,11 +58,11 @@ func TestNeoReadStructToOrganisationMultipleMemberships(t *testing.T) {
 	assertListContainsAll(assert, org.Types, "http://www.ft.com/ontology/organisation/Organisation")
 	assertListContainsAll(assert, *org.Labels, "Super", "Super Incorporated", "Super, Inc.", "Super Inc.", "Super Inc")
 	assertListContainsAll(assert, org.Memberships,
-		getMembership(getDan(), "Controller of Awesomeness", ChangeEvent{StartedAt: "2010-12-11T00:00:00.000Z"}, ChangeEvent{EndedAt: "2012-01-01T00:00:00.000Z"}),
-		getMembership(getNicky(), "Controller of Awesomeness", ChangeEvent{StartedAt: "2009-12-11T00:00:00.000Z"}, ChangeEvent{EndedAt: "2012-05-01T00:00:00.000Z"}),
-		getMembership(getNicky(), "Party Cat Coordinator", ChangeEvent{StartedAt: "2012-06-01T00:00:00.000Z"}),
+		getMembership(getDan(), "Controller of Awesomeness", ChangeEvent{StartedAt: "2010-12-11T00:00:00Z"}, ChangeEvent{EndedAt: "2012-01-01T00:00:00Z"}),
+		getMembership(getNicky(), "Controller of Awesomeness", ChangeEvent{StartedAt: "2009-12-11T00:00:00Z"}, ChangeEvent{EndedAt: "2012-05-01T00:00:00Z"}),
+		getMembership(getNicky(), "Party Cat Coordinator", ChangeEvent{StartedAt: "2012-06-01T00:00:00Z"}),
 		getMembership(getScott(), "Head of Latin American Research & Strategy"),
-		getMembership(getGalia(), "Madame le Président", ChangeEvent{EndedAt: "2012-05-05T00:00:00.000Z"}))
+		getMembership(getGalia(), "Madame le Président", ChangeEvent{EndedAt: "2012-05-05T00:00:00Z"}))
 }
 
 func assertSubsidiaries(assert *assert.Assertions, actual []Subsidiary, items ...Subsidiary) {
