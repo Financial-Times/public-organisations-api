@@ -44,6 +44,12 @@ func BuildInfoHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "build-info")
 }
 
+// MethodNotAllowedHandler does stuff
+func MethodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusMethodNotAllowed)
+	return
+}
+
 // GetOrganisation is the public API
 func GetOrganisation(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)

@@ -8,6 +8,7 @@ import (
 	"github.com/Financial-Times/go-fthealth/v1a"
 	"github.com/Financial-Times/http-handlers-go"
 	"github.com/Financial-Times/public-organisations-api/organisations"
+	"github.com/Financial-Times/public-people-api/people"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
@@ -71,6 +72,8 @@ func runServer(neoURL string, port string) {
 
 	// Then API specific ones:
 	servicesRouter.HandleFunc("/organisations/{uuid}", organisations.GetOrganisation).Methods("GET")
+
+	servicesRouter.HandleFunc("/organisations/{uuid}", people.MethodNotAllowedHandler)
 
 	var monitoringRouter http.Handler = servicesRouter
 	monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(log.StandardLogger(), monitoringRouter)
