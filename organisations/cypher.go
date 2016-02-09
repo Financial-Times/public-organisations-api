@@ -3,6 +3,7 @@ package organisations
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/Financial-Times/neo-model-utils-go/mapper"
 	log "github.com/Sirupsen/logrus"
@@ -204,16 +205,20 @@ func neoReadStructToOrganisation(neo neoReadStruct) Organisation {
 
 func changeEvent(neoChgEvts []neoChangeEvent) (bool, *[]ChangeEvent) {
 	var results []ChangeEvent
+	layout := "2000-01-01T00:00:00Z"
+
 	if neoChgEvts[0].StartedAt == "" && neoChgEvts[1].EndedAt == "" {
 		results = make([]ChangeEvent, 0, 0)
 		return false, &results
 	}
 	for _, neoChgEvt := range neoChgEvts {
 		if neoChgEvt.StartedAt != "" {
-			results = append(results, ChangeEvent{StartedAt: neoChgEvt.StartedAt})
+			t, _ := time.Parse(layout, neoChgEvt.StartedAt)
+			results = append(results, ChangeEvent{StartedAt: t.Format(layout)})
 		}
 		if neoChgEvt.EndedAt != "" {
-			results = append(results, ChangeEvent{EndedAt: neoChgEvt.EndedAt})
+			t, _ := time.Parse(layout, neoChgEvt.EndedAt)
+			results = append(results, ChangeEvent{EndedAt: t.Format(layout)})
 		}
 	}
 	log.Debugf("changeEvent converted: %+v result:%+v", neoChgEvts, results)
