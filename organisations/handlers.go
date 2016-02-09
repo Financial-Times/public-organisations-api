@@ -18,7 +18,7 @@ func HealthCheck() v1a.Check {
 	return v1a.Check{
 		BusinessImpact:   "Unable to respond to Public Organisations api requests",
 		Name:             "Check connectivity to Neo4j - neoUrl is a parameter in hieradata for this service",
-		PanicGuide:       "TODO - write panic guide",
+		PanicGuide:       "https://sites.google.com/a/ft.com/ft-technology-service-transition/home/run-book-library/organisation-read-api",
 		Severity:         1,
 		TechnicalSummary: "Cannot connect to Neo4j a instance with at least one organisation loaded in it",
 		Checker:          Checker,
