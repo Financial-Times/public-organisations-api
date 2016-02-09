@@ -205,7 +205,8 @@ func neoReadStructToOrganisation(neo neoReadStruct) Organisation {
 
 func changeEvent(neoChgEvts []neoChangeEvent) (bool, *[]ChangeEvent) {
 	var results []ChangeEvent
-	layout := "2000-01-01T00:00:00Z"
+	currentLayout := "2006-01-02T15:04:05.999Z"
+	layout := "2006-01-02T15:04:05Z"
 
 	if neoChgEvts[0].StartedAt == "" && neoChgEvts[1].EndedAt == "" {
 		results = make([]ChangeEvent, 0, 0)
@@ -213,7 +214,7 @@ func changeEvent(neoChgEvts []neoChangeEvent) (bool, *[]ChangeEvent) {
 	}
 	for _, neoChgEvt := range neoChgEvts {
 		if neoChgEvt.StartedAt != "" {
-			t, _ := time.Parse(layout, neoChgEvt.StartedAt)
+			t, _ := time.Parse(currentLayout, neoChgEvt.StartedAt)
 			results = append(results, ChangeEvent{StartedAt: t.Format(layout)})
 		}
 		if neoChgEvt.EndedAt != "" {
