@@ -1,0 +1,15 @@
+{
+  "uuid": "bdacd96e-d2f4-429f-bb61-462e40448409",
+  "name": "Galia Rimon",
+  "salutation": "Chère Consœur",
+  "identifiers": [
+    {
+      "authority": "http://api.ft.com/system/FACTSET-PPL",
+      "identifierValue": "GALIAR-1"
+    }
+  ],
+  "aliases": [
+    "Galia Rimon",
+    "galia.rimon"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "uuid": "9c50e77a-de8a-4f8c-b1dd-09c7730e2c70",
+  "prefLabel": "Madame le Président",
+  "personUuid": "bdacd96e-d2f4-429f-bb61-462e40448409",
+  "organisationUuid": "3e844449-b27f-40d4-b696-2ce9b6137133",
+  "terminationDate": "2012-05-05T00:00:00.000Z",
+  "identifiers": [
+    {
+      "authority": "http://api.ft.com/system/FACTSET",
+      "identifierValue": "3603860"
+    }
+  ],
+  "membershipRoles": [
+    {
+      "roleUuid": "5fcfec9c-8ff0-4ee2-9e91-f270492d636c",
+      "terminationDate": "2012-05-06T00:00:00.000Z"
+    }
+  ]
+}

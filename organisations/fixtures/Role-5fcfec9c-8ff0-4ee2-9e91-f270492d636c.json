@@ -1,0 +1,11 @@
+{
+  "uuid": "5fcfec9c-8ff0-4ee2-9e91-f270492d636c",
+  "isBoardRole": false,
+  "prefLabel": "Town Crier",
+  "identifiers": [
+    {
+      "authority": "http://api.ft.com/system/FACTSET",
+      "identifierValue": "STR"
+    }
+  ]
+}
