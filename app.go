@@ -8,15 +8,17 @@ import (
 	"github.com/Financial-Times/go-fthealth/v1a"
 	"github.com/Financial-Times/http-handlers-go"
 	"github.com/Financial-Times/public-organisations-api/organisations"
+	"github.com/getsentry/raven-go"
 
 	"fmt"
+	"strconv"
+	"time"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"github.com/jawher/mow.cli"
 	"github.com/jmcvetta/neoism"
 	"github.com/rcrowley/go-metrics"
-	"strconv"
-	"time"
 )
 
 func main() {
@@ -102,4 +104,8 @@ func runServer(neoURL string, port string, cacheDuration string, env string) {
 		log.Fatalf("Unable to start server: %v", err)
 	}
 
+}
+
+func init() {
+	raven.SetDSN("https://23887ed409dc48d39838440f9cb10d5a:cf772b401f544934bb399fcc15d4b814@app.getsentry.com/66718")
 }
