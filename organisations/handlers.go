@@ -80,5 +80,6 @@ func GetOrganisation(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"message":"Organisation could not be marshelled, err=` + err.Error() + `"}`))
+		raven.CaptureError(err, nil)
 	}
 }
