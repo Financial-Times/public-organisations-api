@@ -21,8 +21,6 @@ import (
 	"github.com/rcrowley/go-metrics"
 )
 
-var env string
-
 func main() {
 	log.Infof("Application starting with args %s", os.Args)
 	app := cli.App("public-organisations-api-neo4j", "A public RESTful API for accessing organisations in neo4j")
@@ -39,7 +37,7 @@ func main() {
 
 	app.Action = func() {
 		baseftrwapp.OutputMetricsIfRequired(*graphiteTCPAddress, *graphitePrefix, *logMetrics)
-
+		setup(*env)
 		if *env != "local" {
 			f, err := os.OpenFile("/var/log/apps/public-organisations-api-go-app.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
 			if err == nil {
@@ -109,9 +107,8 @@ func runServer(neoURL string, port string, cacheDuration string, env string) {
 
 }
 
-func init() {
+func setup(env string) {
 	if env == "test" {
 		raven.SetDSN("https://23887ed409dc48d39838440f9cb10d5a:cf772b401f544934bb399fcc15d4b814@app.getsentry.com/66718")
 	}
-
 }
