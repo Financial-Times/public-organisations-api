@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/Financial-Times/go-fthealth/v1a"
-	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 )
 
@@ -65,7 +64,6 @@ func GetOrganisation(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"message": "` + err.Error() + `"}`))
-		raven.CaptureError(err, nil)
 		return
 	}
 	if !found {
@@ -80,6 +78,5 @@ func GetOrganisation(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"message":"Organisation could not be marshelled, err=` + err.Error() + `"}`))
-		raven.CaptureError(err, nil)
 	}
 }

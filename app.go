@@ -8,7 +8,6 @@ import (
 	"github.com/Financial-Times/go-fthealth/v1a"
 	"github.com/Financial-Times/http-handlers-go"
 	"github.com/Financial-Times/public-organisations-api/organisations"
-	"github.com/getsentry/raven-go"
 
 	"fmt"
 	"strconv"
@@ -26,7 +25,6 @@ func main() {
 	app := cli.App("public-organisations-api-neo4j", "A public RESTful API for accessing organisations in neo4j")
 	neoURL := app.StringOpt("neo-url", "http://localhost:7474/db/data", "neo4j endpoint URL")
 	//neoURL := app.StringOpt("neo-url", "http://ftper60304-law1a-eu-t:8080/db/data", "neo4j endpoint URL")
-	sentryLogon := app.StringOpt("sentry-info", "", "Sentry logon info")
 	port := app.StringOpt("port", "8080", "Port to listen on")
 	env := app.StringOpt("env", "local", "environment this app is running in")
 	graphiteTCPAddress := app.StringOpt("graphiteTCPAddress", "",
@@ -38,7 +36,6 @@ func main() {
 
 	app.Action = func() {
 		baseftrwapp.OutputMetricsIfRequired(*graphiteTCPAddress, *graphitePrefix, *logMetrics)
-		setupSentry(*sentryLogon)
 		if *env != "local" {
 			f, err := os.OpenFile("/var/log/apps/public-organisations-api-go-app.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
 			if err == nil {
@@ -73,7 +70,6 @@ func runServer(neoURL string, port string, cacheDuration string, env string) {
 	db.Session.Client = &http.Client{Transport: &http.Transport{MaxIdleConnsPerHost: 100}}
 	if err != nil {
 		log.Fatalf("Error connecting to neo4j %s", err)
-		raven.CaptureError(err, nil)
 	}
 
 	organisations.OrganisationDriver = organisations.NewCypherDriver(db, env)
@@ -106,10 +102,4 @@ func runServer(neoURL string, port string, cacheDuration string, env string) {
 		log.Fatalf("Unable to start server: %v", err)
 	}
 
-}
-
-func setupSentry(logon string) {
-	if logon != "" {
-		raven.SetDSN(logon)
-	}
 }
