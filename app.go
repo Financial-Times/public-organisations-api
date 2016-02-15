@@ -81,6 +81,7 @@ func runServer(neoURL string, port string, cacheDuration string, env string) {
 		"Checks for accessing neo4j", organisations.HealthCheck()))
 	servicesRouter.HandleFunc("/ping", organisations.Ping)
 	servicesRouter.HandleFunc("/__ping", organisations.Ping)
+	servicesRouter.HandleFunc("/__gtg", organisations.GoToGo)
 
 	// Then API specific ones:
 	servicesRouter.HandleFunc("/organisations/{uuid}", organisations.GetOrganisation).Methods("GET")

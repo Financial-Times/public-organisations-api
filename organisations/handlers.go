@@ -80,3 +80,10 @@ func GetOrganisation(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"message":"Organisation could not be marshelled, err=` + err.Error() + `"}`))
 	}
 }
+
+func GoToGo(writer http.ResponseWriter, req *http.Request) {
+	if _, err := Checker(); err != nil {
+		writer.WriteHeader(http.StatusServiceUnavailable)
+	}
+
+}
