@@ -81,7 +81,8 @@ func GetOrganisation(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GoToGo(writer http.ResponseWriter, req *http.Request) {
+//GoodToGo returns a 503 if the healthcheck fails - suitable for use from varnish to check availability of a node
+func GoodToGo(writer http.ResponseWriter, req *http.Request) {
 	if _, err := Checker(); err != nil {
 		writer.WriteHeader(http.StatusServiceUnavailable)
 	}
