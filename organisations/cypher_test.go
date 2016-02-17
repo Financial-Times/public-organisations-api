@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Financial-Times/base-ft-rw-app-go"
+	"github.com/Financial-Times/base-ft-rw-app-go/baseftrwapp"
 	"github.com/Financial-Times/memberships-rw-neo4j/memberships"
 	"github.com/Financial-Times/neo-utils-go"
 	"github.com/Financial-Times/organisations-rw-neo4j/organisations"
