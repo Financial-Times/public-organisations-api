@@ -92,11 +92,13 @@ func runServer(neoURL string, port string, cacheDuration string, env string) {
 	monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(log.StandardLogger(), monitoringRouter)
 	monitoringRouter = httphandlers.HTTPMetricsHandler(metrics.DefaultRegistry, monitoringRouter)
 
-	// The top one of these feels more correct, but the lower one matches what we have in Dropwizard,
+	// The following endpoints should not be monitored or logged (varnish calls one of these every second, depending on config)
+	// The top one of these build info endpoints feels more correct, but the lower one matches what we have in Dropwizard,
 	// so it's what apps expect currently same as ping, the content of build-info needs more definition
 	//using http router here to be able to catch "/"
 	http.HandleFunc("/__build-info", organisations.BuildInfoHandler)
 	http.HandleFunc("/build-info", organisations.BuildInfoHandler)
+	http.HandleFunc("/__gtg", organisations.GoodToGo)
 	http.Handle("/", monitoringRouter)
 
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
