@@ -52,7 +52,7 @@ func main() {
 		runServer(*neoURL, *port, *cacheDuration, *env)
 
 	}
-	log.SetFormatter(&log.TextFormatter{})
+	log.SetFormatter(&log.TextFormatter{DisableColors: true})
 	log.SetLevel(log.InfoLevel)
 	log.Infof("Application started with args %s", os.Args)
 	app.Run(os.Args)
