@@ -7,5 +7,4 @@ Compiled source #
 ######################
 *.log
 public-organisations-api
-
-
+*.idea
