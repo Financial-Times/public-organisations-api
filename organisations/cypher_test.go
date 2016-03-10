@@ -56,20 +56,20 @@ func TestNeoReadStructToOrganisationMultipleMemberships(t *testing.T) {
 
 	assert.Equal("http://api.ft.com/things/3e844449-b27f-40d4-b696-2ce9b6137133", org.ID)
 	assert.Equal("http://api.ft.com/organisations/3e844449-b27f-40d4-b696-2ce9b6137133", org.APIURL)
-	assertListContainsAll(assert, org.Types, "http://www.ft.com/ontology/organisation/Organisation")
+	assertListContainsAll(assert, org.Types, "http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/organisation/Organisation")
 	assert.Equal("Super, Inc.", org.PrefLabel)
 
 	subsidiary := Subsidiary{}
 	subsidiary.Thing = &Thing{}
 	subsidiary.ID = "http://api.ft.com/things/f21a5cc0-d326-4e62-b84a-d840c2209fee"
 	subsidiary.APIURL = "http://api.ft.com/organisations/f21a5cc0-d326-4e62-b84a-d840c2209fee"
-	subsidiary.Types = []string{"http://www.ft.com/ontology/organisation/Organisation"}
+	subsidiary.Types = []string{"http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/organisation/Organisation"}
 	subsidiary.PrefLabel = "Awesome, Inc."
 
 	assertSubsidiaries(assert, org.Subsidiaries, subsidiary)
 	assert.Equal((*org.Parent).ID, "http://api.ft.com/things/f9694ba7-eab0-4ce0-8e01-ff64bccb813c")
 
-	assertListContainsAll(assert, org.Types, "http://www.ft.com/ontology/organisation/Organisation")
+	assertListContainsAll(assert, org.Types, "http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/organisation/Organisation")
 	assertListContainsAll(assert, *org.Labels, "Super", "Super Incorporated", "Super, Inc.", "Super Inc.", "Super Inc")
 	assertListContainsAll(assert, org.Memberships,
 		getMembership(getDan(), "Controller of Awesomeness", ChangeEvent{StartedAt: "2010-12-11T00:00:00Z"}, ChangeEvent{EndedAt: "2012-01-01T00:00:00Z"}),
@@ -221,7 +221,7 @@ func getDan() *Person {
 	person.Thing = &Thing{}
 	person.ID = "http://api.ft.com/things/868c3c17-611c-4943-9499-600ccded71f3"
 	person.APIURL = "http://api.ft.com/people/868c3c17-611c-4943-9499-600ccded71f3"
-	person.Types = []string{"http://www.ft.com/ontology/person/Person"}
+	person.Types = []string{"http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/person/Person"}
 	person.PrefLabel = "Dan Murphy"
 	return person
 }
@@ -231,7 +231,7 @@ func getScott() *Person {
 	person.Thing = &Thing{}
 	person.ID = "http://api.ft.com/things/84cec0e1-a866-47bd-9444-d74873b69786"
 	person.APIURL = "http://api.ft.com/people/84cec0e1-a866-47bd-9444-d74873b69786"
-	person.Types = []string{"http://www.ft.com/ontology/person/Person"}
+	person.Types = []string{"http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/person/Person"}
 	person.PrefLabel = "Scott Newton"
 	return person
 }
@@ -241,7 +241,7 @@ func getNicky() *Person {
 	person.Thing = &Thing{}
 	person.ID = "http://api.ft.com/things/fa2ae871-ef77-49c8-a030-8d90eae6cf18"
 	person.APIURL = "http://api.ft.com/people/fa2ae871-ef77-49c8-a030-8d90eae6cf18"
-	person.Types = []string{"http://www.ft.com/ontology/person/Person"}
+	person.Types = []string{"http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/person/Person"}
 	person.PrefLabel = "Nicky Wrightson"
 	return person
 }
@@ -251,7 +251,7 @@ func getGalia() *Person {
 	person.Thing = &Thing{}
 	person.ID = "http://api.ft.com/things/bdacd96e-d2f4-429f-bb61-462e40448409"
 	person.APIURL = "http://api.ft.com/people/bdacd96e-d2f4-429f-bb61-462e40448409"
-	person.Types = []string{"http://www.ft.com/ontology/person/Person"}
+	person.Types = []string{"http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/person/Person"}
 	person.PrefLabel = "Galia Rimon"
 	return person
 }
