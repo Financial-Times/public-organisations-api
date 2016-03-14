@@ -94,25 +94,25 @@ func assertListContainsAll(assert *assert.Assertions, list interface{}, items ..
 }
 
 func writeBigOrg(assert *assert.Assertions, peopleRW baseftrwapp.Service, organisationRW baseftrwapp.Service, membershipsRW baseftrwapp.Service, rolesRW baseftrwapp.Service) {
-	writeJsonToService(peopleRW, "./fixtures/Person-Dan_Murphy-868c3c17-611c-4943-9499-600ccded71f3.json", assert)
-	writeJsonToService(peopleRW, "./fixtures/Person-Nicky_Wrightson-fa2ae871-ef77-49c8-a030-8d90eae6cf18.json", assert)
-	writeJsonToService(peopleRW, "./fixtures/Person-Scott_Newton-84cec0e1-a866-47bd-9444-d74873b69786.json", assert)
-	writeJsonToService(peopleRW, "./fixtures/Person-Galia_Rimon-bdacd96e-d2f4-429f-bb61-462e40448409.json", assert)
+	writeJSONToService(peopleRW, "./fixtures/Person-Dan_Murphy-868c3c17-611c-4943-9499-600ccded71f3.json", assert)
+	writeJSONToService(peopleRW, "./fixtures/Person-Nicky_Wrightson-fa2ae871-ef77-49c8-a030-8d90eae6cf18.json", assert)
+	writeJSONToService(peopleRW, "./fixtures/Person-Scott_Newton-84cec0e1-a866-47bd-9444-d74873b69786.json", assert)
+	writeJSONToService(peopleRW, "./fixtures/Person-Galia_Rimon-bdacd96e-d2f4-429f-bb61-462e40448409.json", assert)
 
-	writeJsonToService(organisationRW, "./fixtures/Organisation-Child-f21a5cc0-d326-4e62-b84a-d840c2209fee.json", assert)
-	writeJsonToService(organisationRW, "./fixtures/Organisation-Main-3e844449-b27f-40d4-b696-2ce9b6137133.json", assert)
-	writeJsonToService(organisationRW, "./fixtures/Organisation-Parent-f9694ba7-eab0-4ce0-8e01-ff64bccb813c.json", assert)
+	writeJSONToService(organisationRW, "./fixtures/Organisation-Child-f21a5cc0-d326-4e62-b84a-d840c2209fee.json", assert)
+	writeJSONToService(organisationRW, "./fixtures/Organisation-Main-3e844449-b27f-40d4-b696-2ce9b6137133.json", assert)
+	writeJSONToService(organisationRW, "./fixtures/Organisation-Parent-f9694ba7-eab0-4ce0-8e01-ff64bccb813c.json", assert)
 
-	writeJsonToService(membershipsRW, "./fixtures/Membership-Dan_Murphy-6b278d36-5b30-46a3-b036-55902a9d31ac.json", assert)
-	writeJsonToService(membershipsRW, "./fixtures/Membership-Nicky_Wrightson-668c103f-d8dc-4938-9324-9c60de726705.json", assert)
-	writeJsonToService(membershipsRW, "./fixtures/Membership-Nicky_Wrightson-c739b972-f41d-43d2-b8d9-5848c92e17f6.json", assert)
-	writeJsonToService(membershipsRW, "./fixtures/Membership-Scott_Newton-177de04f-c09a-4d66-ab55-bb68496c9c28.json", assert)
-	writeJsonToService(membershipsRW, "./fixtures/Membership-Galia_Rimon-9c50e77a-de8a-4f8c-b1dd-09c7730e2c70.json", assert)
+	writeJSONToService(membershipsRW, "./fixtures/Membership-Dan_Murphy-6b278d36-5b30-46a3-b036-55902a9d31ac.json", assert)
+	writeJSONToService(membershipsRW, "./fixtures/Membership-Nicky_Wrightson-668c103f-d8dc-4938-9324-9c60de726705.json", assert)
+	writeJSONToService(membershipsRW, "./fixtures/Membership-Nicky_Wrightson-c739b972-f41d-43d2-b8d9-5848c92e17f6.json", assert)
+	writeJSONToService(membershipsRW, "./fixtures/Membership-Scott_Newton-177de04f-c09a-4d66-ab55-bb68496c9c28.json", assert)
+	writeJSONToService(membershipsRW, "./fixtures/Membership-Galia_Rimon-9c50e77a-de8a-4f8c-b1dd-09c7730e2c70.json", assert)
 
-	writeJsonToService(rolesRW, "./fixtures/Role-Board-ff9e35f2-63e4-487a-87a4-d82535e047de.json", assert)
-	writeJsonToService(rolesRW, "./fixtures/Role-c7063a20-5ca5-4f7a-8a96-47e946b5739e.json", assert)
-	writeJsonToService(rolesRW, "./fixtures/Role-d8bbba91-8a87-4dee-bd1a-f79e8139e5c9.json", assert)
-	writeJsonToService(rolesRW, "./fixtures/Role-5fcfec9c-8ff0-4ee2-9e91-f270492d636c.json", assert)
+	writeJSONToService(rolesRW, "./fixtures/Role-Board-ff9e35f2-63e4-487a-87a4-d82535e047de.json", assert)
+	writeJSONToService(rolesRW, "./fixtures/Role-c7063a20-5ca5-4f7a-8a96-47e946b5739e.json", assert)
+	writeJSONToService(rolesRW, "./fixtures/Role-d8bbba91-8a87-4dee-bd1a-f79e8139e5c9.json", assert)
+	writeJSONToService(rolesRW, "./fixtures/Role-5fcfec9c-8ff0-4ee2-9e91-f270492d636c.json", assert)
 }
 
 func deleteAllViaService(assert *assert.Assertions, peopleRW baseftrwapp.Service, organisationRW baseftrwapp.Service, membershipsRW baseftrwapp.Service, rolesRW baseftrwapp.Service) {
@@ -149,8 +149,8 @@ func getServices(t *testing.T, assert *assert.Assertions, db *neoism.Database, b
 	return peopleRW, organisationRW, membershipsRW, rolesRW
 }
 
-func writeJsonToService(service baseftrwapp.Service, pathToJsonFile string, assert *assert.Assertions) {
-	f, err := os.Open(pathToJsonFile)
+func writeJSONToService(service baseftrwapp.Service, pathToJSONFile string, assert *assert.Assertions) {
+	f, err := os.Open(pathToJSONFile)
 	assert.NoError(err)
 	dec := json.NewDecoder(f)
 	inst, _, errr := service.DecodeJSON(dec)

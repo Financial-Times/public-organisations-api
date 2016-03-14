@@ -10,7 +10,7 @@ import(
 )
 var (
 	server   *httptest.Server
-	organisationsUrl string
+	organisationsURL string
 	isFound bool
 )
 const (
@@ -33,14 +33,14 @@ func init()  {
 	r:= mux.NewRouter()
 	r.HandleFunc("/organisations/{uuid}", GetOrganisation).Methods("GET")
 	server = httptest.NewServer(r)
-	organisationsUrl = fmt.Sprintf("%s/organisations", server.URL) //Grab the address for the API endpoint
+	organisationsURL = fmt.Sprintf("%s/organisations", server.URL) //Grab the address for the API endpoint
 	isFound = true
 }
 
 func TestHeadersOKOnFound(t *testing.T) {
 	assert := assert.New(t)
 	isFound = true
-	req, _ := http.NewRequest("GET", organisationsUrl + "/00000000-0000-002a-0000-00000000002a", nil)
+	req, _ := http.NewRequest("GET", organisationsURL + "/00000000-0000-002a-0000-00000000002a", nil)
 	res, err := http.DefaultClient.Do(req)
 	assert.NoError(err)
 	assert.EqualValues(200, res.StatusCode)
@@ -51,7 +51,7 @@ func TestHeadersOKOnFound(t *testing.T) {
 func TestReturnNotFoundIfOrgNotFound(t *testing.T) {
 	assert := assert.New(t)
 	isFound = false
-	req, _ := http.NewRequest("GET", organisationsUrl + "/00000000-0000-002a-0000-00000000002a", nil)
+	req, _ := http.NewRequest("GET", organisationsURL + "/00000000-0000-002a-0000-00000000002a", nil)
 	res, err := http.DefaultClient.Do(req)
 	assert.NoError(err)
 	assert.EqualValues(404, res.StatusCode)
