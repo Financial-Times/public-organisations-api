@@ -8,6 +8,7 @@ import (
 	"github.com/Financial-Times/go-fthealth/v1a"
 	"github.com/Financial-Times/http-handlers-go/httphandlers"
 	"github.com/Financial-Times/public-organisations-api/organisations"
+	status "github.com/Financial-Times/service-status-go/httphandlers"
 
 	"fmt"
 	"strconv"
@@ -79,8 +80,7 @@ func runServer(neoURL string, port string, cacheDuration string, env string) {
 	// Healthchecks and standards first
 	servicesRouter.HandleFunc("/__health", v1a.Handler("PublicOrganisationsRead Healthchecks",
 		"Checks for accessing neo4j", organisations.HealthCheck()))
-	servicesRouter.HandleFunc("/ping", organisations.Ping)
-	servicesRouter.HandleFunc("/__ping", organisations.Ping)
+
 	servicesRouter.HandleFunc("/__gtg", organisations.GoodToGo)
 
 	// Then API specific ones:
@@ -96,8 +96,10 @@ func runServer(neoURL string, port string, cacheDuration string, env string) {
 	// The top one of these build info endpoints feels more correct, but the lower one matches what we have in Dropwizard,
 	// so it's what apps expect currently same as ping, the content of build-info needs more definition
 	//using http router here to be able to catch "/"
-	http.HandleFunc("/__build-info", organisations.BuildInfoHandler)
-	http.HandleFunc("/build-info", organisations.BuildInfoHandler)
+	http.HandleFunc(status.PingPath, status.PingHandler)
+	http.HandleFunc(status.PingPathDW, status.PingHandler)
+	http.HandleFunc(status.BuildInfoPath, status.BuildInfoHandler)
+	http.HandleFunc(status.BuildInfoPathDW, status.BuildInfoHandler)
 	http.HandleFunc("/__gtg", organisations.GoodToGo)
 	http.Handle("/", monitoringRouter)
 
