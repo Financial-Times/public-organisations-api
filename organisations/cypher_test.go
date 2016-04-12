@@ -56,6 +56,7 @@ func TestNeoReadStructToOrganisationMultipleMemberships(t *testing.T) {
 
 	assert.Equal("http://api.ft.com/things/3e844449-b27f-40d4-b696-2ce9b6137133", org.ID)
 	assert.Equal("http://api.ft.com/organisations/3e844449-b27f-40d4-b696-2ce9b6137133", org.APIURL)
+	assert.Equal("7ZW8QJWVPR4P1J1KQY45", org.LegalEntityIdentifier)
 	assertListContainsAll(assert, org.Types, "http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/organisation/Organisation")
 	assert.Equal("Super, Inc.", org.PrefLabel)
 
