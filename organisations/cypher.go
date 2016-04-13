@@ -109,7 +109,7 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
  		WITH o, pm, ind
  		OPTIONAL MATCH (lei:LegalEntityIdentifier)-[:IDENTIFIES]->(o)
 		WITH o, pm, ind,
- 		{ leicode:lei.value } as lei
+ 		{ legalEntityIdentifier:lei.value } as lei
 		WITH o, pm, ind, lei
  		OPTIONAL MATCH (o)-[:SUB_ORGANISATION_OF]->(parent:Organisation)
  		OPTIONAL MATCH (o)<-[:SUB_ORGANISATION_OF]-(sub:Organisation)
