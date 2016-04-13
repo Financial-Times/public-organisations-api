@@ -54,7 +54,7 @@ type neoReadStruct struct {
 		Labels    []string
 	}
 	Lei struct {
-		LEICode string
+		LegalEntityIdentifier string
 	}
 	Parent struct {
 		ID        string
@@ -154,8 +154,8 @@ func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 		public.Labels = &neo.O.Labels
 	}
 
-	if neo.Lei.LEICode != "" {
-		public.LegalEntityIdentifier = neo.Lei.LEICode
+	if neo.Lei.LegalEntityIdentifier != "" {
+		public.LegalEntityIdentifier = neo.Lei.LegalEntityIdentifier
 	}
 
 	if neo.Ind.ID != "" {
