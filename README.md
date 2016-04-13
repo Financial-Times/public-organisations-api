@@ -4,9 +4,9 @@ __Provides a public API for Organisation stored in a Neo4J graph database__
 ## Build & deployment etc:
 _NB You will need to tag a commit in order to build, since the UI asks for a tag to build / deploy_
 * [Jenkins view](http://ftjen10085-lvpr-uk-p:8181/view/JOBS-public-organisation-api/)
-* [Build and publish to forge](http://ftjen10085-lvpr-uk-p:8181/job/public-organisation-api-build)
-* [Deploy to test or production](http://ftjen10085-lvpr-uk-p:8181/job/public-organisation-api-deploy)
-
+* [Build and publish to forge](http://ftjen10085-lvpr-uk-p:8181/view/JOBS-public-organisations-api/job/public-organisations-api-build/)
+* [Deploy to Test](http://ftjen10085-lvpr-uk-p:8181/view/JOBS-public-organisations-api/job/public-organisations-api-deploy-to-test/)
+* [Deploy to Production](http://ftjen10085-lvpr-uk-p:8181/view/JOBS-public-organisations-api/job/public-organisations-api-deploy-to-prod/)
 
 ## Installation & running locally
 * `go get -u github.com/Financial-Times/public-organisation-api`
@@ -27,25 +27,6 @@ Based on the following [google doc](https://docs.google.com/document/d/1SC4Uskl-
 
 ## Healthchecks
 Healthchecks: [http://localhost:8080/__health](http://localhost:8080/__health)
-
-## Todo
-### For parity with existing API
-* Add in TMELabels as part of labels (uniq)
-* Use annotations for ordering memberships
-
-### API specific
-* Complete Test cases
-* Runbook
-* Update or new API documentation based on original [google doc](https://docs.google.com/a/ft.com/document/d/1uWtpTtQsehDg9cC_427iIp2AwXJh9kDsA3hSOR9MlPw)
-
-### Cross cutting concerns
-* Allow service to start if neo4j is unavailable at startup time
-* Rework build / deploy (low priority)
-  * Suggested flow:
-    1. Build & Tests
-    1. Publish Release (using konstructor to generate vrm)
-    1. Deploy vrm/hash to test/prod
-
 
 ### Logging
 the application uses logrus, the logfile is initilaised in main.go.
