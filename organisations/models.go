@@ -32,8 +32,8 @@ public class Organisation extends Thing {
 type Organisation struct {
 	*Thing
 	Types                  []string                `json:"types"`
-	LEICode                string                  `json:"leiCode,omitempty"`
 	Labels                 *[]string               `json:"labels,omitempty"`
+	LegalEntityIdentifier  string                  `json:"leiCode,omitempty"`
 	IndustryClassification *IndustryClassification `json:"industryClassification,omitempty"` //this is a pointer so that the struct is omitted if empty
 	Parent                 *Parent                 `json:"parentOrganisation,omitempty"`
 	Subsidiaries           []Subsidiary            `json:"subsidiaries,omitempty"`
