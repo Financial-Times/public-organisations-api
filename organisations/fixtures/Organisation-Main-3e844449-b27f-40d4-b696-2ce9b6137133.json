@@ -7,6 +7,10 @@
       "identifierValue": "003JLG-E"
     },
     {
+      "authority": "http://api.ft.com/system/FT-UPP",
+      "identifierValue": "3e844449-b27f-40d4-b696-2ce9b6137133"
+    },
+    {
       "authority": "http://api.ft.com/system/LEI",
       "identifierValue": "7ZW8QJWVPR4P1J1KQY45"
     }

@@ -8,6 +8,10 @@
     },
     {
       "authority": "http://api.ft.com/system/FT-UPP",
+      "identifierValue": "2421f3fa-5a6a-4320-88f5-7926d1cb2379"
+    },
+    {
+      "authority": "http://api.ft.com/system/FT-UPP",
       "identifierValue": "f21a5cc0-d326-4e62-b84a-d840c2209fee"
     },
     {

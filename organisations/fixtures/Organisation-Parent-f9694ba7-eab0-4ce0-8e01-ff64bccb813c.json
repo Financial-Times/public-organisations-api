@@ -7,6 +7,10 @@
       "identifierValue": "000RBW-E"
     },
     {
+      "authority": "http://api.ft.com/system/FT-UPP",
+      "identifierValue": "f9694ba7-eab0-4ce0-8e01-ff64bccb813c"
+    },
+    {
       "authority": "http://api.ft.com/system/LEI",
       "identifierValue": "787RXPR0UX0O0XUXPZ81"
     }

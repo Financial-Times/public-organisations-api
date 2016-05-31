@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/Financial-Times/go-fthealth/v1a"
 	"github.com/gorilla/mux"
+	"regexp"
 )
 
 // OrganisationDriver for cypher queries
@@ -50,6 +52,8 @@ func MethodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+const validUUID = "([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
+
 // GetOrganisation is the public API
 func GetOrganisation(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -69,6 +73,15 @@ func GetOrganisation(w http.ResponseWriter, r *http.Request) {
 	if !found {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(`{"message":"Organisation not found."}`))
+		return
+	}
+	//if the request was not made for the canonical, but an alternate uuid: redirect
+	if !strings.Contains(organisation.ID, uuid) {
+		validRegexp := regexp.MustCompile(validUUID)
+		canonicalUUID := validRegexp.FindString(organisation.ID)
+		redirectURL := strings.Replace(r.RequestURI, uuid, canonicalUUID, 1)
+		w.Header().Set("Location", redirectURL)
+		w.WriteHeader(http.StatusMovedPermanently)
 		return
 	}
 
