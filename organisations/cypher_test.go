@@ -73,8 +73,8 @@ func TestNeoReadOrganisationWithAlternateUPPID(t *testing.T) {
 	assert.True(found)
 	assert.NotNil(org)
 
-	assert.Equal("http://api.ft.com/things/" + canonicalUUID, org.ID)
-	assert.Equal("http://api.ft.com/organisations/" + canonicalUUID, org.APIURL)
+	assert.Equal("http://api.ft.com/things/"+canonicalUUID, org.ID)
+	assert.Equal("http://api.ft.com/organisations/"+canonicalUUID, org.APIURL)
 	assert.Equal("7ZW8QJWVPR4P1J1KQY46", org.LegalEntityIdentifier)
 	assertListContainsAll(assert, org.Types, "http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/organisation/Organisation")
 	assert.Equal("Awesome, Inc.", org.PrefLabel)

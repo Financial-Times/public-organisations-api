@@ -1,13 +1,12 @@
 {
   "uuid": "fa2ae871-ef77-49c8-a030-8d90eae6cf18",
   "name": "Nicky Wrightson",
+  "prefLabel": "Nicky Wrightson",
   "salutation": "Ms.",
-  "identifiers": [
-    {
-      "authority": "http://api.ft.com/system/FACTSET-PPL",
-      "identifierValue": "NICKYW-1"
-    }
-  ],
+  "alternativeIdentifiers": {
+    "factsetIdentifier": "NICKYW-1",
+    "uuids": ["fa2ae871-ef77-49c8-a030-8d90eae6cf18"]
+  },
   "aliases": [
     "Nicky Wrightson",
     "nicky.wrightson"
