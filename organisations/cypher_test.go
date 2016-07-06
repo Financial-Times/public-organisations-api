@@ -28,6 +28,81 @@ func TestNeoReadStructToOrganisationMandatoryFields(t *testing.T) {
 	assert.Equal(expected, string(organisationJSON))
 }
 
+func TestNeoReadOrganisationWithCanonicalUPPID(t *testing.T) {
+	assert := assert.New(t)
+	db := getDatabaseConnectionAndCheckClean(t, assert)
+	batchRunner := neoutils.NewBatchCypherRunner(neoutils.StringerDb{db}, 1)
+	_, organisationRW, _, _ := getServices(t, assert, db, &batchRunner)
+
+	writeOrg(assert, organisationRW, "./fixtures/Organisation-Complex-f21a5cc0-d326-4e62-b84a-d840c2209fee.json")
+
+	defer cleanDB(db, t, assert)
+	defer deleteOrgViaService(assert, organisationRW, "f21a5cc0-d326-4e62-b84a-d840c2209fee")
+
+	undertest := NewCypherDriver(db, "prod")
+	org, found, err := undertest.Read("f21a5cc0-d326-4e62-b84a-d840c2209fee")
+	assert.NoError(err)
+	assert.True(found)
+	assert.NotNil(org)
+
+	assert.Equal("http://api.ft.com/things/f21a5cc0-d326-4e62-b84a-d840c2209fee", org.ID)
+	assert.Equal("http://api.ft.com/organisations/f21a5cc0-d326-4e62-b84a-d840c2209fee", org.APIURL)
+	assert.Equal("7ZW8QJWVPR4P1J1KQY46", org.LegalEntityIdentifier)
+	assertListContainsAll(assert, org.Types, "http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/organisation/Organisation")
+	assert.Equal("Awesome, Inc.", org.PrefLabel)
+
+}
+
+func TestNeoReadOrganisationWithAlternateUPPID(t *testing.T) {
+	assert := assert.New(t)
+	db := getDatabaseConnectionAndCheckClean(t, assert)
+	batchRunner := neoutils.NewBatchCypherRunner(neoutils.StringerDb{db}, 1)
+	_, organisationRW, _, _ := getServices(t, assert, db, &batchRunner)
+
+	writeOrg(assert, organisationRW, "./fixtures/Organisation-Complex-f21a5cc0-d326-4e62-b84a-d840c2209fee.json")
+
+	canonicalUUID := "f21a5cc0-d326-4e62-b84a-d840c2209fee"
+	alternateUUID := "2421f3fa-5a6a-4320-88f5-7926d1cb2379"
+
+	defer cleanDB(db, t, assert)
+	defer deleteOrgViaService(assert, organisationRW, canonicalUUID)
+
+	undertest := NewCypherDriver(db, "prod")
+	org, found, err := undertest.Read(alternateUUID)
+	assert.NoError(err)
+	assert.True(found)
+	assert.NotNil(org)
+
+	assert.Equal("http://api.ft.com/things/"+canonicalUUID, org.ID)
+	assert.Equal("http://api.ft.com/organisations/"+canonicalUUID, org.APIURL)
+	assert.Equal("7ZW8QJWVPR4P1J1KQY46", org.LegalEntityIdentifier)
+	assertListContainsAll(assert, org.Types, "http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/organisation/Organisation")
+	assert.Equal("Awesome, Inc.", org.PrefLabel)
+
+}
+
+func TestNeoReadOrganisationWithMissingUPPIDShouldReturnEmptyOrg(t *testing.T) {
+	assert := assert.New(t)
+	db := getDatabaseConnectionAndCheckClean(t, assert)
+	batchRunner := neoutils.NewBatchCypherRunner(neoutils.StringerDb{db}, 1)
+	_, organisationRW, _, _ := getServices(t, assert, db, &batchRunner)
+
+	writeOrg(assert, organisationRW, "./fixtures/Organisation-Complex-f21a5cc0-d326-4e62-b84a-d840c2209fee.json")
+
+	uuid := "3e844449-b27f-40d4-b696-2ce9b6137133"
+	canonicalUUID := "f21a5cc0-d326-4e62-b84a-d840c2209fee"
+
+	defer cleanDB(db, t, assert)
+	defer deleteOrgViaService(assert, organisationRW, canonicalUUID)
+
+	undertest := NewCypherDriver(db, "prod")
+	org, found, err := undertest.Read(uuid)
+	assert.NoError(err)
+	assert.False(found)
+	assert.NotNil(org)
+	assert.Equal(Organisation{}, org)
+}
+
 func TestNeoReadStructToOrganisationEnvIsTest(t *testing.T) {
 	expected := `{"id":"http://api.ft.com/things/","apiUrl":"http://test.api.ft.com/things/","types":null}`
 	organisation := neoReadStructToOrganisation(neoReadStruct{}, "test")
@@ -94,6 +169,10 @@ func assertListContainsAll(assert *assert.Assertions, list interface{}, items ..
 	}
 }
 
+func writeOrg(assert *assert.Assertions, organisationRW baseftrwapp.Service, path string) {
+	writeJSONToService(organisationRW, path, assert)
+}
+
 func writeBigOrg(assert *assert.Assertions, peopleRW baseftrwapp.Service, organisationRW baseftrwapp.Service, membershipsRW baseftrwapp.Service, rolesRW baseftrwapp.Service) {
 	writeJSONToService(peopleRW, "./fixtures/Person-Dan_Murphy-868c3c17-611c-4943-9499-600ccded71f3.json", assert)
 	writeJSONToService(peopleRW, "./fixtures/Person-Nicky_Wrightson-fa2ae871-ef77-49c8-a030-8d90eae6cf18.json", assert)
@@ -114,6 +193,10 @@ func writeBigOrg(assert *assert.Assertions, peopleRW baseftrwapp.Service, organi
 	writeJSONToService(rolesRW, "./fixtures/Role-c7063a20-5ca5-4f7a-8a96-47e946b5739e.json", assert)
 	writeJSONToService(rolesRW, "./fixtures/Role-d8bbba91-8a87-4dee-bd1a-f79e8139e5c9.json", assert)
 	writeJSONToService(rolesRW, "./fixtures/Role-5fcfec9c-8ff0-4ee2-9e91-f270492d636c.json", assert)
+}
+
+func deleteOrgViaService(assert *assert.Assertions, organisationRW baseftrwapp.Service, uuid string) {
+	organisationRW.Delete(uuid)
 }
 
 func deleteAllViaService(assert *assert.Assertions, peopleRW baseftrwapp.Service, organisationRW baseftrwapp.Service, membershipsRW baseftrwapp.Service, rolesRW baseftrwapp.Service) {
@@ -163,7 +246,6 @@ func writeJSONToService(service baseftrwapp.Service, pathToJSONFile string, asse
 func getDatabaseConnectionAndCheckClean(t *testing.T, assert *assert.Assertions) *neoism.Database {
 	db := getDatabaseConnection(t, assert)
 	cleanDB(db, t, assert)
-	//	checkDbClean(db, t)
 	return db
 }
 

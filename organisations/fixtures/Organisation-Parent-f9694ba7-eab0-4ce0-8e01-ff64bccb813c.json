@@ -1,16 +1,12 @@
 {
   "uuid": "f9694ba7-eab0-4ce0-8e01-ff64bccb813c",
   "properName": "NIKE, Inc.",
-  "identifiers": [
-    {
-      "authority": "http://api.ft.com/system/FACTSET-EDM",
-      "identifierValue": "000RBW-E"
-    },
-    {
-      "authority": "http://api.ft.com/system/LEI",
-      "identifierValue": "787RXPR0UX0O0XUXPZ81"
-    }
-  ],
+  "prefLabel": "NIKE, Inc.",
+  "alternativeIdentifiers": {
+    "factsetIdentifier": "000RBW-E",
+    "uuids": ["f9694ba7-eab0-4ce0-8e01-ff64bccb813c"],
+    "leiCode": "787RXPR0UX0O0XUXPZ81"
+  },
   "industryClassification": "f21a5cc0-d326-4e62-b84a-d840c2209fee",
   "shortName": "NIKE",
   "legalName": "NIKE, Inc.",

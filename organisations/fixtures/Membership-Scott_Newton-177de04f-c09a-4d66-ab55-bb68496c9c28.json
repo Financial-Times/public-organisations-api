@@ -3,12 +3,10 @@
   "prefLabel": "Head of Latin American Research & Strategy",
   "personUuid": "84cec0e1-a866-47bd-9444-d74873b69786",
   "organisationUuid": "3e844449-b27f-40d4-b696-2ce9b6137133",
-  "identifiers": [
-    {
-      "authority": "http://api.ft.com/system/FACTSET",
-      "identifierValue": "3603860"
-    }
-  ],
+  "alternativeIdentifiers": {
+    "factsetIdentifier": "3603865",
+    "uuids": ["177de04f-c09a-4d66-ab55-bb68496c9c28"]
+  },
   "membershipRoles": [
     {
       "roleUuid": "c7063a20-5ca5-4f7a-8a96-47e946b5739e",

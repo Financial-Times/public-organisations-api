@@ -1,13 +1,12 @@
 {
   "uuid": "868c3c17-611c-4943-9499-600ccded71f3",
   "name": "Dan Murphy",
+  "prefLabel": "Dan Murphy",
   "salutation": "Mr.",
-  "identifiers": [
-    {
-      "authority": "http://api.ft.com/system/FACTSET-PPL",
-      "identifierValue": "DANMUR-1"
-    }
-  ],
+  "alternativeIdentifiers": {
+    "factsetIdentifier": "DANMUR-1",
+    "uuids": ["868c3c17-611c-4943-9499-600ccded71f3"]
+  },
   "aliases": [
     "Dan Murphy",
     "dan.murphy"
