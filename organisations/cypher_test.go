@@ -324,7 +324,6 @@ func cleanDB(db neoutils.NeoConnection, t *testing.T, assert *assert.Assertions)
 			Statement: fmt.Sprintf("MATCH (s:Identifier {value: '%v'}) DETACH DELETE s", "f9694ba7-eab0-4ce0-8e01-ff64bccb813c"),
 		},
 	}
-
 	err := db.CypherBatch(qs)
 	assert.NoError(err)
 }
