@@ -79,28 +79,31 @@ func TestNeoReadOrganisationWithAlternateUPPID(t *testing.T) {
 
 }
 
-//func TestNeoReadOrganisationWithMissingUPPIDShouldReturnEmptyOrg(t *testing.T) {
-//	assert := assert.New(t)
-//	db := getDatabaseConnectionAndCheckClean(t, assert)
-//	_, organisationRW, _, _ := getServices(t, assert, db)
-//
-//	writeOrg(assert, organisationRW, "./fixtures/Organisation-Complex-f21a5cc0-d326-4e62-b84a-d840c2209fee.json")
-//
-//	//Parent uuid?
-//	uuid := "3e844449-b27f-40d4-b696-2ce9b6137133"
-//	canonicalUUID := "f21a5cc0-d326-4e62-b84a-d840c2209fee"
-//
-//	defer cleanDB(db, t, assert)
-//	defer deleteOrgViaService(assert, organisationRW, canonicalUUID)
-//
-//	undertest := NewCypherDriver(db, "prod")
-//	org, found, err := undertest.Read(uuid)
-//	fmt.Printf("Organisation is %v", org)
-//	assert.NoError(err)
-//	assert.False(found)
-//	assert.NotNil(org)
-//	assert.Equal(Organisation{}, org)
-//}
+func TestNeoReadOrganisationWithMissingUPPIDShouldReturnEmptyOrg(t *testing.T) {
+	assert := assert.New(t)
+	db := getDatabaseConnectionAndCheckClean(t, assert)
+	_, organisationRW, _, _ := getServices(t, assert, db)
+
+	writeOrg(assert, organisationRW, "./fixtures/Organisation-Complex-f21a5cc0-d326-4e62-b84a-d840c2209fee.json")
+
+	canonicalUUID := "f21a5cc0-d326-4e62-b84a-d840c2209fee"
+
+	defer cleanDB(db, t, assert)
+	defer deleteOrgViaService(assert, organisationRW, canonicalUUID)
+
+	removeUppId := neoism.CypherQuery{
+		Statement: fmt.Sprintf("MATCH (upp:UPPIdentifier)-[:IDENTIFIES]->(o:Organisation{uuid:'%v'}) DETACH DELETE upp", canonicalUUID),
+	}
+
+	assert.NoError(db.CypherBatch([]*neoism.CypherQuery{&removeUppId}))
+
+	undertest := NewCypherDriver(db, "prod")
+	org, found, err := undertest.Read(canonicalUUID)
+	assert.NoError(err)
+	assert.False(found)
+	assert.NotNil(org)
+	assert.Equal(Organisation{}, org)
+}
 
 func TestNeoReadStructToOrganisationEnvIsTest(t *testing.T) {
 	expected := `{"id":"http://api.ft.com/things/","apiUrl":"http://test.api.ft.com/things/","types":null}`
