@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Financial-Times/neo-model-utils-go/mapper"
+	"github.com/Financial-Times/neo-utils-go/neoutils"
 	log "github.com/Sirupsen/logrus"
 	"github.com/jmcvetta/neoism"
 )
@@ -18,27 +19,18 @@ type Driver interface {
 
 // CypherDriver struct
 type CypherDriver struct {
-	db  *neoism.Database
-	env string
+	conn neoutils.NeoConnection
+	env  string
 }
 
 //NewCypherDriver instantiate driver
-func NewCypherDriver(db *neoism.Database, env string) CypherDriver {
-	return CypherDriver{db, env}
+func NewCypherDriver(conn neoutils.NeoConnection, env string) CypherDriver {
+	return CypherDriver{conn, env}
 }
 
 // CheckConnectivity tests neo4j by running a simple cypher query
 func (pcw CypherDriver) CheckConnectivity() error {
-	results := []struct {
-		ID int
-	}{}
-	query := &neoism.CypherQuery{
-		Statement: "MATCH (x) RETURN ID(x) LIMIT 1",
-		Result:    &results,
-	}
-	err := pcw.db.Cypher(query)
-	log.Debugf("CheckConnectivity results:%+v  err: %+v", results, err)
-	return err
+	return neoutils.Check(pcw.conn)
 }
 
 type neoChangeEvent struct {
@@ -135,21 +127,16 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
 		Parameters: neoism.Props{"uuid": uuid},
 		Result:     &results,
 	}
-	err = pcw.db.Cypher(query)
-	if err != nil {
-		log.Errorf("Error looking up uuid %s with query %s from neoism: %+v\n", uuid, query.Statement, err)
-		return Organisation{}, false, fmt.Errorf("Error accessing Organisation datastore for uuid: %s", uuid)
-	}
-	log.Debugf("CypherResult ReadOrganisation for uuid: %s was: %+v", uuid, results)
-	if (len(results)) == 0 || len(results[0].Rs) == 0 {
-		return Organisation{}, false, nil
+
+	if err := pcw.conn.CypherBatch([]*neoism.CypherQuery{query}); err != nil || len(results) == 0 || len(results[0].Rs) == 0 {
+		return Organisation{}, false, err
 	} else if len(results) != 1 && len(results[0].Rs) != 1 {
 		errMsg := fmt.Sprintf("Multiple organisations found with the same uuid:%s !", uuid)
 		log.Error(errMsg)
 		return Organisation{}, true, errors.New(errMsg)
 	}
+
 	organisation = neoReadStructToOrganisation(results[0].Rs[0], pcw.env)
-	log.Debugf("Returning %v", organisation)
 	return organisation, true, nil
 }
 

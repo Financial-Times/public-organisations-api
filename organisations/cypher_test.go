@@ -31,8 +31,7 @@ func TestNeoReadStructToOrganisationMandatoryFields(t *testing.T) {
 func TestNeoReadOrganisationWithCanonicalUPPID(t *testing.T) {
 	assert := assert.New(t)
 	db := getDatabaseConnectionAndCheckClean(t, assert)
-	batchRunner := neoutils.NewBatchCypherRunner(neoutils.StringerDb{db}, 1)
-	_, organisationRW, _, _ := getServices(t, assert, db, &batchRunner)
+	_, organisationRW, _, _ := getServices(t, assert, db)
 
 	writeOrg(assert, organisationRW, "./fixtures/Organisation-Complex-f21a5cc0-d326-4e62-b84a-d840c2209fee.json")
 
@@ -56,8 +55,7 @@ func TestNeoReadOrganisationWithCanonicalUPPID(t *testing.T) {
 func TestNeoReadOrganisationWithAlternateUPPID(t *testing.T) {
 	assert := assert.New(t)
 	db := getDatabaseConnectionAndCheckClean(t, assert)
-	batchRunner := neoutils.NewBatchCypherRunner(neoutils.StringerDb{db}, 1)
-	_, organisationRW, _, _ := getServices(t, assert, db, &batchRunner)
+	_, organisationRW, _, _ := getServices(t, assert, db)
 
 	writeOrg(assert, organisationRW, "./fixtures/Organisation-Complex-f21a5cc0-d326-4e62-b84a-d840c2209fee.json")
 
@@ -84,19 +82,23 @@ func TestNeoReadOrganisationWithAlternateUPPID(t *testing.T) {
 func TestNeoReadOrganisationWithMissingUPPIDShouldReturnEmptyOrg(t *testing.T) {
 	assert := assert.New(t)
 	db := getDatabaseConnectionAndCheckClean(t, assert)
-	batchRunner := neoutils.NewBatchCypherRunner(neoutils.StringerDb{db}, 1)
-	_, organisationRW, _, _ := getServices(t, assert, db, &batchRunner)
+	_, organisationRW, _, _ := getServices(t, assert, db)
 
 	writeOrg(assert, organisationRW, "./fixtures/Organisation-Complex-f21a5cc0-d326-4e62-b84a-d840c2209fee.json")
 
-	uuid := "3e844449-b27f-40d4-b696-2ce9b6137133"
 	canonicalUUID := "f21a5cc0-d326-4e62-b84a-d840c2209fee"
 
 	defer cleanDB(db, t, assert)
 	defer deleteOrgViaService(assert, organisationRW, canonicalUUID)
 
+	removeUppId := neoism.CypherQuery{
+		Statement: fmt.Sprintf("MATCH (upp:UPPIdentifier)-[:IDENTIFIES]->(o:Organisation{uuid:'%v'}) DETACH DELETE upp", canonicalUUID),
+	}
+
+	assert.NoError(db.CypherBatch([]*neoism.CypherQuery{&removeUppId}))
+
 	undertest := NewCypherDriver(db, "prod")
-	org, found, err := undertest.Read(uuid)
+	org, found, err := undertest.Read(canonicalUUID)
 	assert.NoError(err)
 	assert.False(found)
 	assert.NotNil(org)
@@ -115,8 +117,7 @@ func TestNeoReadStructToOrganisationEnvIsTest(t *testing.T) {
 func TestNeoReadStructToOrganisationMultipleMemberships(t *testing.T) {
 	assert := assert.New(t)
 	db := getDatabaseConnectionAndCheckClean(t, assert)
-	batchRunner := neoutils.NewBatchCypherRunner(neoutils.StringerDb{db}, 1)
-	peopleRW, organisationRW, membershipsRW, rolesRW := getServices(t, assert, db, &batchRunner)
+	peopleRW, organisationRW, membershipsRW, rolesRW := getServices(t, assert, db)
 
 	writeBigOrg(assert, peopleRW, organisationRW, membershipsRW, rolesRW)
 
@@ -221,14 +222,14 @@ func deleteAllViaService(assert *assert.Assertions, peopleRW baseftrwapp.Service
 	rolesRW.Delete("5fcfec9c-8ff0-4ee2-9e91-f270492d636c")
 }
 
-func getServices(t *testing.T, assert *assert.Assertions, db *neoism.Database, batchRunner *neoutils.CypherRunner) (baseftrwapp.Service, baseftrwapp.Service, baseftrwapp.Service, baseftrwapp.Service) {
-	peopleRW := people.NewCypherPeopleService(*batchRunner, db)
+func getServices(t *testing.T, assert *assert.Assertions, db neoutils.NeoConnection) (baseftrwapp.Service, baseftrwapp.Service, baseftrwapp.Service, baseftrwapp.Service) {
+	peopleRW := people.NewCypherPeopleService(db)
 	assert.NoError(peopleRW.Initialise())
-	organisationRW := organisations.NewCypherOrganisationService(*batchRunner, db)
+	organisationRW := organisations.NewCypherOrganisationService(db)
 	assert.NoError(organisationRW.Initialise())
-	membershipsRW := memberships.NewCypherDriver(*batchRunner, db)
+	membershipsRW := memberships.NewCypherMembershipService(db)
 	assert.NoError(membershipsRW.Initialise())
-	rolesRW := roles.NewCypherDriver(*batchRunner, db)
+	rolesRW := roles.NewCypherDriver(db)
 	assert.NoError(rolesRW.Initialise())
 	return peopleRW, organisationRW, membershipsRW, rolesRW
 }
@@ -243,52 +244,93 @@ func writeJSONToService(service baseftrwapp.Service, pathToJSONFile string, asse
 	assert.NoError(errrr)
 }
 
-func getDatabaseConnectionAndCheckClean(t *testing.T, assert *assert.Assertions) *neoism.Database {
+func getDatabaseConnectionAndCheckClean(t *testing.T, assert *assert.Assertions) neoutils.NeoConnection {
 	db := getDatabaseConnection(t, assert)
 	cleanDB(db, t, assert)
 	return db
 }
 
-func getDatabaseConnection(t *testing.T, assert *assert.Assertions) *neoism.Database {
+func getDatabaseConnection(t *testing.T, assert *assert.Assertions) neoutils.NeoConnection {
 	url := os.Getenv("NEO4J_TEST_URL")
 	if url == "" {
 		url = "http://localhost:7474/db/data"
 	}
 
-	db, err := neoism.Connect(url)
+	conf := neoutils.DefaultConnectionConfig()
+	conf.Transactional = false
+	db, err := neoutils.Connect(url, conf)
 	assert.NoError(err, "Failed to connect to Neo4j")
 	return db
 }
 
-func cleanDB(db *neoism.Database, t *testing.T, assert *assert.Assertions) {
-	uuids := []string{
-		"3e844449-b27f-40d4-b696-2ce9b6137133",
-		"f21a5cc0-d326-4e62-b84a-d840c2209fee",
-		"f9694ba7-eab0-4ce0-8e01-ff64bccb813c",
-		"84cec0e1-a866-47bd-9444-d74873b69786",
-		"fa2ae871-ef77-49c8-a030-8d90eae6cf18",
-		"868c3c17-611c-4943-9499-600ccded71f3",
-		"d8bbba91-8a87-4dee-bd1a-f79e8139e5c9",
-		"c7063a20-5ca5-4f7a-8a96-47e946b5739e",
-		"ff9e35f2-63e4-487a-87a4-d82535e047de",
-		"177de04f-c09a-4d66-ab55-bb68496c9c28",
-		"6b278d36-5b30-46a3-b036-55902a9d31ac",
-		"c739b972-f41d-43d2-b8d9-5848c92e17f6",
-		"668c103f-d8dc-4938-9324-9c60de726705",
-		"f21a5cc0-d326-4e62-b84a-d840c2209fee",
-		"bdacd96e-d2f4-429f-bb61-462e40448409",
-		"9c50e77a-de8a-4f8c-b1dd-09c7730e2c70",
-		"5fcfec9c-8ff0-4ee2-9e91-f270492d636c",
-	}
-
-	qs := make([]*neoism.CypherQuery, len(uuids))
-	for i, uuid := range uuids {
-		qs[i] = &neoism.CypherQuery{
-			Statement: fmt.Sprintf("MATCH (a:Thing {uuid: '%s'}) DETACH DELETE a", uuid)}
+func cleanDB(db neoutils.NeoConnection, t *testing.T, assert *assert.Assertions) {
+	qs := []*neoism.CypherQuery{
+		{
+			Statement: fmt.Sprintf("MATCH (a:Thing {uuid: '%v'}) DETACH DELETE a", "f21a5cc0-d326-4e62-b84a-d840c2209fee"),
+		},
+		{
+			Statement: fmt.Sprintf("MATCH (b:Thing {uuid: '%v'}) DETACH DELETE b", "84cec0e1-a866-47bd-9444-d74873b69786"),
+		},
+		{
+			Statement: fmt.Sprintf("MATCH (c:Thing {uuid: '%v'}) DETACH DELETE c", "fa2ae871-ef77-49c8-a030-8d90eae6cf18"),
+		},
+		{
+			Statement: fmt.Sprintf("MATCH (d:Thing {uuid: '%v'}) DETACH DELETE d", "868c3c17-611c-4943-9499-600ccded71f3"),
+		},
+		{
+			Statement: fmt.Sprintf("MATCH (e:Thing {uuid: '%v'}) DETACH DELETE e", "d8bbba91-8a87-4dee-bd1a-f79e8139e5c9"),
+		},
+		{
+			Statement: fmt.Sprintf("MATCH (f:Thing {uuid: '%v'}) DETACH DELETE f", "c7063a20-5ca5-4f7a-8a96-47e946b5739e"),
+		},
+		{
+			Statement: fmt.Sprintf("MATCH (g:Thing {uuid: '%v'}) DETACH DELETE g", "ff9e35f2-63e4-487a-87a4-d82535e047de"),
+		},
+		{
+			Statement: fmt.Sprintf("MATCH (h:Thing {uuid: '%v'}) DETACH DELETE h", "177de04f-c09a-4d66-ab55-bb68496c9c28"),
+		},
+		{
+			Statement: fmt.Sprintf("MATCH (i:Thing {uuid: '%v'}) DETACH DELETE i", "6b278d36-5b30-46a3-b036-55902a9d31ac"),
+		},
+		{
+			Statement: fmt.Sprintf("MATCH (j:Thing {uuid: '%v'}) DETACH DELETE j", "c739b972-f41d-43d2-b8d9-5848c92e17f6"),
+		},
+		{
+			Statement: fmt.Sprintf("MATCH (k:Thing {uuid: '%v'}) DETACH DELETE k", "668c103f-d8dc-4938-9324-9c60de726705"),
+		},
+		{
+			Statement: fmt.Sprintf("MATCH (l:Thing {uuid: '%v'}) DETACH DELETE l", "f21a5cc0-d326-4e62-b84a-d840c2209fee"),
+		},
+		{
+			Statement: fmt.Sprintf("MATCH (m:Thing {uuid: '%v'}) DETACH DELETE m", "bdacd96e-d2f4-429f-bb61-462e40448409"),
+		},
+		{
+			Statement: fmt.Sprintf("MATCH (n:Thing {uuid: '%v'}) DETACH DELETE n", "9c50e77a-de8a-4f8c-b1dd-09c7730e2c70"),
+		},
+		{
+			Statement: fmt.Sprintf("MATCH (o:Thing {uuid: '%v'}) DETACH DELETE o", "5fcfec9c-8ff0-4ee2-9e91-f270492d636c"),
+		},
+		{
+			//deletes parent 'org' which only has type Thing
+			Statement: fmt.Sprintf("MATCH (p:Thing {uuid: '%v'}) DETACH DELETE p", "3e844449-b27f-40d4-b696-2ce9b6137133"),
+		},
+		{
+			//deletes upp identifier for the above parent 'org'
+			Statement: fmt.Sprintf("MATCH (q:Identifier {value: '%v'}) DETACH DELETE q", "3e844449-b27f-40d4-b696-2ce9b6137133"),
+		},
+		{
+			//deletes parent 'org' which only has type Thing
+			Statement: fmt.Sprintf("MATCH (r:Thing {uuid: '%v'}) DETACH DELETE r", "f9694ba7-eab0-4ce0-8e01-ff64bccb813c"),
+		},
+		{
+			//deletes upp identifier for the above parent 'org'
+			Statement: fmt.Sprintf("MATCH (s:Identifier {value: '%v'}) DETACH DELETE s", "f9694ba7-eab0-4ce0-8e01-ff64bccb813c"),
+		},
 	}
 	err := db.CypherBatch(qs)
 	assert.NoError(err)
 }
+
 func getMembership(person *Person, title string, changeEvents ...ChangeEvent) Membership {
 	membership := Membership{}
 	membership.Title = title
