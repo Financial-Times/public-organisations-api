@@ -86,6 +86,12 @@ type neoReadStruct struct {
 			Labels    []string
 		}
 	}
+	Fi []struct {
+		ID 	  string
+		PrefLabel string
+		Types     []string
+		FIGI      string
+	}
 }
 
 func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool, err error) {
@@ -119,8 +125,12 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
  		{ id:parent.uuid, types:labels(parent), prefLabel:parent.prefLabel} as parent,
  		{ id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel, annCount:COUNT(ms) } as sub ORDER BY sub.annCount DESC
  		WITH o, pm, ind, lei, parent, collect(sub) as sub
-		WITH pm, ind, parent, sub, lei, { id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases} as o
- 		return collect ({o:o, lei:lei, parent:parent, ind:ind, sub:sub, pm:pm}) as rs
+ 		OPTIONAL MATCH (fi:FinancialInstrument)-[:ISSUED_BY]->(o)
+ 		OPTIONAL MATCH (fi)<-[:IDENTIFIES]-(figi:FIGIIdentifier)
+ 		WITH o, pm, ind, lei, parent, sub,
+ 		{id:fi.uuid, types:labels(fi), prefLabel:fi.prefLabel, figi:figi.value} as fi
+		WITH pm, ind, parent, sub, lei, collect(fi) as fi, { id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases} as o
+ 		return collect ({o:o, lei:lei, parent:parent, ind:ind, sub:sub, pm:pm, fi:fi}) as rs
 							`,
 		Parameters: neoism.Props{"uuid": uuid},
 		Result:     &results,
@@ -165,6 +175,22 @@ func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 		public.IndustryClassification.ID = mapper.IDURL(neo.Ind.ID)
 		public.IndustryClassification.APIURL = mapper.APIURL(neo.Ind.ID, neo.Ind.Types, env)
 		public.IndustryClassification.PrefLabel = neo.Ind.PrefLabel
+	}
+
+	if len(neo.Fi) == 1 && neo.Fi[0].ID == "" {
+		public.FinancialInstruments = make([]FinancialInstrument, 0, 0)
+	} else {
+		public.FinancialInstruments = make([]FinancialInstrument, len(neo.Fi))
+		for idx, fi := range neo.Fi {
+			financialInstrument := FinancialInstrument{}
+			financialInstrument.Thing = &Thing{}
+			financialInstrument.ID = mapper.IDURL(fi.ID)
+			financialInstrument.APIURL = mapper.APIURL(fi.ID, fi.Types, env)
+			financialInstrument.Types = mapper.TypeURIs(fi.Types)
+			financialInstrument.PrefLabel = fi.PrefLabel
+			financialInstrument.Figi = fi.FIGI
+			public.FinancialInstruments[idx] = financialInstrument
+		}
 	}
 
 	if neo.Parent.ID != "" {
