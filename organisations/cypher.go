@@ -78,8 +78,8 @@ type neoReadStruct struct {
 			Labels    []string
 		}
 	}
-	Fi []struct {
-		ID 	  string
+	Fi struct {
+		ID        string
 		PrefLabel string
 		Types     []string
 		FIGI      string
@@ -121,7 +121,7 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
  		OPTIONAL MATCH (fi)<-[:IDENTIFIES]-(figi:FIGIIdentifier)
  		WITH o, pm, ind, lei, parent, sub,
  		{id:fi.uuid, types:labels(fi), prefLabel:fi.prefLabel, figi:figi.value} as fi
-		WITH pm, ind, parent, sub, lei, collect(fi) as fi, { id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases} as o
+		WITH pm, ind, parent, sub, lei, fi, { id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases} as o
  		return collect ({o:o, lei:lei, parent:parent, ind:ind, sub:sub, pm:pm, fi:fi}) as rs
 							`,
 		Parameters: neoism.Props{"uuid": uuid},
@@ -164,20 +164,14 @@ func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 		public.IndustryClassification.PrefLabel = neo.Ind.PrefLabel
 	}
 
-	if len(neo.Fi) == 1 && neo.Fi[0].ID == "" {
-		public.FinancialInstruments = make([]FinancialInstrument, 0, 0)
-	} else {
-		public.FinancialInstruments = make([]FinancialInstrument, len(neo.Fi))
-		for idx, fi := range neo.Fi {
-			financialInstrument := FinancialInstrument{}
-			financialInstrument.Thing = &Thing{}
-			financialInstrument.ID = mapper.IDURL(fi.ID)
-			financialInstrument.APIURL = mapper.APIURL(fi.ID, fi.Types, env)
-			financialInstrument.Types = mapper.TypeURIs(fi.Types)
-			financialInstrument.PrefLabel = fi.PrefLabel
-			financialInstrument.Figi = fi.FIGI
-			public.FinancialInstruments[idx] = financialInstrument
-		}
+	if neo.Fi.ID != "" {
+		public.FinancialInstrument = FinancialInstrument{}
+		public.FinancialInstrument.Thing = &Thing{}
+		public.FinancialInstrument.ID = mapper.IDURL(neo.Fi.ID)
+		public.FinancialInstrument.APIURL = mapper.APIURL(neo.Fi.ID, neo.Fi.Types, env)
+		public.FinancialInstrument.Types = mapper.TypeURIs(neo.Fi.Types)
+		public.FinancialInstrument.PrefLabel = neo.Fi.PrefLabel
+		public.FinancialInstrument.Figi = neo.Fi.FIGI
 	}
 
 	if neo.Parent.ID != "" {
