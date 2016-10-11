@@ -38,7 +38,7 @@ type Organisation struct {
 	Parent                 *Parent                 `json:"parentOrganisation,omitempty"`
 	Subsidiaries           []Subsidiary            `json:"subsidiaries,omitempty"`
 	Memberships            []Membership            `json:"memberships,omitempty"`
-	FinancialInstrument    FinancialInstrument     `json:"financialInstrument,omitempty"`
+	FinancialInstrument    *FinancialInstrument    `json:"financialInstrument,omitempty"`
 }
 
 // Membership represents the relationship between an organisation and a person

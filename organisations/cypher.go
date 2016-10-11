@@ -165,7 +165,7 @@ func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 	}
 
 	if neo.Fi.ID != "" {
-		public.FinancialInstrument = FinancialInstrument{}
+		public.FinancialInstrument = &FinancialInstrument{}
 		public.FinancialInstrument.Thing = &Thing{}
 		public.FinancialInstrument.ID = mapper.IDURL(neo.Fi.ID)
 		public.FinancialInstrument.APIURL = mapper.APIURL(neo.Fi.ID, neo.Fi.Types, env)
