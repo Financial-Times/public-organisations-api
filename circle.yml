@@ -3,6 +3,7 @@ machine:
     - neo4j
   environment:
     NEO4J_TEST_URL: http://neo4j:x@localhost:7474/db/data/
+    _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
 
 test:
   pre:
