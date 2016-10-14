@@ -97,10 +97,9 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
 		MATCH (identifier)-[:IDENTIFIES]->(o:Organisation)
  		OPTIONAL MATCH (o)<-[:HAS_ORGANISATION]-(m:Membership)
  		OPTIONAL MATCH (m)-[:HAS_MEMBER]->(p:Person)
- 		OPTIONAL MATCH (p)<-[:MENTIONS]-(poc:Content)-[:MENTIONS]->(o)
  		WITH    o,
  		{ id:p.uuid, types:labels(p), prefLabel:p.prefLabel} as p,
- 		{ id:m.uuid, prefLabel:m.prefLabel, changeEvents:[{startedAt:m.inceptionDate}, {endedAt:m.terminationDate}], annCount:COUNT(poc) } as m ORDER BY m.annCount DESC LIMIT 1000
+ 		{ id:m.uuid, prefLabel:m.prefLabel, changeEvents:[{startedAt:m.inceptionDate}, {endedAt:m.terminationDate}]} as m ORDER BY m.uuid DESC LIMIT 1000
  		WITH o, collect({m:m, p:p}) as pm
  		OPTIONAL MATCH (o)-[:HAS_CLASSIFICATION]->(ind:IndustryClassification)
  		WITH o, pm,
@@ -112,10 +111,9 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
 		WITH o, pm, ind, lei
  		OPTIONAL MATCH (o)-[:SUB_ORGANISATION_OF]->(parent:Organisation)
  		OPTIONAL MATCH (o)<-[:SUB_ORGANISATION_OF]-(sub:Organisation)
- 		OPTIONAL MATCH (soc:Content)-[ms:MENTIONS]->(sub)
  		WITH o, pm, ind, lei,
  		{ id:parent.uuid, types:labels(parent), prefLabel:parent.prefLabel} as parent,
- 		{ id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel, annCount:COUNT(ms) } as sub ORDER BY sub.annCount DESC
+ 		{ id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel} as sub ORDER BY sub.uuid DESC
  		WITH o, pm, ind, lei, parent, collect(sub) as sub
  		OPTIONAL MATCH (fi:FinancialInstrument)-[:ISSUED_BY]->(o)
  		OPTIONAL MATCH (fi)<-[:IDENTIFIES]-(figi:FIGIIdentifier)
