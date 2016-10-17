@@ -253,5 +253,16 @@
             ]
          }
       }
-   ]
+   ],
+   "financialInstrument": {
+     "id":"http://api.ft.com/things/0c4461d1-0ed3-324f-bbb3-ae948bd3bb09",
+     "apiUrl":"http://api.ft.com/things/0c4461d1-0ed3-324f-bbb3-ae948bd3bb09",
+     "prefLabel": "Emergency Pest Services, Inc.",
+     "types": [
+        "http://www.ft.com/ontology/core/Thing",
+        "http://www.ft.com/ontology/concept/Concept",
+        "http://www.ft.com/ontology/FinancialInstrument"
+    ],
+    "FIGI": "BBG000BQVGX3"
+   }
 }

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/Financial-Times/base-ft-rw-app-go/baseftrwapp"
+	"github.com/Financial-Times/financial-instruments-rw-neo4j/financialinstruments"
 	"github.com/Financial-Times/memberships-rw-neo4j/memberships"
 	"github.com/Financial-Times/neo-utils-go/neoutils"
 	"github.com/Financial-Times/organisations-rw-neo4j/organisations"
@@ -31,7 +32,7 @@ func TestNeoReadStructToOrganisationMandatoryFields(t *testing.T) {
 func TestNeoReadOrganisationWithCanonicalUPPID(t *testing.T) {
 	assert := assert.New(t)
 	db := getDatabaseConnectionAndCheckClean(t, assert)
-	_, organisationRW, _, _ := getServices(t, assert, db)
+	_, organisationRW, _, _, _ := getServices(t, assert, db)
 
 	writeOrg(assert, organisationRW, "./fixtures/Organisation-Complex-f21a5cc0-d326-4e62-b84a-d840c2209fee.json")
 
@@ -55,7 +56,7 @@ func TestNeoReadOrganisationWithCanonicalUPPID(t *testing.T) {
 func TestNeoReadOrganisationWithAlternateUPPID(t *testing.T) {
 	assert := assert.New(t)
 	db := getDatabaseConnectionAndCheckClean(t, assert)
-	_, organisationRW, _, _ := getServices(t, assert, db)
+	_, organisationRW, _, _, _ := getServices(t, assert, db)
 
 	writeOrg(assert, organisationRW, "./fixtures/Organisation-Complex-f21a5cc0-d326-4e62-b84a-d840c2209fee.json")
 
@@ -82,7 +83,7 @@ func TestNeoReadOrganisationWithAlternateUPPID(t *testing.T) {
 func TestNeoReadOrganisationWithMissingUPPIDShouldReturnEmptyOrg(t *testing.T) {
 	assert := assert.New(t)
 	db := getDatabaseConnectionAndCheckClean(t, assert)
-	_, organisationRW, _, _ := getServices(t, assert, db)
+	_, organisationRW, _, _, _ := getServices(t, assert, db)
 
 	writeOrg(assert, organisationRW, "./fixtures/Organisation-Complex-f21a5cc0-d326-4e62-b84a-d840c2209fee.json")
 
@@ -117,7 +118,7 @@ func TestNeoReadStructToOrganisationEnvIsTest(t *testing.T) {
 func TestNeoReadStructToOrganisationMultipleMemberships(t *testing.T) {
 	assert := assert.New(t)
 	db := getDatabaseConnectionAndCheckClean(t, assert)
-	peopleRW, organisationRW, membershipsRW, rolesRW := getServices(t, assert, db)
+	peopleRW, organisationRW, membershipsRW, rolesRW, _ := getServices(t, assert, db)
 
 	writeBigOrg(assert, peopleRW, organisationRW, membershipsRW, rolesRW)
 
@@ -174,6 +175,10 @@ func writeOrg(assert *assert.Assertions, organisationRW baseftrwapp.Service, pat
 	writeJSONToService(organisationRW, path, assert)
 }
 
+func writeFinancialInstrument(assert *assert.Assertions, financialInstrumentsRW baseftrwapp.Service, path string) {
+	writeJSONToService(financialInstrumentsRW, path, assert)
+}
+
 func writeBigOrg(assert *assert.Assertions, peopleRW baseftrwapp.Service, organisationRW baseftrwapp.Service, membershipsRW baseftrwapp.Service, rolesRW baseftrwapp.Service) {
 	writeJSONToService(peopleRW, "./fixtures/Person-Dan_Murphy-868c3c17-611c-4943-9499-600ccded71f3.json", assert)
 	writeJSONToService(peopleRW, "./fixtures/Person-Nicky_Wrightson-fa2ae871-ef77-49c8-a030-8d90eae6cf18.json", assert)
@@ -222,7 +227,12 @@ func deleteAllViaService(assert *assert.Assertions, peopleRW baseftrwapp.Service
 	rolesRW.Delete("5fcfec9c-8ff0-4ee2-9e91-f270492d636c")
 }
 
-func getServices(t *testing.T, assert *assert.Assertions, db neoutils.NeoConnection) (baseftrwapp.Service, baseftrwapp.Service, baseftrwapp.Service, baseftrwapp.Service) {
+func deleteFinancialInstrumentViaService(assert *assert.Assertions, financialInstrument baseftrwapp.Service, uuid string) {
+	_, err := financialInstrument.Delete(uuid)
+	assert.NoError(err)
+}
+
+func getServices(t *testing.T, assert *assert.Assertions, db neoutils.NeoConnection) (baseftrwapp.Service, baseftrwapp.Service, baseftrwapp.Service, baseftrwapp.Service, baseftrwapp.Service) {
 	peopleRW := people.NewCypherPeopleService(db)
 	assert.NoError(peopleRW.Initialise())
 	organisationRW := organisations.NewCypherOrganisationService(db)
@@ -231,7 +241,9 @@ func getServices(t *testing.T, assert *assert.Assertions, db neoutils.NeoConnect
 	assert.NoError(membershipsRW.Initialise())
 	rolesRW := roles.NewCypherDriver(db)
 	assert.NoError(rolesRW.Initialise())
-	return peopleRW, organisationRW, membershipsRW, rolesRW
+	financialInstrumentsRW := financialinstruments.NewCypherFinancialInstrumentService(db)
+	assert.NoError(financialInstrumentsRW.Initialise())
+	return peopleRW, organisationRW, membershipsRW, rolesRW, financialInstrumentsRW
 }
 
 func writeJSONToService(service baseftrwapp.Service, pathToJSONFile string, assert *assert.Assertions) {
@@ -253,7 +265,7 @@ func getDatabaseConnectionAndCheckClean(t *testing.T, assert *assert.Assertions)
 func getDatabaseConnection(t *testing.T, assert *assert.Assertions) neoutils.NeoConnection {
 	url := os.Getenv("NEO4J_TEST_URL")
 	if url == "" {
-		url = "http://localhost:7474/db/data"
+		url = "http://neo4j:neo4j_new@localhost:7474/db/data"
 	}
 
 	conf := neoutils.DefaultConnectionConfig()
@@ -379,4 +391,35 @@ func getGalia() *Person {
 	person.Types = []string{"http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/person/Person"}
 	person.PrefLabel = "Galia Rimon"
 	return person
+}
+
+func TestNeoReadOrganisationWithFinancialInstrument(t *testing.T) {
+	assert := assert.New(t)
+	db := getDatabaseConnectionAndCheckClean(t, assert)
+	_, organisationRW, _, _, financialInstrumentsRW := getServices(t, assert, db)
+
+	writeOrg(assert, organisationRW, "./fixtures/Organisation-Complex-f21a5cc0-d326-4e62-b84a-d840c2209fee.json")
+	writeFinancialInstrument(assert, financialInstrumentsRW, "./fixtures/FinancialInstrument-0c4461d1-0ed3-324f-bbb3-ae948bd3bb09.json")
+
+	defer cleanDB(db, t, assert)
+	defer deleteOrgViaService(assert, organisationRW, "f21a5cc0-d326-4e62-b84a-d840c2209fee")
+	defer deleteFinancialInstrumentViaService(assert, financialInstrumentsRW, "0c4461d1-0ed3-324f-bbb3-ae948bd3bb09")
+
+	orgService := NewCypherDriver(db, "prod")
+	org, found, err := orgService.Read("f21a5cc0-d326-4e62-b84a-d840c2209fee")
+	assert.NoError(err)
+	assert.True(found)
+	assert.NotNil(org.FinancialInstrument)
+
+	assert.Equal("http://api.ft.com/things/f21a5cc0-d326-4e62-b84a-d840c2209fee", org.ID)
+	assert.Equal("http://api.ft.com/organisations/f21a5cc0-d326-4e62-b84a-d840c2209fee", org.APIURL)
+	assert.Equal("7ZW8QJWVPR4P1J1KQY46", org.LegalEntityIdentifier)
+	assertListContainsAll(assert, org.Types, "http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/organisation/Organisation")
+	assert.Equal("Awesome, Inc.", org.PrefLabel)
+
+	assert.Equal("http://api.ft.com/things/0c4461d1-0ed3-324f-bbb3-ae948bd3bb09", org.FinancialInstrument.ID)
+	assert.Equal("http://api.ft.com/things/0c4461d1-0ed3-324f-bbb3-ae948bd3bb09", org.FinancialInstrument.APIURL)
+	assert.Equal("Emergency Pest Services, Inc.", org.FinancialInstrument.PrefLabel)
+	assertListContainsAll(assert, org.FinancialInstrument.Types, "http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/FinancialInstrument")
+	assert.Equal("BBG000BQVGX3", org.FinancialInstrument.Figi)
 }
