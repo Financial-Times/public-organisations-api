@@ -83,7 +83,7 @@ type neoReadStruct struct {
 func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool, err error) {
 	organisation = Organisation{}
 	results := []struct {
-		Rs []neoReadStruct
+		Rs neoReadStruct
 	}{}
 	query := &neoism.CypherQuery{
 		Statement: `
@@ -108,20 +108,20 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
 		WITH o, pm, ind, lei, parent, collect(sub) as sub
 		WITH pm, ind, parent, sub, lei, { id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases} as o
 		WITH pm, ind, parent, sub, lei, o
-		return collect({o:o, lei:lei, parent:parent, ind:ind, sub:sub, pm:pm}) as rs`,
+		return {o:o, lei:lei, parent:parent, ind:ind, sub:sub, pm:pm} as rs`,
 		Parameters: neoism.Props{"uuid": uuid},
 		Result:     &results,
 	}
 
-	if err := pcw.conn.CypherBatch([]*neoism.CypherQuery{query}); err != nil || len(results) == 0 || len(results[0].Rs) == 0 {
+	if err := pcw.conn.CypherBatch([]*neoism.CypherQuery{query}); err != nil || len(results) == 0 {
 		return Organisation{}, false, err
-	} else if len(results) != 1 && len(results[0].Rs) != 1 {
+	} else if len(results) != 1 {
 		errMsg := fmt.Sprintf("Multiple organisations found with the same uuid:%s !", uuid)
 		log.Error(errMsg)
 		return Organisation{}, true, errors.New(errMsg)
 	}
 
-	organisation = neoReadStructToOrganisation(results[0].Rs[0], pcw.env)
+	organisation = neoReadStructToOrganisation(results[0].Rs, pcw.env)
 	return organisation, true, nil
 }
 
