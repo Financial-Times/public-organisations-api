@@ -38,6 +38,7 @@ type Organisation struct {
 	Parent                 *Parent                 `json:"parentOrganisation,omitempty"`
 	Subsidiaries           []Subsidiary            `json:"subsidiaries,omitempty"`
 	Memberships            []Membership            `json:"memberships,omitempty"`
+	FinancialInstrument    *FinancialInstrument    `json:"financialInstrument,omitempty"`
 }
 
 // Membership represents the relationship between an organisation and a person
@@ -90,4 +91,10 @@ public class ChangeEvent {
 type ChangeEvent struct {
 	StartedAt string `json:"startedAt,omitempty"`
 	EndedAt   string `json:"endedAt,omitempty"`
+}
+
+type FinancialInstrument struct {
+	*Thing
+	Types []string `json:"types,omitempty"`
+	Figi  string   `json:"FIGI"`
 }

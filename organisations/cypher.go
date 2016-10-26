@@ -78,6 +78,12 @@ type neoReadStruct struct {
 			Labels    []string
 		}
 	}
+	Fi struct {
+		ID        string
+		PrefLabel string
+		Types     []string
+		FIGI      string
+	}
 }
 
 func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool, err error) {
@@ -91,7 +97,7 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
 		MATCH (identifier)-[:IDENTIFIES]->(o:Organisation)
 		OPTIONAL MATCH (o)<-[:HAS_ORGANISATION]-(m:Membership)-[:HAS_MEMBER]->(p:Person)
 		WITH o, m, p, size((p)<-[:MENTIONS]-(:Content)-[:MENTIONS]->(o)) as annCount
-		WITH o, { id:p.uuid, types:labels(p), prefLabel:p.prefLabel} as p, { id:m.uuid, prefLabel:m.prefLabel, changeEvents:[{startedAt:m.inceptionDate}, {endedAt:m.terminationDate}], annCount:annCount } as m ORDER BY annCount DESC LIMIT 1000
+		WITH o, { id:p.uuid, types:labels(p), prefLabel:p.prefLabel} as p, { id:m.uuid, prefLabel:m.prefLabel, changeEvents:[{startedAt:m.inceptionDate}, {endedAt:m.terminationDate}], annCount:annCount } as m ORDER BY m.annCount DESC, p.prefLabel ASC LIMIT 1000
 		WITH o, collect({m:m, p:p}) as pm
 		OPTIONAL MATCH (o)-[:HAS_CLASSIFICATION]->(ind:IndustryClassification)
 		WITH o, pm, { id:ind.uuid, types:labels(ind), prefLabel:ind.prefLabel} as ind
@@ -104,11 +110,13 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
 		WITH o, pm, ind, lei, parent
 		OPTIONAL MATCH (o)<-[:SUB_ORGANISATION_OF]-(sub:Organisation)
 		WITH o, pm, ind, lei, parent, sub, size((:Content)-[:MENTIONS]->(sub)) as annCounts
-		WITH o, pm, ind, lei, parent, { id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel, annCount:annCounts } as sub ORDER BY sub.annCount DESC
+		WITH o, pm, ind, lei, parent, { id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel, annCount:annCounts } as sub ORDER BY sub.annCounts DESC, o.prefLabel ASC
 		WITH o, pm, ind, lei, parent, collect(sub) as sub
-		WITH pm, ind, parent, sub, lei, { id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases} as o
-		WITH pm, ind, parent, sub, lei, o
-		return {o:o, lei:lei, parent:parent, ind:ind, sub:sub, pm:pm} as rs`,
+ 		OPTIONAL MATCH (o)<-[:ISSUED_BY]-(fi:FinancialInstrument)<-[:IDENTIFIES]-(figi:FIGIIdentifier)
+ 		WITH o, pm, ind, lei, parent, sub, {id:fi.uuid, types:labels(fi), prefLabel:fi.prefLabel, figi:figi.value} as fi
+		WITH pm, ind, parent, sub, lei, fi, { id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases} as o
+		WITH pm, ind, parent, sub, lei, fi, o
+		return {o:o, lei:lei, parent:parent, ind:ind, sub:sub, pm:pm, fi:fi} as rs`,
 		Parameters: neoism.Props{"uuid": uuid},
 		Result:     &results,
 	}
@@ -147,6 +155,16 @@ func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 		public.IndustryClassification.ID = mapper.IDURL(neo.Ind.ID)
 		public.IndustryClassification.APIURL = mapper.APIURL(neo.Ind.ID, neo.Ind.Types, env)
 		public.IndustryClassification.PrefLabel = neo.Ind.PrefLabel
+	}
+
+	if neo.Fi.ID != "" {
+		public.FinancialInstrument = &FinancialInstrument{}
+		public.FinancialInstrument.Thing = &Thing{}
+		public.FinancialInstrument.ID = mapper.IDURL(neo.Fi.ID)
+		public.FinancialInstrument.APIURL = mapper.APIURL(neo.Fi.ID, neo.Fi.Types, env)
+		public.FinancialInstrument.Types = mapper.TypeURIs(neo.Fi.Types)
+		public.FinancialInstrument.PrefLabel = neo.Fi.PrefLabel
+		public.FinancialInstrument.Figi = neo.Fi.FIGI
 	}
 
 	if neo.Parent.ID != "" {
