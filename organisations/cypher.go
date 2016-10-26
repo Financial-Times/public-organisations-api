@@ -112,8 +112,7 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
 		WITH o, pm, ind, lei, parent, sub, size((:Content)-[:MENTIONS]->(sub)) as annCounts
 		WITH o, pm, ind, lei, parent, { id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel, annCount:annCounts } as sub ORDER BY sub.annCounts DESC, o.prefLabel ASC
 		WITH o, pm, ind, lei, parent, collect(sub) as sub
-		OPTIONAL MATCH (fi:FinancialInstrument)-[:ISSUED_BY]->(o)
- 		OPTIONAL MATCH (fi)<-[:IDENTIFIES]-(figi:FIGIIdentifier)
+ 		OPTIONAL MATCH (o)<-[:ISSUED_BY]-(fi:FinancialInstrument)<-[:IDENTIFIES]-(figi:FIGIIdentifier)
  		WITH o, pm, ind, lei, parent, sub, {id:fi.uuid, types:labels(fi), prefLabel:fi.prefLabel, figi:figi.value} as fi
 		WITH pm, ind, parent, sub, lei, fi, { id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases} as o
 		WITH pm, ind, parent, sub, lei, fi, o
