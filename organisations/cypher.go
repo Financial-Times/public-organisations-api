@@ -39,12 +39,11 @@ type neoChangeEvent struct {
 }
 
 type neoReadStruct struct {
-	O struct {
-		ID        string
-		Types     []string
-		PrefLabel string
-		Labels    []string
-	}
+	ID        string
+	Types     []string
+	PrefLabel string
+	Labels    []string
+
 	Lei struct {
 		LegalEntityIdentifier string
 	}
@@ -95,28 +94,28 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
 		Statement: `
 		MATCH (identifier:UPPIdentifier{value:{uuid}})
 		MATCH (identifier)-[:IDENTIFIES]->(o:Organisation)
-		OPTIONAL MATCH (o)<-[:HAS_ORGANISATION]-(m:Membership)-[:HAS_MEMBER]->(p:Person)
-		WITH o, m, p, size((p)<-[:MENTIONS]-(:Content)-[:MENTIONS]->(o)) as annCount
-		WITH o, { id:p.uuid, types:labels(p), prefLabel:p.prefLabel} as p, { id:m.uuid, prefLabel:m.prefLabel, changeEvents:[{startedAt:m.inceptionDate}, {endedAt:m.terminationDate}], annCount:annCount } as m ORDER BY m.annCount DESC, p.prefLabel ASC LIMIT 1000
-		WITH o, collect({m:m, p:p}) as pm
 		OPTIONAL MATCH (o)-[:HAS_CLASSIFICATION]->(ind:IndustryClassification)
-		WITH o, pm, { id:ind.uuid, types:labels(ind), prefLabel:ind.prefLabel} as ind
-		WITH o, pm, ind
+		WITH o, { id:ind.uuid, types:labels(ind), prefLabel:ind.prefLabel} as ind
+		WITH o, ind
 		OPTIONAL MATCH (lei:LegalEntityIdentifier)-[:IDENTIFIES]->(o)
-		WITH o, pm, ind, { legalEntityIdentifier:lei.value } as lei
-		WITH o, pm, ind, lei
+		WITH o, ind, { legalEntityIdentifier:lei.value } as lei
+		WITH o, ind, lei
 		OPTIONAL MATCH (o)-[:SUB_ORGANISATION_OF]->(parent:Organisation)
-		WITH o, pm, ind, lei, { id:parent.uuid, types:labels(parent), prefLabel:parent.prefLabel} as parent
-		WITH o, pm, ind, lei, parent
+		WITH o, ind, lei, { id:parent.uuid, types:labels(parent), prefLabel:parent.prefLabel} as parent
+		WITH o, ind, lei, parent
+		OPTIONAL MATCH (o)<-[:ISSUED_BY]-(fi:FinancialInstrument)<-[:IDENTIFIES]-(figi:FIGIIdentifier)
+		WITH o, ind, lei, parent, {id:fi.uuid, types:labels(fi), prefLabel:fi.prefLabel, figi:figi.value} as fi
+		WITH o, ind, lei, parent, fi
+		WITH o, ind, lei, parent, fi
 		OPTIONAL MATCH (o)<-[:SUB_ORGANISATION_OF]-(sub:Organisation)
-		WITH o, pm, ind, lei, parent, sub, size((:Content)-[:MENTIONS]->(sub)) as annCounts
-		WITH o, pm, ind, lei, parent, { id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel, annCount:annCounts } as sub ORDER BY sub.annCounts DESC, o.prefLabel ASC
-		WITH o, pm, ind, lei, parent, collect(sub) as sub
- 		OPTIONAL MATCH (o)<-[:ISSUED_BY]-(fi:FinancialInstrument)<-[:IDENTIFIES]-(figi:FIGIIdentifier)
- 		WITH o, pm, ind, lei, parent, sub, {id:fi.uuid, types:labels(fi), prefLabel:fi.prefLabel, figi:figi.value} as fi
-		WITH pm, ind, parent, sub, lei, fi, { id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases} as o
-		WITH pm, ind, parent, sub, lei, fi, o
-		return {o:o, lei:lei, parent:parent, ind:ind, sub:sub, pm:pm, fi:fi} as rs`,
+		WITH o, ind, lei, parent, fi, sub, size((:Content)-[:MENTIONS]->(sub)) as annCounts
+		WITH o, ind, lei, parent, fi, { id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel, annCount:annCounts } as sub ORDER BY sub.annCounts DESC, o.prefLabel ASC
+		WITH o, ind, lei, parent, fi, collect(sub) as sub
+		OPTIONAL MATCH (o)<-[:HAS_ORGANISATION]-(m:Membership)-[:HAS_MEMBER]->(p:Person)
+		WITH o, ind, parent, lei, fi, sub, m, p, size((p)<-[:MENTIONS]-(:Content)-[:MENTIONS]->(o)) as annCount
+		WITH o, ind, parent, lei, fi, sub, { id:p.uuid, types:labels(p), prefLabel:p.prefLabel} as p, { id:m.uuid, prefLabel:m.prefLabel, changeEvents:[{startedAt:m.inceptionDate}, {endedAt:m.terminationDate}], annCount:annCount } as m ORDER BY m.annCount DESC, p.prefLabel ASC LIMIT 1000
+		WITH o, ind, parent, lei, fi, sub, collect({m:m, p:p}) as pm
+		return {id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases, lei:lei, parent:parent, ind:ind, sub:sub, pm:pm, fi:fi} as rs`,
 		Parameters: neoism.Props{"uuid": uuid},
 		Result:     &results,
 	}
@@ -137,12 +136,12 @@ func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 	//TODO find out why we only get two memberships here compared to 17 off PROD graphDB... also, performance of e.g. Barclays
 	public := Organisation{}
 	public.Thing = &Thing{}
-	public.ID = mapper.IDURL(neo.O.ID)
-	public.APIURL = mapper.APIURL(neo.O.ID, neo.O.Types, env)
-	public.Types = mapper.TypeURIs(neo.O.Types)
-	public.PrefLabel = neo.O.PrefLabel
-	if len(neo.O.Labels) > 0 {
-		public.Labels = &neo.O.Labels
+	public.ID = mapper.IDURL(neo.ID)
+	public.APIURL = mapper.APIURL(neo.ID, neo.Types, env)
+	public.Types = mapper.TypeURIs(neo.Types)
+	public.PrefLabel = neo.PrefLabel
+	if len(neo.Labels) > 0 {
+		public.Labels = &neo.Labels
 	}
 
 	if neo.Lei.LegalEntityIdentifier != "" {
