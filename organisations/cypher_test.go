@@ -278,65 +278,57 @@ func getDatabaseConnection(t *testing.T, assert *assert.Assertions) neoutils.Neo
 func cleanDB(db neoutils.NeoConnection, t *testing.T, assert *assert.Assertions) {
 	qs := []*neoism.CypherQuery{
 		{
-			Statement: fmt.Sprintf("MATCH (a:Thing {uuid: '%v'}) DETACH DELETE a", "f21a5cc0-d326-4e62-b84a-d840c2209fee"),
+			Statement: fmt.Sprintf("MATCH (a:Thing {uuid: '%v'}) OPTIONAL MATCH (a)-[]-(b:Identifier) DETACH DELETE a,b", "f21a5cc0-d326-4e62-b84a-d840c2209fee"),
 		},
 		{
-			Statement: fmt.Sprintf("MATCH (b:Thing {uuid: '%v'}) DETACH DELETE b", "84cec0e1-a866-47bd-9444-d74873b69786"),
+			Statement: fmt.Sprintf("MATCH (a:Thing {uuid: '%v'}) OPTIONAL MATCH (a)-[]-(b:Identifier) DETACH DELETE a,b", "84cec0e1-a866-47bd-9444-d74873b69786"),
 		},
 		{
-			Statement: fmt.Sprintf("MATCH (c:Thing {uuid: '%v'}) DETACH DELETE c", "fa2ae871-ef77-49c8-a030-8d90eae6cf18"),
+			Statement: fmt.Sprintf("MATCH (a:Thing {uuid: '%v'}) OPTIONAL MATCH (a)-[]-(b:Identifier) DETACH DELETE a,b", "fa2ae871-ef77-49c8-a030-8d90eae6cf18"),
 		},
 		{
-			Statement: fmt.Sprintf("MATCH (d:Thing {uuid: '%v'}) DETACH DELETE d", "868c3c17-611c-4943-9499-600ccded71f3"),
+			Statement: fmt.Sprintf("MATCH (a:Thing {uuid: '%v'}) OPTIONAL MATCH (a)-[]-(b:Identifier) DETACH DELETE a,b", "868c3c17-611c-4943-9499-600ccded71f3"),
 		},
 		{
-			Statement: fmt.Sprintf("MATCH (e:Thing {uuid: '%v'}) DETACH DELETE e", "d8bbba91-8a87-4dee-bd1a-f79e8139e5c9"),
+			Statement: fmt.Sprintf("MATCH (a:Thing {uuid: '%v'}) OPTIONAL MATCH (a)-[]-(b:Identifier) DETACH DELETE a,b", "d8bbba91-8a87-4dee-bd1a-f79e8139e5c9"),
 		},
 		{
-			Statement: fmt.Sprintf("MATCH (f:Thing {uuid: '%v'}) DETACH DELETE f", "c7063a20-5ca5-4f7a-8a96-47e946b5739e"),
+			Statement: fmt.Sprintf("MATCH (a:Thing {uuid: '%v'}) OPTIONAL MATCH (a)-[]-(b:Identifier) DETACH DELETE a,b", "c7063a20-5ca5-4f7a-8a96-47e946b5739e"),
 		},
 		{
-			Statement: fmt.Sprintf("MATCH (g:Thing {uuid: '%v'}) DETACH DELETE g", "ff9e35f2-63e4-487a-87a4-d82535e047de"),
+			Statement: fmt.Sprintf("MATCH (a:Thing {uuid: '%v'}) OPTIONAL MATCH (a)-[]-(b:Identifier) DETACH DELETE a,b", "ff9e35f2-63e4-487a-87a4-d82535e047de"),
 		},
 		{
-			Statement: fmt.Sprintf("MATCH (h:Thing {uuid: '%v'}) DETACH DELETE h", "177de04f-c09a-4d66-ab55-bb68496c9c28"),
+			Statement: fmt.Sprintf("MATCH (a:Thing {uuid: '%v'}) OPTIONAL MATCH (a)-[]-(b:Identifier) DETACH DELETE a,b", "177de04f-c09a-4d66-ab55-bb68496c9c28"),
 		},
 		{
-			Statement: fmt.Sprintf("MATCH (i:Thing {uuid: '%v'}) DETACH DELETE i", "6b278d36-5b30-46a3-b036-55902a9d31ac"),
+			Statement: fmt.Sprintf("MATCH (a:Thing {uuid: '%v'}) OPTIONAL MATCH (a)-[]-(b:Identifier) DETACH DELETE a,b", "6b278d36-5b30-46a3-b036-55902a9d31ac"),
 		},
 		{
-			Statement: fmt.Sprintf("MATCH (j:Thing {uuid: '%v'}) DETACH DELETE j", "c739b972-f41d-43d2-b8d9-5848c92e17f6"),
+			Statement: fmt.Sprintf("MATCH (a:Thing {uuid: '%v'}) OPTIONAL MATCH (a)-[]-(b:Identifier) DETACH DELETE a,b", "c739b972-f41d-43d2-b8d9-5848c92e17f6"),
 		},
 		{
-			Statement: fmt.Sprintf("MATCH (k:Thing {uuid: '%v'}) DETACH DELETE k", "668c103f-d8dc-4938-9324-9c60de726705"),
+			Statement: fmt.Sprintf("MATCH (a:Thing {uuid: '%v'}) OPTIONAL MATCH (a)-[]-(b:Identifier) DETACH DELETE a,b", "668c103f-d8dc-4938-9324-9c60de726705"),
 		},
 		{
-			Statement: fmt.Sprintf("MATCH (l:Thing {uuid: '%v'}) DETACH DELETE l", "f21a5cc0-d326-4e62-b84a-d840c2209fee"),
+			Statement: fmt.Sprintf("MATCH (a:Thing {uuid: '%v'}) OPTIONAL MATCH (a)-[]-(b:Identifier) DETACH DELETE a,b", "f21a5cc0-d326-4e62-b84a-d840c2209fee"),
 		},
 		{
-			Statement: fmt.Sprintf("MATCH (m:Thing {uuid: '%v'}) DETACH DELETE m", "bdacd96e-d2f4-429f-bb61-462e40448409"),
+			Statement: fmt.Sprintf("MATCH (a:Thing {uuid: '%v'}) OPTIONAL MATCH (a)-[]-(b:Identifier) DETACH DELETE a,b", "bdacd96e-d2f4-429f-bb61-462e40448409"),
 		},
 		{
-			Statement: fmt.Sprintf("MATCH (n:Thing {uuid: '%v'}) DETACH DELETE n", "9c50e77a-de8a-4f8c-b1dd-09c7730e2c70"),
+			Statement: fmt.Sprintf("MATCH (a:Thing {uuid: '%v'}) OPTIONAL MATCH (a)-[]-(b:Identifier) DETACH DELETE a,b", "9c50e77a-de8a-4f8c-b1dd-09c7730e2c70"),
 		},
 		{
-			Statement: fmt.Sprintf("MATCH (o:Thing {uuid: '%v'}) DETACH DELETE o", "5fcfec9c-8ff0-4ee2-9e91-f270492d636c"),
-		},
-		{
-			//deletes parent 'org' which only has type Thing
-			Statement: fmt.Sprintf("MATCH (p:Thing {uuid: '%v'}) DETACH DELETE p", "3e844449-b27f-40d4-b696-2ce9b6137133"),
-		},
-		{
-			//deletes upp identifier for the above parent 'org'
-			Statement: fmt.Sprintf("MATCH (q:Identifier {value: '%v'}) DETACH DELETE q", "3e844449-b27f-40d4-b696-2ce9b6137133"),
+			Statement: fmt.Sprintf("MATCH (a:Thing {uuid: '%v'}) OPTIONAL MATCH (a)-[]-(b:Identifier) DETACH DELETE a,b", "5fcfec9c-8ff0-4ee2-9e91-f270492d636c"),
 		},
 		{
 			//deletes parent 'org' which only has type Thing
-			Statement: fmt.Sprintf("MATCH (r:Thing {uuid: '%v'}) DETACH DELETE r", "f9694ba7-eab0-4ce0-8e01-ff64bccb813c"),
+			Statement: fmt.Sprintf("MATCH (a:Thing {uuid: '%v'}) OPTIONAL MATCH (a)-[]-(b:Identifier) DETACH DELETE a,b", "3e844449-b27f-40d4-b696-2ce9b6137133"),
 		},
 		{
-			//deletes upp identifier for the above parent 'org'
-			Statement: fmt.Sprintf("MATCH (s:Identifier {value: '%v'}) DETACH DELETE s", "f9694ba7-eab0-4ce0-8e01-ff64bccb813c"),
+			//deletes parent 'org' which only has type Thing
+			Statement: fmt.Sprintf("MATCH (a:Thing {uuid: '%v'}) OPTIONAL MATCH (a)-[]-(b:Identifier) DETACH DELETE a,b", "f9694ba7-eab0-4ce0-8e01-ff64bccb813c"),
 		},
 	}
 	err := db.CypherBatch(qs)
