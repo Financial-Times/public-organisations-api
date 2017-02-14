@@ -108,8 +108,8 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
 		WITH o, ind, lei, parent, fi
 		WITH o, ind, lei, parent, fi
 		OPTIONAL MATCH (o)<-[:SUB_ORGANISATION_OF]-(sub:Organisation)
-		WITH o, ind, lei, parent, fi, sub, size((:Content)-[:MENTIONS]->(sub)) as annCounts
-		WITH o, ind, lei, parent, fi, { id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel, annCount:annCounts } as sub ORDER BY sub.annCounts DESC, o.prefLabel ASC
+		WITH o, ind, lei, parent, fi, sub, size((:Content)-[:MENTIONS]->(sub)) as annCounts ORDER BY annCounts DESC, o.prefLabel ASC
+		WITH o, ind, lei, parent, fi, { id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel, annCount:annCounts } as sub
 		WITH o, ind, lei, parent, fi, collect(sub) as sub
 		OPTIONAL MATCH (o)<-[:HAS_ORGANISATION]-(m:Membership)-[:HAS_MEMBER]->(p:Person)
 		WITH o, ind, parent, lei, fi, sub, m, p, size((p)<-[:MENTIONS]-(:Content)-[:MENTIONS]->(o)) as annCount
