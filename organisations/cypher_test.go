@@ -149,12 +149,6 @@ func TestNeoReadStructToOrganisationMultipleMemberships(t *testing.T) {
 
 	assertListContainsAll(assert, org.Types, "http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/organisation/Organisation")
 	assertListContainsAll(assert, *org.Labels, "Super", "Super Incorporated", "Super, Inc.", "Super Inc.", "Super Inc")
-	assertListContainsAll(assert, org.Memberships,
-		getMembership(getDan(), "Controller of Awesomeness", ChangeEvent{StartedAt: "2010-12-11T00:00:00Z"}, ChangeEvent{EndedAt: "2012-01-01T00:00:00Z"}),
-		getMembership(getNicky(), "Controller of Awesomeness", ChangeEvent{StartedAt: "2009-12-11T00:00:00Z"}, ChangeEvent{EndedAt: "2012-05-01T00:00:00Z"}),
-		getMembership(getNicky(), "Party Cat Coordinator", ChangeEvent{StartedAt: "2012-06-01T00:00:00Z"}),
-		getMembership(getScott(), "Head of Latin American Research & Strategy"),
-		getMembership(getGalia(), "Madame le Président", ChangeEvent{EndedAt: "2012-05-05T00:00:00Z"}))
 }
 
 func assertSubsidiaries(assert *assert.Assertions, actual []Subsidiary, items ...Subsidiary) {
@@ -335,8 +329,27 @@ func cleanDB(db neoutils.NeoConnection, t *testing.T, assert *assert.Assertions)
 	assert.NoError(err)
 }
 
-func getMembership(person *Person, title string, changeEvents ...ChangeEvent) Membership {
-	membership := Membership{}
+// Membership represents the relationship between an organisation and a person
+// Move membership and people info in tests, to prove that the query works for real structure, without being influenced by the presence of it
+type membership struct {
+	Title        string         `json:"title,omitempty"`
+	Person       person         `json:"person"`
+	ChangeEvents *[]changeEvent `json:"changeEvents,omitempty"`
+}
+
+// Person simplified representation used in Organisation API
+type person struct {
+	*Thing
+	Types []string `json:"types,omitempty"`
+}
+
+type changeEvent struct {
+	StartedAt string `json:"startedAt,omitempty"`
+	EndedAt   string `json:"endedAt,omitempty"`
+}
+
+func getMembership(person *person, title string, changeEvents ...changeEvent) membership {
+	membership := membership{}
 	membership.Title = title
 	membership.Person = (*person)
 	if len(changeEvents) > 0 {
@@ -345,8 +358,8 @@ func getMembership(person *Person, title string, changeEvents ...ChangeEvent) Me
 	return membership
 }
 
-func getDan() *Person {
-	person := &Person{}
+func getDan() *person {
+	person := &person{}
 	person.Thing = &Thing{}
 	person.ID = "http://api.ft.com/things/868c3c17-611c-4943-9499-600ccded71f3"
 	person.APIURL = "http://api.ft.com/people/868c3c17-611c-4943-9499-600ccded71f3"
@@ -355,8 +368,8 @@ func getDan() *Person {
 	return person
 }
 
-func getScott() *Person {
-	person := &Person{}
+func getScott() *person {
+	person := &person{}
 	person.Thing = &Thing{}
 	person.ID = "http://api.ft.com/things/84cec0e1-a866-47bd-9444-d74873b69786"
 	person.APIURL = "http://api.ft.com/people/84cec0e1-a866-47bd-9444-d74873b69786"
@@ -365,8 +378,8 @@ func getScott() *Person {
 	return person
 }
 
-func getNicky() *Person {
-	person := &Person{}
+func getNicky() *person {
+	person := &person{}
 	person.Thing = &Thing{}
 	person.ID = "http://api.ft.com/things/fa2ae871-ef77-49c8-a030-8d90eae6cf18"
 	person.APIURL = "http://api.ft.com/people/fa2ae871-ef77-49c8-a030-8d90eae6cf18"
@@ -375,8 +388,8 @@ func getNicky() *Person {
 	return person
 }
 
-func getGalia() *Person {
-	person := &Person{}
+func getGalia() *person {
+	person := &person{}
 	person.Thing = &Thing{}
 	person.ID = "http://api.ft.com/things/bdacd96e-d2f4-429f-bb61-462e40448409"
 	person.APIURL = "http://api.ft.com/people/bdacd96e-d2f4-429f-bb61-462e40448409"

@@ -3,7 +3,6 @@ package organisations
 import (
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/Financial-Times/neo-model-utils-go/mapper"
 	"github.com/Financial-Times/neo-utils-go/neoutils"
@@ -111,11 +110,7 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
 		WITH o, ind, lei, parent, fi, sub, size((:Content)-[:MENTIONS]->(sub)) as annCounts ORDER BY annCounts DESC, o.prefLabel ASC
 		WITH o, ind, lei, parent, fi, { id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel, annCount:annCounts } as sub
 		WITH o, ind, lei, parent, fi, collect(sub) as sub
-		OPTIONAL MATCH (o)<-[:HAS_ORGANISATION]-(m:Membership)-[:HAS_MEMBER]->(p:Person)
-		WITH o, ind, parent, lei, fi, sub, m, p, size((p)<-[:MENTIONS]-(:Content)-[:MENTIONS]->(o)) as annCount
-		WITH o, ind, parent, lei, fi, sub, { id:p.uuid, types:labels(p), prefLabel:p.prefLabel} as p, { id:m.uuid, prefLabel:m.prefLabel, changeEvents:[{startedAt:m.inceptionDate}, {endedAt:m.terminationDate}], annCount:annCount } as m ORDER BY m.annCount DESC, p.prefLabel ASC LIMIT 1000
-		WITH o, ind, parent, lei, fi, sub, collect({m:m, p:p}) as pm
-		return {id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases, lei:lei, parent:parent, ind:ind, sub:sub, pm:pm, fi:fi} as rs`,
+		return {id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases, lei:lei, parent:parent, ind:ind, sub:sub, fi:fi} as rs`,
 		Parameters: neoism.Props{"uuid": uuid},
 		Result:     &results,
 	}
@@ -133,7 +128,6 @@ func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool
 }
 
 func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
-	//TODO find out why we only get two memberships here compared to 17 off PROD graphDB... also, performance of e.g. Barclays
 	public := Organisation{}
 	public.Thing = &Thing{}
 	public.ID = mapper.IDURL(neo.ID)
@@ -190,48 +184,6 @@ func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 		}
 	}
 
-	if len(neo.PM) == 1 && (neo.PM[0].M.ID == "") {
-		public.Memberships = make([]Membership, 0, 0)
-	} else {
-		public.Memberships = make([]Membership, len(neo.PM))
-		for mIdx, neoMem := range neo.PM {
-			membership := Membership{}
-			membership.Title = neoMem.M.PrefLabel
-			membership.Person = Person{}
-			membership.Person.Thing = &Thing{}
-			membership.Person.ID = mapper.IDURL(neoMem.P.ID)
-			membership.Person.APIURL = mapper.APIURL(neoMem.P.ID, neoMem.P.Types, env)
-			membership.Person.Types = mapper.TypeURIs(neoMem.P.Types)
-			membership.Person.PrefLabel = neoMem.P.PrefLabel
-			if a, b := changeEvent(neoMem.M.ChangeEvents); a == true {
-				membership.ChangeEvents = b
-			}
-			public.Memberships[mIdx] = membership
-		}
-	}
 	log.Debugf("neoReadStructToOrganisation neo: %+v result: %+v", neo, public)
 	return public
-}
-
-func changeEvent(neoChgEvts []neoChangeEvent) (bool, *[]ChangeEvent) {
-	var results []ChangeEvent
-	currentLayout := "2006-01-02T15:04:05.999Z"
-	layout := "2006-01-02T15:04:05Z"
-
-	if neoChgEvts[0].StartedAt == "" && neoChgEvts[1].EndedAt == "" {
-		results = make([]ChangeEvent, 0, 0)
-		return false, &results
-	}
-	for _, neoChgEvt := range neoChgEvts {
-		if neoChgEvt.StartedAt != "" {
-			t, _ := time.Parse(currentLayout, neoChgEvt.StartedAt)
-			results = append(results, ChangeEvent{StartedAt: t.Format(layout)})
-		}
-		if neoChgEvt.EndedAt != "" {
-			t, _ := time.Parse(layout, neoChgEvt.EndedAt)
-			results = append(results, ChangeEvent{EndedAt: t.Format(layout)})
-		}
-	}
-	log.Debugf("changeEvent converted: %+v result:%+v", neoChgEvts, results)
-	return true, &results
 }
