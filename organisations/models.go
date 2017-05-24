@@ -26,7 +26,7 @@ public class Organisation extends Thing {
     public Thing industryClassification;
     public Thing parentOrganisation;
     public List<Thing> subsidiaries = new ArrayList<>();
-    public List<Membership> memberships = new ArrayList<>();
+    public List<Membership> memberships = new ArrayList<>(); - except membership, which has been removed from the response
 }
 */
 type Organisation struct {
@@ -37,30 +37,7 @@ type Organisation struct {
 	IndustryClassification *IndustryClassification `json:"industryClassification,omitempty"` //this is a pointer so that the struct is omitted if empty
 	Parent                 *Parent                 `json:"parentOrganisation,omitempty"`
 	Subsidiaries           []Subsidiary            `json:"subsidiaries,omitempty"`
-	Memberships            []Membership            `json:"memberships,omitempty"`
 	FinancialInstrument    *FinancialInstrument    `json:"financialInstrument,omitempty"`
-}
-
-// Membership represents the relationship between an organisation and a person
-/*
-@JsonInclude(Include.NON_EMPTY)
-public class Membership {
-    public String title;
-    public Thing organisation;
-    public Thing person;
-    public List<ChangeEvent> changeEvents = new ArrayList();
-    public List<MembershipRole> roles = new ArrayList();
-*/
-type Membership struct {
-	Title        string         `json:"title,omitempty"`
-	Person       Person         `json:"person"`
-	ChangeEvents *[]ChangeEvent `json:"changeEvents,omitempty"`
-}
-
-// Person simplified representation used in Organisation API
-type Person struct {
-	*Thing
-	Types []string `json:"types,omitempty"`
 }
 
 // Parent is a simplified representation of a parent organisation, used in Organisation API
@@ -79,18 +56,6 @@ type Subsidiary struct {
 type IndustryClassification struct {
 	*Thing
 	Types []string `json:"types,omitempty"`
-}
-
-// ChangeEvent represent when something started or ended
-/*
-@JsonInclude(Include.NON_EMPTY)
-public class ChangeEvent {
-    public String startedAt;
-    public String endedAt;
-*/
-type ChangeEvent struct {
-	StartedAt string `json:"startedAt,omitempty"`
-	EndedAt   string `json:"endedAt,omitempty"`
 }
 
 type FinancialInstrument struct {

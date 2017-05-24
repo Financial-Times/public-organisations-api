@@ -149,12 +149,6 @@ func TestNeoReadStructToOrganisationMultipleMemberships(t *testing.T) {
 
 	assertListContainsAll(assert, org.Types, "http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/organisation/Organisation")
 	assertListContainsAll(assert, *org.Labels, "Super", "Super Incorporated", "Super, Inc.", "Super Inc.", "Super Inc")
-	assertListContainsAll(assert, org.Memberships,
-		getMembership(getDan(), "Controller of Awesomeness", ChangeEvent{StartedAt: "2010-12-11T00:00:00Z"}, ChangeEvent{EndedAt: "2012-01-01T00:00:00Z"}),
-		getMembership(getNicky(), "Controller of Awesomeness", ChangeEvent{StartedAt: "2009-12-11T00:00:00Z"}, ChangeEvent{EndedAt: "2012-05-01T00:00:00Z"}),
-		getMembership(getNicky(), "Party Cat Coordinator", ChangeEvent{StartedAt: "2012-06-01T00:00:00Z"}),
-		getMembership(getScott(), "Head of Latin American Research & Strategy"),
-		getMembership(getGalia(), "Madame le Président", ChangeEvent{EndedAt: "2012-05-05T00:00:00Z"}))
 }
 
 func assertSubsidiaries(assert *assert.Assertions, actual []Subsidiary, items ...Subsidiary) {
@@ -333,56 +327,6 @@ func cleanDB(db neoutils.NeoConnection, t *testing.T, assert *assert.Assertions)
 	}
 	err := db.CypherBatch(qs)
 	assert.NoError(err)
-}
-
-func getMembership(person *Person, title string, changeEvents ...ChangeEvent) Membership {
-	membership := Membership{}
-	membership.Title = title
-	membership.Person = (*person)
-	if len(changeEvents) > 0 {
-		membership.ChangeEvents = &changeEvents
-	}
-	return membership
-}
-
-func getDan() *Person {
-	person := &Person{}
-	person.Thing = &Thing{}
-	person.ID = "http://api.ft.com/things/868c3c17-611c-4943-9499-600ccded71f3"
-	person.APIURL = "http://api.ft.com/people/868c3c17-611c-4943-9499-600ccded71f3"
-	person.Types = []string{"http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/person/Person"}
-	person.PrefLabel = "Dan Murphy"
-	return person
-}
-
-func getScott() *Person {
-	person := &Person{}
-	person.Thing = &Thing{}
-	person.ID = "http://api.ft.com/things/84cec0e1-a866-47bd-9444-d74873b69786"
-	person.APIURL = "http://api.ft.com/people/84cec0e1-a866-47bd-9444-d74873b69786"
-	person.Types = []string{"http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/person/Person"}
-	person.PrefLabel = "Scott Newton"
-	return person
-}
-
-func getNicky() *Person {
-	person := &Person{}
-	person.Thing = &Thing{}
-	person.ID = "http://api.ft.com/things/fa2ae871-ef77-49c8-a030-8d90eae6cf18"
-	person.APIURL = "http://api.ft.com/people/fa2ae871-ef77-49c8-a030-8d90eae6cf18"
-	person.Types = []string{"http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/person/Person"}
-	person.PrefLabel = "Nicky Wrightson"
-	return person
-}
-
-func getGalia() *Person {
-	person := &Person{}
-	person.Thing = &Thing{}
-	person.ID = "http://api.ft.com/things/bdacd96e-d2f4-429f-bb61-462e40448409"
-	person.APIURL = "http://api.ft.com/people/bdacd96e-d2f4-429f-bb61-462e40448409"
-	person.Types = []string{"http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/person/Person"}
-	person.PrefLabel = "Galia Rimon"
-	return person
 }
 
 func TestNeoReadOrganisationWithFinancialInstrument(t *testing.T) {
