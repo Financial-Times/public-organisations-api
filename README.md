@@ -11,6 +11,10 @@ _NB You will need to tag a commit in order to build, since the UI asks for a tag
 ## Installation & running locally
 * `go get -u github.com/Financial-Times/public-organisation-api`
 * `cd $GOPATH/src/github.com/Financial-Times/public-organisation-api`
+
+* `go get github.com/kardianos/govendor`
+* `govendor sync`
+
 * `go test ./...`
 * `go install`
 * `$GOPATH/bin/public-organisation-api --neo-url={neo4jUrl} --port={port} --log-level={DEBUG|INFO|WARN|ERROR} --cache-duration{e.g. 22h10m3s}`
