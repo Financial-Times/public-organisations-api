@@ -38,49 +38,56 @@ type neoChangeEvent struct {
 }
 
 type neoReadStruct struct {
-	ID        string
-	Types     []string
-	PrefLabel string
-	Labels    []string
+	ID         string
+	Types      []string
+	DirectType string
+	PrefLabel  string
+	Labels     []string
 
 	Lei struct {
 		LegalEntityIdentifier string
 	}
 	Parent struct {
-		ID        string
-		Types     []string
-		PrefLabel string
+		ID         string
+		Types      []string
+		DirectType string
+		PrefLabel  string
 	}
 	Ind struct {
-		ID        string
-		Types     []string
-		PrefLabel string
+		ID         string
+		Types      []string
+		DirectType string
+		PrefLabel  string
 	}
 	Sub []struct {
-		ID        string
-		Types     []string
-		PrefLabel string
+		ID         string
+		Types      []string
+		DirectType string
+		PrefLabel  string
 	}
 	PM []struct {
 		M struct {
 			ID           string
 			Types        []string
+			DirectType   string
 			PrefLabel    string
 			Title        string
 			ChangeEvents []neoChangeEvent
 		}
 		P struct {
-			ID        string
-			Types     []string
-			PrefLabel string
-			Labels    []string
+			ID         string
+			Types      []string
+			DirectType string
+			PrefLabel  string
+			Labels     []string
 		}
 	}
 	Fi struct {
-		ID        string
-		PrefLabel string
-		Types     []string
-		FIGI      string
+		ID         string
+		PrefLabel  string
+		Types      []string
+		DirectType string
+		FIGI       string
 	}
 }
 
@@ -133,6 +140,7 @@ func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 	public.ID = mapper.IDURL(neo.ID)
 	public.APIURL = mapper.APIURL(neo.ID, neo.Types, env)
 	public.Types = mapper.TypeURIs(neo.Types)
+	public.DirectType = filterToMostSpecificType(neo.Types)
 	public.PrefLabel = neo.PrefLabel
 	if len(neo.Labels) > 0 {
 		public.Labels = &neo.Labels
@@ -147,6 +155,8 @@ func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 		public.IndustryClassification.Thing = &Thing{}
 		public.IndustryClassification.ID = mapper.IDURL(neo.Ind.ID)
 		public.IndustryClassification.APIURL = mapper.APIURL(neo.Ind.ID, neo.Ind.Types, env)
+		public.IndustryClassification.Types = mapper.TypeURIs(neo.Ind.Types)
+		public.IndustryClassification.DirectType = filterToMostSpecificType(neo.Ind.Types)
 		public.IndustryClassification.PrefLabel = neo.Ind.PrefLabel
 	}
 
@@ -156,6 +166,7 @@ func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 		public.FinancialInstrument.ID = mapper.IDURL(neo.Fi.ID)
 		public.FinancialInstrument.APIURL = mapper.APIURL(neo.Fi.ID, neo.Fi.Types, env)
 		public.FinancialInstrument.Types = mapper.TypeURIs(neo.Fi.Types)
+		public.FinancialInstrument.DirectType = filterToMostSpecificType(neo.Fi.Types)
 		public.FinancialInstrument.PrefLabel = neo.Fi.PrefLabel
 		public.FinancialInstrument.Figi = neo.Fi.FIGI
 	}
@@ -166,6 +177,7 @@ func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 		public.Parent.ID = mapper.IDURL(neo.Parent.ID)
 		public.Parent.APIURL = mapper.APIURL(neo.Parent.ID, neo.Parent.Types, env)
 		public.Parent.Types = mapper.TypeURIs(neo.Parent.Types)
+		public.Parent.DirectType = filterToMostSpecificType(neo.Parent.Types)
 		public.Parent.PrefLabel = neo.Parent.PrefLabel
 	}
 
@@ -179,6 +191,7 @@ func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 			subsidiary.ID = mapper.IDURL(neoSub.ID)
 			subsidiary.APIURL = mapper.APIURL(neoSub.ID, neoSub.Types, env)
 			subsidiary.Types = mapper.TypeURIs(neoSub.Types)
+			subsidiary.DirectType = filterToMostSpecificType(neoSub.Types)
 			subsidiary.PrefLabel = neoSub.PrefLabel
 			public.Subsidiaries[idx] = subsidiary
 		}
@@ -186,4 +199,13 @@ func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 
 	log.Debugf("neoReadStructToOrganisation neo: %+v result: %+v", neo, public)
 	return public
+}
+
+func filterToMostSpecificType(unfilteredTypes []string) string {
+	mostSpecificType, err := mapper.MostSpecificType(unfilteredTypes)
+	if err != nil {
+		return ""
+	}
+	fullURI := mapper.TypeURIs([]string{mostSpecificType})
+	return fullURI[0]
 }

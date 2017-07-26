@@ -49,6 +49,7 @@ func TestNeoReadOrganisationWithCanonicalUPPID(t *testing.T) {
 	assert.Equal("http://api.ft.com/organisations/f21a5cc0-d326-4e62-b84a-d840c2209fee", org.APIURL)
 	assert.Equal("7ZW8QJWVPR4P1J1KQY46", org.LegalEntityIdentifier)
 	assertListContainsAll(assert, org.Types, "http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/organisation/Organisation")
+	assert.Equal("http://www.ft.com/ontology/organisation/Organisation", org.DirectType)
 	assert.Equal("Awesome, Inc.", org.PrefLabel)
 
 }
@@ -76,6 +77,7 @@ func TestNeoReadOrganisationWithAlternateUPPID(t *testing.T) {
 	assert.Equal("http://api.ft.com/organisations/"+canonicalUUID, org.APIURL)
 	assert.Equal("7ZW8QJWVPR4P1J1KQY46", org.LegalEntityIdentifier)
 	assertListContainsAll(assert, org.Types, "http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/organisation/Organisation")
+	assert.Equal("http://www.ft.com/ontology/organisation/Organisation", org.DirectType)
 	assert.Equal("Awesome, Inc.", org.PrefLabel)
 
 }
@@ -135,6 +137,7 @@ func TestNeoReadStructToOrganisationMultipleMemberships(t *testing.T) {
 	assert.Equal("http://api.ft.com/organisations/3e844449-b27f-40d4-b696-2ce9b6137133", org.APIURL)
 	assert.Equal("7ZW8QJWVPR4P1J1KQY45", org.LegalEntityIdentifier)
 	assertListContainsAll(assert, org.Types, "http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/organisation/Organisation")
+	assert.Equal("http://www.ft.com/ontology/organisation/Organisation", org.DirectType)
 	assert.Equal("Super, Inc.", org.PrefLabel)
 
 	subsidiary := Subsidiary{}
@@ -142,12 +145,15 @@ func TestNeoReadStructToOrganisationMultipleMemberships(t *testing.T) {
 	subsidiary.ID = "http://api.ft.com/things/f21a5cc0-d326-4e62-b84a-d840c2209fee"
 	subsidiary.APIURL = "http://api.ft.com/organisations/f21a5cc0-d326-4e62-b84a-d840c2209fee"
 	subsidiary.Types = []string{"http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/organisation/Organisation"}
+	subsidiary.DirectType = "http://www.ft.com/ontology/organisation/Organisation"
 	subsidiary.PrefLabel = "Awesome, Inc."
 
 	assertSubsidiaries(assert, org.Subsidiaries, subsidiary)
 	assert.Equal((*org.Parent).ID, "http://api.ft.com/things/f9694ba7-eab0-4ce0-8e01-ff64bccb813c")
-
-	assertListContainsAll(assert, org.Types, "http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/organisation/Organisation")
+	for _, item := range org.Subsidiaries {
+		assertListContainsAll(assert, item.Types, "http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/organisation/Organisation")
+		assert.Equal("http://www.ft.com/ontology/organisation/Organisation", item.DirectType)
+	}
 	assertListContainsAll(assert, *org.Labels, "Super", "Super Incorporated", "Super, Inc.", "Super Inc.", "Super Inc")
 }
 
@@ -351,11 +357,13 @@ func TestNeoReadOrganisationWithFinancialInstrument(t *testing.T) {
 	assert.Equal("http://api.ft.com/organisations/f21a5cc0-d326-4e62-b84a-d840c2209fee", org.APIURL)
 	assert.Equal("7ZW8QJWVPR4P1J1KQY46", org.LegalEntityIdentifier)
 	assertListContainsAll(assert, org.Types, "http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/organisation/Organisation")
+	assert.Equal("http://www.ft.com/ontology/organisation/Organisation", org.DirectType)
 	assert.Equal("Awesome, Inc.", org.PrefLabel)
 
 	assert.Equal("http://api.ft.com/things/0c4461d1-0ed3-324f-bbb3-ae948bd3bb09", org.FinancialInstrument.ID)
 	assert.Equal("http://api.ft.com/things/0c4461d1-0ed3-324f-bbb3-ae948bd3bb09", org.FinancialInstrument.APIURL)
 	assert.Equal("Emergency Pest Services, Inc.", org.FinancialInstrument.PrefLabel)
 	assertListContainsAll(assert, org.FinancialInstrument.Types, "http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/FinancialInstrument")
+	assert.Equal("http://www.ft.com/ontology/FinancialInstrument", org.FinancialInstrument.DirectType)
 	assert.Equal("BBG000BQVGX3", org.FinancialInstrument.Figi)
 }
