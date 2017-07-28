@@ -32,6 +32,7 @@ public class Organisation extends Thing {
 type Organisation struct {
 	*Thing
 	Types                  []string                `json:"types"`
+	DirectType             string                  `json:"directType,omitempty"`
 	Labels                 *[]string               `json:"labels,omitempty"`
 	LegalEntityIdentifier  string                  `json:"leiCode,omitempty"`
 	IndustryClassification *IndustryClassification `json:"industryClassification,omitempty"` //this is a pointer so that the struct is omitted if empty
@@ -43,23 +44,27 @@ type Organisation struct {
 // Parent is a simplified representation of a parent organisation, used in Organisation API
 type Parent struct {
 	*Thing
-	Types []string `json:"types,omitempty"`
+	Types      []string `json:"types,omitempty"`
+	DirectType string   `json:"directType,omitempty"`
 }
 
 // Subsidiary is a simplified representation of a subsidiary organisation, used in Organisation API
 type Subsidiary struct {
 	*Thing
-	Types []string `json:"types,omitempty"`
+	Types      []string `json:"types,omitempty"`
+	DirectType string   `json:"directType,omitempty"`
 }
 
 // IndustryClassification represents the type of Organisation, e.g. a Bank
 type IndustryClassification struct {
 	*Thing
-	Types []string `json:"types,omitempty"`
+	Types      []string `json:"types,omitempty"`
+	DirectType string   `json:"directType,omitempty"`
 }
 
 type FinancialInstrument struct {
 	*Thing
-	Types []string `json:"types,omitempty"`
-	Figi  string   `json:"FIGI"`
+	Types      []string `json:"types,omitempty"`
+	DirectType string   `json:"directType,omitempty"`
+	Figi       string   `json:"FIGI"`
 }
