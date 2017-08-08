@@ -1,5 +1,3 @@
-##this is an example deployment.yaml that should be customized in order to meet the configuration for app k8s deployment
-
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -24,35 +22,35 @@ spec:
         image: "{{ .Values.image.repository }}:{{ .Chart.Version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
-          - name: APP_PORT
-            value: "8080"
           - name: NEO_URL
             valueFrom:
               configMapKeyRef:
                 name: global-config
-                key: neo4j.read.write.url
+                key: neo4j.read.only.url
           - name: GRAPHITE_ADDRESS
             valueFrom:
               configMapKeyRef:
                 name: global-config
                 key: graphite.address
           - name: GRAPHITE_PREFIX
-            value: "{{ .Values.env.graphite.prefix }}"
+            value: "coco.services.k8s.{{ .Values.service.name }}"
           - name: LOG_METRICS
-            value: "false"
+            value: "{{ .Values.env.LOG_METRICS }}"
           - name: CACHE_DURATION
-            value: 24h
+            value: {{ .Values.env.CACHE_DURATION }}
+          - name: APP_PORT
+            value: "{{ .Values.env.APP_PORT }}"
         ports: 
-        - containerPort: 8080 
+        - containerPort: {{ .Values.env.APP_PORT }} 
         livenessProbe: 
           tcpSocket: 
-            port: 8080 
-          initialDelaySeconds: 10 
+            port: {{ .Values.env.APP_PORT }} 
+          initialDelaySeconds: 5
         readinessProbe: 
           httpGet: 
             path: "/__gtg" 
-            port: 8080 
-          initialDelaySeconds: 15 
+            port: {{ .Values.env.APP_PORT }} 
+          initialDelaySeconds: 20 
           periodSeconds: 30 
         resources: 
 {{ toYaml .Values.resources | indent 12 }}
