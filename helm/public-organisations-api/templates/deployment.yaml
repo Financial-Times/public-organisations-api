@@ -8,6 +8,16 @@ metadata:
     visualize: "true" 
     app: {{ .Values.service.name }} 
 spec:
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: app
+            operator: In
+            values:
+            - {{ .Values.service.name }}
+        topologyKey: "kubernetes.io/hostname"
   replicas: {{ .Values.replicaCount }} 
   selector: 
     matchLabels:
