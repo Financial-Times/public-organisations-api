@@ -15,10 +15,12 @@
 			"revisionTime": "2017-02-08T12:56:11Z"
 		},
 		{
-			"checksumSHA1": "FUhczVSvt/VQAlWfzATo1YLez2E=",
-			"path": "github.com/Financial-Times/go-fthealth/v1a",
-			"revision": "bc27ed19189994eef0364e4a07879d5a3f3be76f",
-			"revisionTime": "2017-03-24T12:21:32Z"
+			"checksumSHA1": "G8lW8pPVLieqh/MTJZkvI/i/WyM=",
+			"path": "github.com/Financial-Times/go-fthealth/v1_1",
+			"revision": "1b007e2b37b7936dfb6671fa17e5a29fd35a08ea",
+			"revisionTime": "2017-12-04T12:48:31Z",
+			"version": "0.4.0",
+			"versionExact": "0.4.0"
 		},
 		{
 			"checksumSHA1": "zUpINnstJChGK0LAtkt7jBc3RY0=",
