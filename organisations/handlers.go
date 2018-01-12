@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 
-	"github.com/Financial-Times/go-fthealth/v1a"
+	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
+	"github.com/Financial-Times/service-status-go/gtg"
 	"github.com/gorilla/mux"
-	"regexp"
 )
 
 // OrganisationDriver for cypher queries
@@ -16,11 +17,12 @@ var OrganisationDriver Driver
 var CacheControlHeader string
 
 // HealthCheck does something
-func HealthCheck() v1a.Check {
-	return v1a.Check{
+func HealthCheck() fthealth.Check {
+	return fthealth.Check{
+		ID:               "neo4j-check",
 		BusinessImpact:   "Unable to respond to Public Organisations api requests",
-		Name:             "Check connectivity to Neo4j - neoUrl is a parameter in hieradata for this service",
-		PanicGuide:       "https://sites.google.com/a/ft.com/ft-technology-service-transition/home/run-book-library/organisation-read-api",
+		Name:             "Check connectivity to Neo4j",
+		PanicGuide:       "https://dewey.ft.com/public-org-api.html",
 		Severity:         1,
 		TechnicalSummary: "Cannot connect to Neo4j a instance with at least one organisation loaded in it",
 		Checker:          Checker,
@@ -95,9 +97,16 @@ func GetOrganisation(w http.ResponseWriter, r *http.Request) {
 }
 
 //GoodToGo returns a 503 if the healthcheck fails - suitable for use from varnish to check availability of a node
-func GoodToGo(writer http.ResponseWriter, req *http.Request) {
-	if _, err := Checker(); err != nil {
-		writer.WriteHeader(http.StatusServiceUnavailable)
+func GTG() gtg.Status {
+	statusCheck := func() gtg.Status {
+		return gtgCheck(Checker)
 	}
+	return gtg.FailFastParallelCheck([]gtg.StatusChecker{statusCheck})()
+}
 
+func gtgCheck(handler func() (string, error)) gtg.Status {
+	if _, err := handler(); err != nil {
+		return gtg.Status{GoodToGo: false, Message: err.Error()}
+	}
+	return gtg.Status{GoodToGo: true}
 }
