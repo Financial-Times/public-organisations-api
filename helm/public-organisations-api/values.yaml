@@ -9,6 +9,8 @@ image:
   repository: coco/public-organisations-api
   pullPolicy: IfNotPresent
 resources:
+  requests:
+    memory: 25Mi
   limits:
     memory: 256Mi
 env:
