@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/Financial-Times/base-ft-rw-app-go/baseftrwapp"
-	"github.com/Financial-Times/go-fthealth/v1a"
+	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 	"github.com/Financial-Times/http-handlers-go/httphandlers"
 	"github.com/Financial-Times/neo-utils-go/neoutils"
 	"github.com/Financial-Times/public-organisations-api/organisations"
@@ -108,10 +108,17 @@ func runServer(neoURL string, port string, cacheDuration string, env string) {
 	servicesRouter := mux.NewRouter()
 
 	// Healthchecks and standards first
-	servicesRouter.HandleFunc("/__health", v1a.Handler("PublicOrganisationsRead Healthchecks",
-		"Checks for accessing neo4j", organisations.HealthCheck()))
+	healthCheck := fthealth.TimedHealthCheck{
+		HealthCheck: fthealth.HealthCheck{
+			SystemCode:  "public-org-api",
+			Name:        "PublicOrganisationsRead Healthcheck",
+			Description: "Checks for accessing neo4j",
+			Checks:      []fthealth.Check{organisations.HealthCheck()},
+		},
+		Timeout: 10 * time.Second,
+	}
 
-	servicesRouter.HandleFunc("/__gtg", organisations.GoodToGo)
+	servicesRouter.HandleFunc("/__health", fthealth.Handler(healthCheck))
 
 	// Then API specific ones:
 	servicesRouter.HandleFunc("/organisations/{uuid}", organisations.GetOrganisation).Methods("GET")
@@ -130,7 +137,7 @@ func runServer(neoURL string, port string, cacheDuration string, env string) {
 	http.HandleFunc(status.PingPathDW, status.PingHandler)
 	http.HandleFunc(status.BuildInfoPath, status.BuildInfoHandler)
 	http.HandleFunc(status.BuildInfoPathDW, status.BuildInfoHandler)
-	http.HandleFunc("/__gtg", organisations.GoodToGo)
+	servicesRouter.HandleFunc(status.GTGPath, status.NewGoodToGoHandler(organisations.GTG))
 	http.Handle("/", monitoringRouter)
 
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
