@@ -23,7 +23,7 @@ func HealthCheck() fthealth.Check {
 		BusinessImpact:   "Unable to respond to Public Organisations api requests",
 		Name:             "Check connectivity to Neo4j",
 		PanicGuide:       "https://dewey.ft.com/public-org-api.html",
-		Severity:         1,
+		Severity:         2,
 		TechnicalSummary: "Cannot connect to Neo4j a instance with at least one organisation loaded in it",
 		Checker:          Checker,
 	}
