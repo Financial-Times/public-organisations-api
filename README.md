@@ -2,11 +2,9 @@
 __Provides a public API for Organisation stored in a Neo4J graph database__
 
 ## Build & deployment etc:
-_NB You will need to tag a commit in order to build, since the UI asks for a tag to build / deploy_
-* [Jenkins view](http://ftjen10085-lvpr-uk-p:8181/view/JOBS-public-organisation-api/)
-* [Build and publish to forge](http://ftjen10085-lvpr-uk-p:8181/view/JOBS-public-organisations-api/job/public-organisations-api-build/)
-* [Deploy to Test](http://ftjen10085-lvpr-uk-p:8181/view/JOBS-public-organisations-api/job/public-organisations-api-deploy-to-test/)
-* [Deploy to Production](http://ftjen10085-lvpr-uk-p:8181/view/JOBS-public-organisations-api/job/public-organisations-api-deploy-to-prod/)
+_NB You will need to create a tagged release in order to build
+* [Build and Deploy](https://upp-k8s-jenkins.in.ft.com/job/k8s-deployment/job/apps-deployment/job/public-organisations-api-auto-deploy/)
+
 
 ## Installation & running locally
 * `go get -u github.com/Financial-Times/public-organisation-api`
