@@ -174,7 +174,11 @@ func (pcw CypherDriver) ReadNewFormat(uuid string) (organisation Organisation, f
 				industryClassification,
 				parentOrganisation,
 				subOrganisation,
-				financialInstrument
+				financialInstrument,
+				size((:Content)-[:MENTIONS]->(subOrganisation)) as annCounts
+				ORDER BY
+					annCounts DESC,
+					source.prefLabel ASC
 			WITH
 				canonical,
 				{
@@ -199,8 +203,7 @@ func (pcw CypherDriver) ReadNewFormat(uuid string) (organisation Organisation, f
 				{
 					id: subOrganisation.uuid,
 					types: labels(subOrganisation),
-					prefLabel: subOrganisation.prefLabel,
-					annCount: size((:Content)-[:MENTIONS]->(subOrganisation))
+					prefLabel: subOrganisation.prefLabel
 				} as sub
 			RETURN
 				{
