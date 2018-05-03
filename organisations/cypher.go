@@ -46,7 +46,7 @@ type neoReadStruct struct {
 	ProperName             string
 	ShortName              string
 	HiddenLabel            string
-	FormerNames            string
+	FormerNames            []string
 	CountryCode            string
 	CountryOfIncorporation string
 	PostalCode             string
@@ -90,7 +90,7 @@ type neoNewFormatReadStruct struct {
 	ProperName             string
 	ShortName              string
 	HiddenLabel            string
-	FormerNames            string
+	FormerNames            []string
 	CountryCode            string
 	CountryOfIncorporation string
 	PostalCode             string

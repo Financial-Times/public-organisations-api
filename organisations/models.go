@@ -34,7 +34,7 @@ type Organisation struct {
 	ProperName             string                  `json:"properName,omitempty"`
 	ShortName              string                  `json:"shortName,omitempty"`
 	HiddenLabel            string                  `json:"hiddenLabel,omitempty"`
-	FormerNames            string                  `json:"formerNames,omitempty"`
+	FormerNames            []string                `json:"formerNames,omitempty"`
 	CountryCode            string                  `json:"countryCode,omitempty"`
 	CountryOfIncorporation string                  `json:"countryOfIncorporation,omitempty"`
 	PostalCode             string                  `json:"postalCode,omitempty"`
