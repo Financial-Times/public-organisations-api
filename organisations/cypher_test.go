@@ -430,6 +430,15 @@ func TestRetrieveConceptAsThingWithoutRelationships(t *testing.T) {
 		DirectType: "http://www.ft.com/ontology/organisation/Organisation",
 	}
 	assertSubsidiaries(assert, org.Subsidiaries, subsidiary)
+
+	// look for a non-canonical node
+	org, found, err = orgService.Read("e11e81f7-09c6-3faf-ad43-66e18781b81f")
+	assert.NoError(err)
+	assert.True(found)
+	assert.NotNil(org)
+
+	assert.Equal("http://api.ft.com/things/dd128106-3382-406f-8dfb-f4c69dcbbdfb", org.ID)
+	assert.Equal("http://api.ft.com/organisations/dd128106-3382-406f-8dfb-f4c69dcbbdfb", org.APIURL)
 }
 
 func writeJSONToConceptsService(t *testing.T, service concepts.ConceptService, pathToJSONFile string) {
