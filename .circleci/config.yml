@@ -5,45 +5,45 @@ jobs:
     docker:
       - image: circleci/golang:1.10
         environment:
-          NEO4J_TEST_URL: "http://localhost:7474/db/data/"
-          CIRCLE_TEST_REPORTS: /tmp/test-results
-          CIRCLE_COVERAGE_REPORT: /tmp/coverage-results
-      - image: neo4j:3.1.0-enterprise
+          CIRCLE_TEST_REPORTS: /tmp/test-reports
+          CIRCLE_ARTIFACTS: /tmp/artifacts
+      - image: neo4j:3.2.7-enterprise
         environment:
           NEO4J_AUTH: none
           NEO4J_HEAP_MEMORY: 256
           NEO4J_CACHE_MEMORY: 256M
-      steps:
+    steps:
       - checkout
       - run:
-          name: External dependencies
+          name: Create folders
           command: |
-            go get -u github.com/mattn/goveralls
+            mkdir -p $CIRCLE_TEST_REPORTS/golang
+            mkdir -p $CIRCLE_ARTIFACTS
+      - run:
+          name: Download dependancies
+          command: |
             go get -u github.com/jstemmer/go-junit-report
+            go get -u github.com/mattn/goveralls
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
       - run:
-          name: Make result folders
+          name: Download vendored dependancies
           command: |
-            mkdir -p ${CIRCLE_TEST_REPORTS}
-            mkdir -p ${CIRCLE_COVERAGE_REPORT}
+            dep ensure -v -vendor-only
       - run:
-          name: Download vendored dependencies
-          command: dep ensure -v -vendor-only
+          name: Build app
+          command: |
+            go build -v
       - run:
-          name: Go build
-          command: go build -v
+          name: Run tests and create coverage report
+          command: |
+            go test ./... -race -cover -coverprofile=$CIRCLE_TEST_REPORTS/coverage.out | go-junit-report > $CIRCLE_TEST_REPORTS/golang/junit.xml
       - run:
-          name: Test neo connection
-          command: wget --retry-connrefused --no-check-certificate -T 60 $NEO4J_TEST_URL; curl $NEO4J_TEST_URL
-      - run:
-          name: Run tests
-          command: go test -race -cover -coverprofile=${CIRCLE_COVERAGE_REPORT}/coverage.out ./... | go-junit-report > ${CIRCLE_TEST_REPORTS}/junit.xml
-      - run:
-          name: Upload coverage
-          command: goveralls -coverprofile=${CIRCLE_COVERAGE_REPORT}/coverage.out -service=circle-ci -repotoken=${COVERALLS_TOKEN}
+          name: Upload coverage report
+          command: |
+            /go/bin/goveralls -coverprofile=$CIRCLE_TEST_REPORTS/coverage.out -service=circle-ci -repotoken=$COVERALLS_TOKEN
       - store_test_results:
-          path: /tmp/test-results
-  dockerfile:
+          path: /tmp/test-reports
+  docker_build:
     working_directory: /public-organisations-api
     docker:
       - image: docker:18.03
@@ -55,9 +55,9 @@ jobs:
           command: docker build .
 workflows:
   version: 2
-  test-and-build-docker:
+  tests_and_docker:
     jobs:
       - build
-      - dockerfile:
+      - docker_build:
           requires:
             - build
