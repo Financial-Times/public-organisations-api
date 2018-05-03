@@ -72,23 +72,6 @@ type neoReadStruct struct {
 		DirectType string
 		PrefLabel  string
 	}
-	PM []struct {
-		M struct {
-			ID           string
-			Types        []string
-			DirectType   string
-			PrefLabel    string
-			Title        string
-			ChangeEvents []neoChangeEvent
-		}
-		P struct {
-			ID         string
-			Types      []string
-			DirectType string
-			PrefLabel  string
-			Labels     []string
-		}
-	}
 	Fi struct {
 		ID         string
 		PrefLabel  string
