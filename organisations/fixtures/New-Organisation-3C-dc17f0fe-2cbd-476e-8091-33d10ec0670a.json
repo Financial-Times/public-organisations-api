@@ -1,0 +1,18 @@
+{
+    "prefUUID": "dc17f0fe-2cbd-476e-8091-33d10ec0670a",
+    "prefLabel": "3C",
+    "type": "Organisation",
+    "aliases": [
+        "3Com"
+    ],
+    "sourceRepresentations": [
+        {
+            "uuid": "dc17f0fe-2cbd-476e-8091-33d10ec0670a",
+            "type": "Organisation",
+            "prefLabel": "3C",
+            "authority": "Smartlogic",
+            "authorityValue": "dc17f0fe-2cbd-476e-8091-33d10ec0670a",
+            "parentOrganisation": "dd128106-3382-406f-8dfb-f4c69dcbbdfb"
+        }
+    ]
+}

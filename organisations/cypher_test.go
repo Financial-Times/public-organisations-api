@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/Financial-Times/base-ft-rw-app-go/baseftrwapp"
+	"github.com/Financial-Times/concepts-rw-neo4j/concepts"
 	"github.com/Financial-Times/financial-instruments-rw-neo4j/financialinstruments"
 	"github.com/Financial-Times/memberships-rw-neo4j/memberships"
 	"github.com/Financial-Times/neo-utils-go/neoutils"
@@ -202,33 +203,33 @@ func writeBigOrg(assert *assert.Assertions, peopleRW baseftrwapp.Service, organi
 }
 
 func deleteOrgViaService(assert *assert.Assertions, organisationRW baseftrwapp.Service, uuid string) {
-	organisationRW.Delete(uuid)
+	organisationRW.Delete(uuid, "trans_if")
 }
 
 func deleteAllViaService(assert *assert.Assertions, peopleRW baseftrwapp.Service, organisationRW baseftrwapp.Service, membershipsRW baseftrwapp.Service, rolesRW baseftrwapp.Service) {
-	peopleRW.Delete("868c3c17-611c-4943-9499-600ccded71f3")
-	peopleRW.Delete("fa2ae871-ef77-49c8-a030-8d90eae6cf18")
-	peopleRW.Delete("84cec0e1-a866-47bd-9444-d74873b69786")
-	peopleRW.Delete("bdacd96e-d2f4-429f-bb61-462e40448409")
+	peopleRW.Delete("868c3c17-611c-4943-9499-600ccded71f3", "trans_id")
+	peopleRW.Delete("fa2ae871-ef77-49c8-a030-8d90eae6cf18", "trans_id")
+	peopleRW.Delete("84cec0e1-a866-47bd-9444-d74873b69786", "trans_id")
+	peopleRW.Delete("bdacd96e-d2f4-429f-bb61-462e40448409", "trans_id")
 
-	organisationRW.Delete("f21a5cc0-d326-4e62-b84a-d840c2209fee")
-	organisationRW.Delete("3e844449-b27f-40d4-b696-2ce9b6137133")
-	organisationRW.Delete("f9694ba7-eab0-4ce0-8e01-ff64bccb813c")
+	organisationRW.Delete("f21a5cc0-d326-4e62-b84a-d840c2209fee", "trans_id")
+	organisationRW.Delete("3e844449-b27f-40d4-b696-2ce9b6137133", "trans_id")
+	organisationRW.Delete("f9694ba7-eab0-4ce0-8e01-ff64bccb813c", "trans_id")
 
-	membershipsRW.Delete("6b278d36-5b30-46a3-b036-55902a9d31ac")
-	membershipsRW.Delete("668c103f-d8dc-4938-9324-9c60de726705")
-	membershipsRW.Delete("c739b972-f41d-43d2-b8d9-5848c92e17f6")
-	membershipsRW.Delete("177de04f-c09a-4d66-ab55-bb68496c9c28")
-	membershipsRW.Delete("9c50e77a-de8a-4f8c-b1dd-09c7730e2c70")
+	membershipsRW.Delete("6b278d36-5b30-46a3-b036-55902a9d31ac", "trans_id")
+	membershipsRW.Delete("668c103f-d8dc-4938-9324-9c60de726705", "trans_id")
+	membershipsRW.Delete("c739b972-f41d-43d2-b8d9-5848c92e17f6", "trans_id")
+	membershipsRW.Delete("177de04f-c09a-4d66-ab55-bb68496c9c28", "trans_id")
+	membershipsRW.Delete("9c50e77a-de8a-4f8c-b1dd-09c7730e2c70", "trans_id")
 
-	rolesRW.Delete("ff9e35f2-63e4-487a-87a4-d82535e047de")
-	rolesRW.Delete("c7063a20-5ca5-4f7a-8a96-47e946b5739e")
-	rolesRW.Delete("d8bbba91-8a87-4dee-bd1a-f79e8139e5c9")
-	rolesRW.Delete("5fcfec9c-8ff0-4ee2-9e91-f270492d636c")
+	rolesRW.Delete("ff9e35f2-63e4-487a-87a4-d82535e047de", "trans_id")
+	rolesRW.Delete("c7063a20-5ca5-4f7a-8a96-47e946b5739e", "trans_id")
+	rolesRW.Delete("d8bbba91-8a87-4dee-bd1a-f79e8139e5c9", "trans_id")
+	rolesRW.Delete("5fcfec9c-8ff0-4ee2-9e91-f270492d636c", "trans_id")
 }
 
 func deleteFinancialInstrumentViaService(assert *assert.Assertions, financialInstrument baseftrwapp.Service, uuid string) {
-	_, err := financialInstrument.Delete(uuid)
+	_, err := financialInstrument.Delete(uuid, "trans_id")
 	assert.NoError(err)
 }
 
@@ -252,7 +253,7 @@ func writeJSONToService(service baseftrwapp.Service, pathToJSONFile string, asse
 	dec := json.NewDecoder(f)
 	inst, _, errr := service.DecodeJSON(dec)
 	assert.NoError(errr)
-	errrr := service.Write(inst)
+	errrr := service.Write(inst, "trans_id")
 	assert.NoError(errrr)
 }
 
@@ -330,6 +331,16 @@ func cleanDB(db neoutils.NeoConnection, t *testing.T, assert *assert.Assertions)
 			//deletes parent 'org' which only has type Thing
 			Statement: fmt.Sprintf("MATCH (a:Thing {uuid: '%v'}) OPTIONAL MATCH (a)-[]-(b:Identifier) DETACH DELETE a,b", "f9694ba7-eab0-4ce0-8e01-ff64bccb813c"),
 		},
+		{Statement: `MATCH (n:Thing {prefUUID: "dd128106-3382-406f-8dfb-f4c69dcbbdfb"}) DETACH DELETE n`},
+		{Statement: `MATCH (n:Thing {uuid: "dd128106-3382-406f-8dfb-f4c69dcbbdfb"}) DETACH DELETE n`},
+		{Statement: `MATCH (n:Thing {uuid: "e11e81f7-09c6-3faf-ad43-66e18781b81f"}) DETACH DELETE n`},
+		{Statement: `MATCH (n:Thing {uuid: "982549bc-be43-33f8-94d8-f1f62c2e7003"}) DETACH DELETE n`},
+		{Statement: `MATCH (n:Thing {prefUUID: "dc17f0fe-2cbd-476e-8091-33d10ec0670a"}) DETACH DELETE n`},
+		{Statement: `MATCH (n:Thing {uuid: "dc17f0fe-2cbd-476e-8091-33d10ec0670a"}) DETACH DELETE n`},
+		{Statement: `MATCH (n:Thing {prefUUID: "8b18a74f-cb7b-4347-a018-7b6412aeb3f6"}) DETACH DELETE n`},
+		{Statement: `MATCH (n:Thing {uuid: "8b18a74f-cb7b-4347-a018-7b6412aeb3f6"}) DETACH DELETE n`},
+		{Statement: `MATCH (n:Thing {uuid: "000LNN-E"}) DETACH DELETE n`},
+		{Statement: `MATCH (n:Thing {value: "000LNN-E"}) DETACH DELETE n`},
 	}
 	err := db.CypherBatch(qs)
 	assert.NoError(err)
@@ -366,4 +377,68 @@ func TestNeoReadOrganisationWithFinancialInstrument(t *testing.T) {
 	assertListContainsAll(assert, org.FinancialInstrument.Types, "http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/FinancialInstrument")
 	assert.Equal("http://www.ft.com/ontology/FinancialInstrument", org.FinancialInstrument.DirectType)
 	assert.Equal("BBG000BQVGX3", org.FinancialInstrument.Figi)
+}
+
+func TestRetrieveConceptAsThingWithoutRelationships(t *testing.T) {
+	assert := assert.New(t)
+	db := getDatabaseConnectionAndCheckClean(t, assert)
+
+	conceptsDriver := concepts.NewConceptService(db)
+	assert.NoError(conceptsDriver.Initialise())
+
+	writeJSONToConceptsService(t, conceptsDriver, fmt.Sprintf("./fixtures/New-Organisation-3Com-dd128106-3382-406f-8dfb-f4c69dcbbdfb.json"))
+	writeJSONToConceptsService(t, conceptsDriver, fmt.Sprintf("./fixtures/New-Finanancial-Instrument-3Com-8b18a74f-cb7b-4347-a018-7b6412aeb3f6.json"))
+	writeJSONToConceptsService(t, conceptsDriver, fmt.Sprintf("./fixtures/New-Organisation-3C-dc17f0fe-2cbd-476e-8091-33d10ec0670a.json"))
+
+	orgService := NewCypherDriver(db, "prod")
+	org, found, err := orgService.Read("dd128106-3382-406f-8dfb-f4c69dcbbdfb")
+	assert.NoError(err)
+	assert.True(found)
+	assert.NotNil(org)
+
+	assert.Equal("http://api.ft.com/things/dd128106-3382-406f-8dfb-f4c69dcbbdfb", org.ID)
+	assert.Equal("http://api.ft.com/organisations/dd128106-3382-406f-8dfb-f4c69dcbbdfb", org.APIURL)
+	assert.Equal("LEI1000", org.LegalEntityIdentifier)
+	assertListContainsAll(assert, org.Types, "http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/organisation/Organisation")
+	assert.Equal("http://www.ft.com/ontology/organisation/Organisation", org.DirectType)
+	assert.Equal("3Com Corp", org.PrefLabel)
+	assert.Equal("US", org.CountryCode)
+	assert.Equal("US", org.CountryOfIncorporation)
+	assert.Equal("3COM CORP", org.HiddenLabel)
+	assert.Equal("01752-3064", org.PostalCode)
+	assert.Equal("3Com Corp.", org.ProperName)
+	assert.Equal("3Com", org.ShortName)
+	assert.Equal(1979, org.YearFounded)
+
+	assert.Equal("http://api.ft.com/things/8b18a74f-cb7b-4347-a018-7b6412aeb3f6", org.FinancialInstrument.ID)
+	assert.Equal("BBG001S715Z0", org.FinancialInstrument.Figi)
+	assert.Equal("3Com FI", org.FinancialInstrument.PrefLabel)
+	assertListContainsAll(assert, org.FinancialInstrument.Types, "http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/FinancialInstrument")
+	assert.Equal("http://www.ft.com/ontology/FinancialInstrument", org.FinancialInstrument.DirectType)
+
+	subsidiary := Subsidiary{
+		Thing: &Thing{
+			ID:        "http://api.ft.com/things/dc17f0fe-2cbd-476e-8091-33d10ec0670a",
+			APIURL:    "http://api.ft.com/organisations/dc17f0fe-2cbd-476e-8091-33d10ec0670a",
+			PrefLabel: "3C",
+		},
+		Types: []string{
+			"http://www.ft.com/ontology/core/Thing",
+			"http://www.ft.com/ontology/concept/Concept",
+			"http://www.ft.com/ontology/organisation/Organisation",
+		},
+		DirectType: "http://www.ft.com/ontology/organisation/Organisation",
+	}
+	assertSubsidiaries(assert, org.Subsidiaries, subsidiary)
+}
+
+func writeJSONToConceptsService(t *testing.T, service concepts.ConceptService, pathToJSONFile string) {
+	f, err := os.Open(pathToJSONFile)
+	assert.NoError(t, err)
+	dec := json.NewDecoder(f)
+	inst, _, errr := service.DecodeJSON(dec)
+	assert.NoError(t, errr)
+
+	_, errs := service.Write(inst, "TRANS_ID")
+	assert.NoError(t, errs)
 }

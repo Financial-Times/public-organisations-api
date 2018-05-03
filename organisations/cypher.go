@@ -6,8 +6,8 @@ import (
 
 	"github.com/Financial-Times/neo-model-utils-go/mapper"
 	"github.com/Financial-Times/neo-utils-go/neoutils"
-	log "github.com/Sirupsen/logrus"
 	"github.com/jmcvetta/neoism"
+	log "github.com/sirupsen/logrus"
 )
 
 // Driver interface
@@ -38,13 +38,20 @@ type neoChangeEvent struct {
 }
 
 type neoReadStruct struct {
-	ID         string
-	Types      []string
-	DirectType string
-	PrefLabel  string
-	Labels     []string
-
-	Lei struct {
+	ID                     string
+	Types                  []string
+	DirectType             string
+	PrefLabel              string
+	Labels                 []string
+	ProperName             string
+	ShortName              string
+	HiddenLabel            string
+	FormerNames            string
+	CountryCode            string
+	CountryOfIncorporation string
+	PostalCode             string
+	YearFounded            int
+	Lei                    struct {
 		LegalEntityIdentifier string
 	}
 	Parent struct {
@@ -91,7 +98,184 @@ type neoReadStruct struct {
 	}
 }
 
-func (pcw CypherDriver) Read(uuid string) (organisation Organisation, found bool, err error) {
+type neoNewFormatReadStruct struct {
+	ID                     string
+	Types                  []string
+	DirectType             string
+	PrefLabel              string
+	Labels                 []string
+	ProperName             string
+	ShortName              string
+	HiddenLabel            string
+	FormerNames            string
+	CountryCode            string
+	CountryOfIncorporation string
+	PostalCode             string
+	YearFounded            int
+	Lei                    struct {
+		LegalEntityIdentifier string
+	}
+	Parent []struct {
+		ID         string
+		Types      []string
+		DirectType string
+		PrefLabel  string
+	}
+	Ind []struct {
+		ID         string
+		Types      []string
+		DirectType string
+		PrefLabel  string
+	}
+	Sub []struct {
+		ID         string
+		Types      []string
+		DirectType string
+		PrefLabel  string
+	}
+	Fi []struct {
+		ID         string
+		PrefLabel  string
+		Types      []string
+		DirectType string
+		FIGI       string
+	}
+}
+
+func (pcw CypherDriver) Read(uuid string) (Organisation, bool, error) {
+	org, found, err := pcw.ReadNewFormat(uuid)
+	if err != nil {
+		return Organisation{}, false, err
+	}
+
+	if found {
+		return org, found, nil
+	}
+
+	return pcw.ReadOldFormat(uuid)
+}
+
+func (pcw CypherDriver) ReadNewFormat(uuid string) (organisation Organisation, found bool, err error) {
+	organisation = Organisation{}
+	results := []struct {
+		Rs neoNewFormatReadStruct
+	}{}
+	query := &neoism.CypherQuery{
+		Statement: `
+			MATCH (canonical:Thing {prefUUID:"dd128106-3382-406f-8dfb-f4c69dcbbdfb"})<-[:EQUIVALENT_TO]-(source:Thing)
+			OPTIONAL MATCH (source)-[:HAS_CLASSIFICATION]->(industryClassification:Thing)
+			OPTIONAL MATCH (source)-[:SUB_ORGANISATION_OF]->(parentOrganisation:Thing)
+			OPTIONAL MATCH (source)<-[:SUB_ORGANISATION_OF]-(subOrganisation:Thing)
+			OPTIONAL MATCH (source)<-[:ISSUED_BY]-(financialInstrument:Thing)
+			WITH
+				canonical,
+				industryClassification,
+				parentOrganisation,
+				subOrganisation,
+				financialInstrument
+			WITH
+				canonical,
+				{
+					id: industryClassification.uuid,
+					types: labels(industryClassification),
+					prefLabel: industryClassification.prefLabel
+				} as ind,
+				{
+					legalEntityIdentifier: canonical.leiCode
+				} as lei,
+				{
+					id: parentOrganisation.uuid,
+					types: labels(parentOrganisation),
+					prefLabel: parentOrganisation.prefLabel
+				} as parent,
+				{
+					id: financialInstrument.uuid,
+					types: labels(financialInstrument),
+					prefLabel: financialInstrument.prefLabel,
+					figi: financialInstrument.figiCode
+				} as fi,
+				{
+					id: subOrganisation.uuid,
+					types: labels(subOrganisation),
+					prefLabel: subOrganisation.prefLabel,
+					annCount: size((:Content)-[:MENTIONS]->(subOrganisation))
+				} as sub
+			RETURN
+				{
+					id: canonical.prefUUID,
+					types: labels(canonical),
+					prefLabel: canonical.prefLabel,
+					labels: canonical.aliases,
+					lei: lei,
+					properName:canonical.properName,
+					shortName: canonical.shortName,
+					hiddenLabel: canonical.hiddenLabel,
+					formerNames: canonical.formerNames,
+					countryCode: canonical.countryCode,
+					countryOfIncorporation: canonical.countryOfIncorporation,
+					postalCode: canonical.postalCode,
+					yearFounded: canonical.yearFounded,
+					parent: collect(parent),
+					ind: collect(ind),
+					fi: collect(fi),
+					sub: collect(sub)
+				} as rs
+		`,
+		Parameters: neoism.Props{"uuid": uuid},
+		Result:     &results,
+	}
+
+	if err := pcw.conn.CypherBatch([]*neoism.CypherQuery{query}); err != nil || len(results) == 0 {
+		return Organisation{}, false, err
+	}
+
+	complexReadStruct := results[0].Rs
+	cleanReadStruct := neoReadStruct{
+		ID:                     complexReadStruct.ID,
+		Types:                  complexReadStruct.Types,
+		DirectType:             complexReadStruct.DirectType,
+		PrefLabel:              complexReadStruct.PrefLabel,
+		Labels:                 complexReadStruct.Labels,
+		Lei:                    complexReadStruct.Lei,
+		ProperName:             complexReadStruct.ProperName,
+		ShortName:              complexReadStruct.ShortName,
+		HiddenLabel:            complexReadStruct.HiddenLabel,
+		FormerNames:            complexReadStruct.FormerNames,
+		CountryCode:            complexReadStruct.CountryCode,
+		CountryOfIncorporation: complexReadStruct.CountryOfIncorporation,
+		PostalCode:             complexReadStruct.PostalCode,
+		YearFounded:            complexReadStruct.YearFounded,
+	}
+	for _, parent := range complexReadStruct.Parent {
+		if parent.ID == "" {
+			continue
+		}
+		cleanReadStruct.Parent = parent
+	}
+	for _, ind := range complexReadStruct.Ind {
+		if ind.ID == "" {
+			continue
+		}
+		cleanReadStruct.Ind = ind
+	}
+	for _, sub := range complexReadStruct.Sub {
+		if sub.ID == "" {
+			continue
+		}
+		cleanReadStruct.Sub = append(cleanReadStruct.Sub, sub)
+	}
+	for _, fi := range complexReadStruct.Fi {
+		if fi.ID == "" {
+			continue
+		}
+		cleanReadStruct.Fi = fi
+	}
+
+	organisation = neoReadStructToOrganisation(cleanReadStruct, pcw.env)
+	return organisation, true, nil
+}
+
+func (pcw CypherDriver) ReadOldFormat(uuid string) (organisation Organisation, found bool, err error) {
 	organisation = Organisation{}
 	results := []struct {
 		Rs neoReadStruct
@@ -142,6 +326,14 @@ func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 	public.Types = mapper.TypeURIs(neo.Types)
 	public.DirectType = filterToMostSpecificType(neo.Types)
 	public.PrefLabel = neo.PrefLabel
+	public.ProperName = neo.ProperName
+	public.ShortName = neo.ShortName
+	public.HiddenLabel = neo.HiddenLabel
+	public.FormerNames = neo.FormerNames
+	public.CountryCode = neo.CountryCode
+	public.CountryOfIncorporation = neo.CountryOfIncorporation
+	public.PostalCode = neo.PostalCode
+	public.YearFounded = neo.YearFounded
 	if len(neo.Labels) > 0 {
 		public.Labels = &neo.Labels
 	}

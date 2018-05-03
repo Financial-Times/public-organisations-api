@@ -31,6 +31,14 @@ public class Organisation extends Thing {
 */
 type Organisation struct {
 	*Thing
+	ProperName             string                  `json:"properName,omitempty"`
+	ShortName              string                  `json:"shortName,omitempty"`
+	HiddenLabel            string                  `json:"hiddenLabel,omitempty"`
+	FormerNames            string                  `json:"formerNames,omitempty"`
+	CountryCode            string                  `json:"countryCode,omitempty"`
+	CountryOfIncorporation string                  `json:"countryOfIncorporation,omitempty"`
+	PostalCode             string                  `json:"postalCode,omitempty"`
+	YearFounded            int                     `json:"yearFounded,omitempty"`
 	Types                  []string                `json:"types"`
 	DirectType             string                  `json:"directType,omitempty"`
 	Labels                 *[]string               `json:"labels,omitempty"`
