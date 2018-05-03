@@ -165,10 +165,10 @@ func (pcw CypherDriver) ReadNewFormat(uuid string) (organisation Organisation, f
 			MATCH (identifier:UPPIdentifier{value: {uuid}})
 			MATCH (identifier)-[:IDENTIFIES]->(pp:Organisation)-[:EQUIVALENT_TO]->(canonical:Organisation)
 			OPTIONAL MATCH (canonical)<-[:EQUIVALENT_TO]-(source:Organisation)
-			OPTIONAL MATCH (source)-[:HAS_CLASSIFICATION]->(industryClassification:Thing)
-			OPTIONAL MATCH (source)-[:SUB_ORGANISATION_OF]->(parentOrganisation:Thing)
-			OPTIONAL MATCH (source)<-[:SUB_ORGANISATION_OF]-(subOrganisation:Thing)
-			OPTIONAL MATCH (source)<-[:ISSUED_BY]-(financialInstrument:Thing)
+			OPTIONAL MATCH (source)-[:HAS_CLASSIFICATION]->(industryClassification:IndustryClassification)
+			OPTIONAL MATCH (source)-[:SUB_ORGANISATION_OF]->(parentOrganisation:Organisation)
+			OPTIONAL MATCH (source)<-[:SUB_ORGANISATION_OF]-(subOrganisation:Organisation)
+			OPTIONAL MATCH (source)<-[:ISSUED_BY]-(financialInstrument:FinancialInstrument)
 			WITH
 				canonical,
 				industryClassification,
