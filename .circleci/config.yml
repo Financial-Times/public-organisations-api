@@ -5,9 +5,15 @@ jobs:
     docker:
       - image: circleci/golang:1.10
         environment:
+          NEO4J_TEST_URL: "http://localhost:7474/db/data/"
           CIRCLE_TEST_REPORTS: /tmp/test-results
           CIRCLE_COVERAGE_REPORT: /tmp/coverage-results
-    steps:
+      - image: neo4j:3.1.0-enterprise
+        environment:
+          NEO4J_AUTH: none
+          NEO4J_HEAP_MEMORY: 256
+          NEO4J_CACHE_MEMORY: 256M
+      steps:
       - checkout
       - run:
           name: External dependencies
@@ -26,6 +32,8 @@ jobs:
       - run:
           name: Go build
           command: go build -v
+      - run:
+          wget --retry-connrefused --no-check-certificate -T 60 $NEO4J_TEST_URL; curl $NEO4J_TEST_URL
       - run:
           name: Run tests
           command: go test -race -cover -coverprofile=${CIRCLE_COVERAGE_REPORT}/coverage.out ./... | go-junit-report > ${CIRCLE_TEST_REPORTS}/junit.xml
