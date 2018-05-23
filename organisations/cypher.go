@@ -145,8 +145,7 @@ func (pcw CypherDriver) ReadNewFormat(uuid string) (organisation Organisation, f
 	}{}
 	query := &neoism.CypherQuery{
 		Statement: `
-			MATCH (identifier:UPPIdentifier{value: {uuid}})
-			MATCH (identifier)-[:IDENTIFIES]->(pp:Organisation)-[:EQUIVALENT_TO]->(canonical:Organisation)
+			MATCH (Organisation{uuid:{uuid}})-[:EQUIVALENT_TO]->(canonical:Organisation)
 			OPTIONAL MATCH (canonical)<-[:EQUIVALENT_TO]-(source:Organisation)
 			OPTIONAL MATCH (source)-[:HAS_CLASSIFICATION]->(industryClassification:IndustryClassification)
 			OPTIONAL MATCH (source)-[:SUB_ORGANISATION_OF]->(parentOrganisation:Organisation)

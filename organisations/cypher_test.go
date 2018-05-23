@@ -341,6 +341,17 @@ func cleanDB(db neoutils.NeoConnection, t *testing.T, assert *assert.Assertions)
 		{Statement: `MATCH (n:Thing {uuid: "8b18a74f-cb7b-4347-a018-7b6412aeb3f6"}) DETACH DELETE n`},
 		{Statement: `MATCH (n:Thing {uuid: "000LNN-E"}) DETACH DELETE n`},
 		{Statement: `MATCH (n:Thing {value: "000LNN-E"}) DETACH DELETE n`},
+		{Statement: `MATCH (n:Identifier {value: "TnN0ZWluX09OX0FGVE1fT05fNjQ4OA==-T04="}) DETACH DELETE n`},
+		{Statement: `MATCH (n:Identifier {value: "BBG001S715Z0"}) DETACH DELETE n`},
+		{Statement: `MATCH (n:Identifier {value: "000BFD-E"}) DETACH DELETE n`},
+		{Statement: `MATCH (n:Identifier {value: "B98W15-S"}) DETACH DELETE n`},
+		{Statement: `MATCH (n:Identifier {value: "000LNN-E"}) DETACH DELETE n`},
+		{Statement: `MATCH (n:Identifier {value: "dd128106-3382-406f-8dfb-f4c69dcbbdfb"}) DETACH DELETE n`},
+		{Statement: `MATCH (n:Identifier {value: "dc17f0fe-2cbd-476e-8091-33d10ec0670a"}) DETACH DELETE n`},
+		{Statement: `MATCH (n:Identifier {value: "8b18a74f-cb7b-4347-a018-7b6412aeb3f6"}) DETACH DELETE n`},
+		{Statement: `MATCH (n:Identifier {value: "dc17f0fe-2cbd-476e-8091-33d10ec0670a"}) DETACH DELETE n`},
+		{Statement: `MATCH (n:Identifier {value: "982549bc-be43-33f8-94d8-f1f62c2e7003"}) DETACH DELETE n`},
+		{Statement: `MATCH (n:Identifier {value: "e11e81f7-09c6-3faf-ad43-66e18781b81f"}) DETACH DELETE n`},
 	}
 	err := db.CypherBatch(qs)
 	assert.NoError(err)
@@ -382,6 +393,7 @@ func TestNeoReadOrganisationWithFinancialInstrument(t *testing.T) {
 func TestRetrieveConceptAsThingWithoutRelationships(t *testing.T) {
 	assert := assert.New(t)
 	db := getDatabaseConnectionAndCheckClean(t, assert)
+	defer cleanDB(db, t, assert)
 
 	conceptsDriver := concepts.NewConceptService(db)
 	assert.NoError(conceptsDriver.Initialise())
@@ -439,6 +451,8 @@ func TestRetrieveConceptAsThingWithoutRelationships(t *testing.T) {
 
 	assert.Equal("http://api.ft.com/things/dd128106-3382-406f-8dfb-f4c69dcbbdfb", org.ID)
 	assert.Equal("http://api.ft.com/organisations/dd128106-3382-406f-8dfb-f4c69dcbbdfb", org.APIURL)
+
+
 }
 
 func writeJSONToConceptsService(t *testing.T, service concepts.ConceptService, pathToJSONFile string) {
