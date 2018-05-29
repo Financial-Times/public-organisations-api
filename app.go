@@ -15,10 +15,10 @@ import (
 	"strconv"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"github.com/jawher/mow.cli"
 	"github.com/rcrowley/go-metrics"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
