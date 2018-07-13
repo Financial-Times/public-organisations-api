@@ -209,23 +209,34 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 
 	var subsidiaries = []Subsidiary{}
 	for _, item := range conceptsApiResponse.Related {
+		c := item.Concept
 		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == "/hasParentOrganisation" {
 			parent := &Parent{}
-			parent.ID = item.Concept.ID
-			parent.APIURL = item.Concept.ApiURL
-			parent.PrefLabel = item.Concept.PrefLabel
-			parent.DirectType = item.Concept.Type
+			parent.ID = c.ID
+			parent.APIURL = c.ApiURL
+			parent.PrefLabel = c.PrefLabel
+			parent.DirectType = c.Type
 			parent.Types = organisationTypes
 			mappedOrganisation.Parent = parent
 		}
 		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == "/isParentOrganisationOf" {
 			subsidiary := Subsidiary{}
-			subsidiary.ID = item.Concept.ID
-			subsidiary.APIURL = item.Concept.ApiURL
-			subsidiary.PrefLabel = item.Concept.PrefLabel
-			subsidiary.DirectType = item.Concept.Type
+			subsidiary.ID = c.ID
+			subsidiary.APIURL = c.ApiURL
+			subsidiary.PrefLabel = c.PrefLabel
+			subsidiary.DirectType = c.Type
 			subsidiary.Types = organisationTypes
 			subsidiaries = append(subsidiaries, subsidiary)
+		}
+		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == "/issuedBy" {
+			f := &FinancialInstrument{}
+			f.ID = c.ID
+			f.APIURL = c.ApiURL
+			f.PrefLabel = c.PrefLabel
+			f.DirectType = c.Type
+			f.Types = []string{}
+			f.Figi = "" // TODO: c.Figi?
+			mappedOrganisation.FinancialInstrument = f
 		}
 	}
 
@@ -233,8 +244,8 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 		mappedOrganisation.Subsidiaries = subsidiaries
 	}
 
+	// TODO: which org has industry classification?
 	mappedOrganisation.IndustryClassification = &IndustryClassification{}
-	mappedOrganisation.FinancialInstrument = &FinancialInstrument{}
 
 	return mappedOrganisation, mappedOrganisation.ID, true, nil
 }
