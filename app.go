@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net"
 	"net/http"
 	"os"
 
@@ -21,6 +22,16 @@ import (
 	"github.com/rcrowley/go-metrics"
 	log "github.com/sirupsen/logrus"
 )
+
+var httpClient = http.Client{
+	Transport: &http.Transport{
+		MaxIdleConnsPerHost: 128,
+		Dial: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).Dial,
+	},
+}
 
 func main() {
 	app := cli.App("public-organisations-api-neo4j", "A public RESTful API for accessing organisations in neo4j")
@@ -129,13 +140,15 @@ func runServer(neoURL string, port string, cacheDuration string, env string, pub
 
 	servicesRouter := mux.NewRouter()
 
+	handler := organisations.NewHandler(&httpClient, publicConceptsApiURL)
+
 	// Healthchecks and standards first
 	healthCheck := fthealth.TimedHealthCheck{
 		HealthCheck: fthealth.HealthCheck{
 			SystemCode:  "public-org-api",
 			Name:        "PublicOrganisationsRead Healthcheck",
 			Description: "Checks for accessing neo4j",
-			Checks:      []fthealth.Check{organisations.HealthCheck()},
+			Checks:      []fthealth.Check{handler.HealthCheck()},
 		},
 		Timeout: 10 * time.Second,
 	}
@@ -143,9 +156,8 @@ func runServer(neoURL string, port string, cacheDuration string, env string, pub
 	servicesRouter.HandleFunc("/__health", fthealth.Handler(healthCheck))
 
 	// Then API specific ones:
-	servicesRouter.HandleFunc("/organisations/{uuid}", organisations.GetOrganisation).Methods("GET")
-
-	servicesRouter.HandleFunc("/organisations/{uuid}", organisations.MethodNotAllowedHandler)
+	handler.RegisterHandlers(servicesRouter)
+	servicesRouter.HandleFunc("/organisations/{uuid}", handler.MethodNotAllowedHandler)
 
 	var monitoringRouter http.Handler = servicesRouter
 	monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(log.StandardLogger(), monitoringRouter)

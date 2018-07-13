@@ -24,7 +24,7 @@ public class Organisation extends Thing {
     public List<String> labels = new ArrayList<>();
     public String profile;
     public Thing industryClassification;
-    public Thing parentOrganisation;
+	public Thing parentOrganisation;
     public List<Thing> subsidiaries = new ArrayList<>();
     public List<Membership> memberships = new ArrayList<>(); - except membership, which has been removed from the response
 }
@@ -75,4 +75,30 @@ type FinancialInstrument struct {
 	Types      []string `json:"types,omitempty"`
 	DirectType string   `json:"directType,omitempty"`
 	Figi       string   `json:"FIGI"`
+}
+
+type ConceptApiResponse struct {
+	Concept
+	DescriptionXML         string           `json:"descriptionXML,omitempty"`
+	Strapline              string           `json:"strapline,omitempty"`
+	Broader                []RelatedConcept `json:"broaderConcepts,omitempty"`
+	Narrower               []RelatedConcept `json:"narrowerConcepts,omitempty"`
+	Related                []RelatedConcept `json:"relatedConcepts,omitempty"`
+	CountryCode            string           `json:"countryCode,omitempty"`
+	CountryOfIncorporation string           `json:"countryOfIncorporation,omitempty"`
+	LeiCode                string           `json:"leiCode,omitempty"`
+	PostalCode             string           `json:"postalCode,omitempty"`
+	YearFounded            int              `json:"yearFounded,omitempty"`
+}
+
+type RelatedConcept struct {
+	Concept   Concept `json:concept,omitempty`
+	Predicate string  `json:predicate,omitempty`
+}
+
+type Concept struct {
+	ID        string `json:"id,omitempty"`
+	ApiURL    string `json:"apiUrl,omitempty"`
+	PrefLabel string `json:"prefLabel,omitempty"`
+	Type      string `json:"type,omitempty"`
 }
