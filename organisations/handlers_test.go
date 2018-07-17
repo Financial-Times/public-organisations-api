@@ -190,7 +190,7 @@ var getRedirectedOrganisation = `{
 
 var getPersonAsConcept = `{
 	"id": "http://api.ft.com/things/f92a4ca4-84f9-11e8-8f42-da24cd01f044",
-	"apiUrl": "http://api.ft.com/brands/f92a4ca4-84f9-11e8-8f42-da24cd01f044",
+	"apiUrl": "http://api.ft.com/concepts/f92a4ca4-84f9-11e8-8f42-da24cd01f044",
 	"type": "http://www.ft.com/ontology/person/Person",
-	"prefLabel": "Not a brand"
+	"prefLabel": "Not a organisation"
 }`

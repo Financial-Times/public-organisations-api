@@ -192,7 +192,7 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 	}
 
 	if conceptsApiResponse.Type != organisationOntology {
-		logger.WithTransactionID(transID).WithUUID(uuid).Debug("requested concept is not a brand")
+		logger.WithTransactionID(transID).WithUUID(uuid).Debug("requested concept is not a organisation")
 		return org, false, nil
 	}
 
