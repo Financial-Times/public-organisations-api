@@ -30,7 +30,7 @@ public class Organisation extends Thing {
 }
 */
 type Organisation struct {
-	*Thing
+	Thing
 	ProperName             string                  `json:"properName,omitempty"`
 	ShortName              string                  `json:"shortName,omitempty"`
 	HiddenLabel            string                  `json:"hiddenLabel,omitempty"`
@@ -51,27 +51,27 @@ type Organisation struct {
 
 // Parent is a simplified representation of a parent organisation, used in Organisation API
 type Parent struct {
-	*Thing
+	Thing
 	Types      []string `json:"types,omitempty"`
 	DirectType string   `json:"directType,omitempty"`
 }
 
 // Subsidiary is a simplified representation of a subsidiary organisation, used in Organisation API
 type Subsidiary struct {
-	*Thing
+	Thing
 	Types      []string `json:"types,omitempty"`
 	DirectType string   `json:"directType,omitempty"`
 }
 
 // IndustryClassification represents the type of Organisation, e.g. a Bank
 type IndustryClassification struct {
-	*Thing
+	Thing
 	Types      []string `json:"types,omitempty"`
 	DirectType string   `json:"directType,omitempty"`
 }
 
 type FinancialInstrument struct {
-	*Thing
+	Thing
 	Types      []string `json:"types,omitempty"`
 	DirectType string   `json:"directType,omitempty"`
 	Figi       string   `json:"FIGI"`

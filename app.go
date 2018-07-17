@@ -90,7 +90,7 @@ func main() {
 	})
 	publicConceptsApiURL := app.String(cli.StringOpt{
 		Name:   "publicConceptsApiURL",
-		Value:  "http://localhost:8080/concepts",
+		Value:  "http://localhost:8080",
 		Desc:   "Public concepts API endpoint URL.",
 		EnvVar: "CONCEPTS_API",
 	})
@@ -157,7 +157,6 @@ func runServer(neoURL string, port string, cacheDuration string, env string, pub
 
 	// Then API specific ones:
 	handler.RegisterHandlers(servicesRouter)
-	servicesRouter.HandleFunc("/organisations/{uuid}", handler.MethodNotAllowedHandler)
 
 	var monitoringRouter http.Handler = servicesRouter
 	monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(log.StandardLogger(), monitoringRouter)
@@ -171,7 +170,7 @@ func runServer(neoURL string, port string, cacheDuration string, env string, pub
 	http.HandleFunc(status.PingPathDW, status.PingHandler)
 	http.HandleFunc(status.BuildInfoPath, status.BuildInfoHandler)
 	http.HandleFunc(status.BuildInfoPathDW, status.BuildInfoHandler)
-	servicesRouter.HandleFunc(status.GTGPath, status.NewGoodToGoHandler(organisations.GTG))
+	servicesRouter.HandleFunc(status.GTGPath, status.NewGoodToGoHandler(handler.GTG))
 	http.Handle("/", monitoringRouter)
 
 	if err := http.ListenAndServe(":"+port, nil); err != nil {

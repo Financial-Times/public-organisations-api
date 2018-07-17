@@ -42,7 +42,9 @@ func (h *OrganisationsHandler) RegisterHandlers(router *mux.Router) {
 		"GET": http.HandlerFunc(h.GetOrganisation),
 	}
 
-	router.Handle("/organisations/{uuid}", mh)
+	path := "/organisations/{uuid}"
+	router.Handle(path, mh)
+	router.HandleFunc(path, h.MethodNotAllowedHandler)
 }
 
 // HealthCheck does something
@@ -84,7 +86,7 @@ func (h *OrganisationsHandler) MethodNotAllowedHandler(w http.ResponseWriter, r 
 }
 
 const validUUID = "([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
-const ontologyPrefix = "Ahttp://www.ft.com/ontology"
+const ontologyPrefix = "http://www.ft.com/ontology"
 const organisationOntology = ontologyPrefix + "/organisation/Organisation"
 
 var organisationTypes = []string{
@@ -109,7 +111,7 @@ func (h *OrganisationsHandler) GetOrganisation(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	organisation, canonicalUUID, found, err := h.getOrganisationViaConceptsAPI(uuid, transID)
+	organisation, found, err := h.getOrganisationViaConceptsAPI(uuid, transID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"message": "` + err.Error() + `"}`))
@@ -154,15 +156,15 @@ func gtgCheck(handler func() (string, error)) gtg.Status {
 	return gtg.Status{GoodToGo: true}
 }
 
-func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transID string) (organisation Organisation, canonicalUUID string, found bool, err error) {
-	mappedOrganisation := Organisation{}
+func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transID string) (organisation Organisation, found bool, err error) {
+	org := Organisation{}
 	reqURL := h.conceptsURL + "/concepts/" + uuid
 	request, err := http.NewRequest("GET", reqURL, nil)
 
 	if err != nil {
 		msg := fmt.Sprintf("failed to create request to %s", reqURL)
 		logger.WithError(err).WithUUID(uuid).WithTransactionID(transID).Error(msg)
-		return mappedOrganisation, "", false, err
+		return org, false, err
 	}
 
 	request.Header.Set("X-Request-Id", transID)
@@ -170,10 +172,10 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 	if err != nil {
 		msg := fmt.Sprintf("request to %s returned status: %d", reqURL, resp.StatusCode)
 		logger.WithError(err).WithUUID(uuid).WithTransactionID(transID).Error(msg)
-		return mappedOrganisation, "", false, err
+		return org, false, err
 	}
 	if resp.StatusCode == http.StatusNotFound {
-		return mappedOrganisation, "", false, nil
+		return org, false, nil
 	}
 
 	conceptsApiResponse := ConceptApiResponse{}
@@ -181,31 +183,31 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 	if err != nil {
 		msg := fmt.Sprintf("failed to read response body: %v", resp.Body)
 		logger.WithError(err).WithUUID(uuid).WithTransactionID(transID).Error(msg)
-		return mappedOrganisation, "", false, err
+		return org, false, err
 	}
 	if err = json.Unmarshal(body, &conceptsApiResponse); err != nil {
 		msg := fmt.Sprintf("failed to unmarshal response body: %v", body)
 		logger.WithError(err).WithUUID(uuid).WithTransactionID(transID).Error(msg)
-		return mappedOrganisation, "", false, err
+		return org, false, err
 	}
 
 	if conceptsApiResponse.Type != organisationOntology {
 		logger.WithTransactionID(transID).WithUUID(uuid).Debug("requested concept is not a brand")
-		return mappedOrganisation, "", false, nil
+		return org, false, nil
 	}
 
-	mappedOrganisation.ID = conceptsApiResponse.ID
-	mappedOrganisation.APIURL = conceptsApiResponse.ApiURL
-	mappedOrganisation.PrefLabel = conceptsApiResponse.PrefLabel
-	mappedOrganisation.ProperName = ""
-	mappedOrganisation.ShortName = ""
-	mappedOrganisation.HiddenLabel = ""
-	mappedOrganisation.Types = organisationTypes
-	mappedOrganisation.DirectType = conceptsApiResponse.Type
-	mappedOrganisation.PostalCode = conceptsApiResponse.PostalCode
-	mappedOrganisation.CountryCode = conceptsApiResponse.CountryCode
-	mappedOrganisation.CountryOfIncorporation = conceptsApiResponse.CountryOfIncorporation
-	mappedOrganisation.LegalEntityIdentifier = conceptsApiResponse.LeiCode
+	org.ID = conceptsApiResponse.ID
+	org.APIURL = conceptsApiResponse.ApiURL
+	org.PrefLabel = conceptsApiResponse.PrefLabel
+	org.ProperName = ""
+	org.ShortName = ""
+	org.HiddenLabel = ""
+	org.Types = organisationTypes
+	org.DirectType = conceptsApiResponse.Type
+	org.PostalCode = conceptsApiResponse.PostalCode
+	org.CountryCode = conceptsApiResponse.CountryCode
+	org.CountryOfIncorporation = conceptsApiResponse.CountryOfIncorporation
+	org.LegalEntityIdentifier = conceptsApiResponse.LeiCode
 
 	var subsidiaries = []Subsidiary{}
 	for _, item := range conceptsApiResponse.Related {
@@ -217,7 +219,7 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 			parent.PrefLabel = c.PrefLabel
 			parent.DirectType = c.Type
 			parent.Types = organisationTypes
-			mappedOrganisation.Parent = parent
+			org.Parent = parent
 		}
 		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == "/isParentOrganisationOf" {
 			subsidiary := Subsidiary{}
@@ -236,16 +238,16 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 			f.DirectType = c.Type
 			f.Types = []string{}
 			f.Figi = "" // TODO: c.Figi?
-			mappedOrganisation.FinancialInstrument = f
+			org.FinancialInstrument = f
 		}
 	}
 
 	if len(subsidiaries) > 0 {
-		mappedOrganisation.Subsidiaries = subsidiaries
+		org.Subsidiaries = subsidiaries
 	}
 
 	// TODO: which org has industry classification?
-	mappedOrganisation.IndustryClassification = &IndustryClassification{}
+	org.IndustryClassification = &IndustryClassification{}
 
-	return mappedOrganisation, mappedOrganisation.ID, true, nil
+	return org, true, nil
 }

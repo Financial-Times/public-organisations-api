@@ -308,7 +308,7 @@ func (pcw CypherDriver) ReadOldFormat(uuid string) (organisation Organisation, f
 
 func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 	public := Organisation{}
-	public.Thing = &Thing{}
+	public.Thing = Thing{}
 	public.ID = mapper.IDURL(neo.ID)
 	public.APIURL = mapper.APIURL(neo.ID, neo.Types, env)
 	public.Types = mapper.TypeURIs(neo.Types)
@@ -332,7 +332,7 @@ func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 
 	if neo.Ind.ID != "" {
 		public.IndustryClassification = &IndustryClassification{}
-		public.IndustryClassification.Thing = &Thing{}
+		public.IndustryClassification.Thing = Thing{}
 		public.IndustryClassification.ID = mapper.IDURL(neo.Ind.ID)
 		public.IndustryClassification.APIURL = mapper.APIURL(neo.Ind.ID, neo.Ind.Types, env)
 		public.IndustryClassification.Types = mapper.TypeURIs(neo.Ind.Types)
@@ -342,7 +342,7 @@ func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 
 	if neo.Fi.ID != "" {
 		public.FinancialInstrument = &FinancialInstrument{}
-		public.FinancialInstrument.Thing = &Thing{}
+		public.FinancialInstrument.Thing = Thing{}
 		public.FinancialInstrument.ID = mapper.IDURL(neo.Fi.ID)
 		public.FinancialInstrument.APIURL = mapper.APIURL(neo.Fi.ID, neo.Fi.Types, env)
 		public.FinancialInstrument.Types = mapper.TypeURIs(neo.Fi.Types)
@@ -353,7 +353,7 @@ func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 
 	if neo.Parent.ID != "" {
 		public.Parent = &Parent{}
-		public.Parent.Thing = &Thing{}
+		public.Parent.Thing = Thing{}
 		public.Parent.ID = mapper.IDURL(neo.Parent.ID)
 		public.Parent.APIURL = mapper.APIURL(neo.Parent.ID, neo.Parent.Types, env)
 		public.Parent.Types = mapper.TypeURIs(neo.Parent.Types)
@@ -367,7 +367,7 @@ func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 		public.Subsidiaries = make([]Subsidiary, len(neo.Sub))
 		for idx, neoSub := range neo.Sub {
 			subsidiary := Subsidiary{}
-			subsidiary.Thing = &Thing{}
+			subsidiary.Thing = Thing{}
 			subsidiary.ID = mapper.IDURL(neoSub.ID)
 			subsidiary.APIURL = mapper.APIURL(neoSub.ID, neoSub.Types, env)
 			subsidiary.Types = mapper.TypeURIs(neoSub.Types)
