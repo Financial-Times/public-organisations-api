@@ -323,7 +323,7 @@ func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 	public.PostalCode = neo.PostalCode
 	public.YearFounded = neo.YearFounded
 	if len(neo.Labels) > 0 {
-		public.Labels = &neo.Labels
+		public.Labels = neo.Labels
 	}
 
 	if neo.Lei.LegalEntityIdentifier != "" {

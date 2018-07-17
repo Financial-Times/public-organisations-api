@@ -41,7 +41,7 @@ type Organisation struct {
 	YearFounded            int                     `json:"yearFounded,omitempty"`
 	Types                  []string                `json:"types"`
 	DirectType             string                  `json:"directType,omitempty"`
-	Labels                 *[]string               `json:"labels,omitempty"`
+	Labels                 []string                `json:"labels,omitempty"`
 	LegalEntityIdentifier  string                  `json:"leiCode,omitempty"`
 	IndustryClassification *IndustryClassification `json:"industryClassification,omitempty"` //this is a pointer so that the struct is omitted if empty
 	Parent                 *Parent                 `json:"parentOrganisation,omitempty"`
@@ -77,6 +77,11 @@ type FinancialInstrument struct {
 	Figi       string   `json:"FIGI"`
 }
 
+type TypedValue struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
+}
+
 type ConceptApiResponse struct {
 	Concept
 	DescriptionXML         string           `json:"descriptionXML,omitempty"`
@@ -89,6 +94,7 @@ type ConceptApiResponse struct {
 	LeiCode                string           `json:"leiCode,omitempty"`
 	PostalCode             string           `json:"postalCode,omitempty"`
 	YearFounded            int              `json:"yearFounded,omitempty"`
+	AlternativeLabels      []TypedValue     `json:"alternativeLabels,omitempty"`
 }
 
 type RelatedConcept struct {

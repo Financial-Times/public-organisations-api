@@ -199,15 +199,43 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 	org.ID = conceptsApiResponse.ID
 	org.APIURL = conceptsApiResponse.ApiURL
 	org.PrefLabel = conceptsApiResponse.PrefLabel
-	org.ProperName = ""
-	org.ShortName = ""
-	org.HiddenLabel = ""
 	org.Types = organisationTypes
 	org.DirectType = conceptsApiResponse.Type
 	org.PostalCode = conceptsApiResponse.PostalCode
 	org.CountryCode = conceptsApiResponse.CountryCode
 	org.CountryOfIncorporation = conceptsApiResponse.CountryOfIncorporation
 	org.LegalEntityIdentifier = conceptsApiResponse.LeiCode
+	org.YearFounded = conceptsApiResponse.YearFounded
+
+	formerNames := []string{}
+	m := make(map[string]bool)
+	uniqLabel := []string{}
+	for _, label := range conceptsApiResponse.AlternativeLabels {
+		compare := func(expected string) bool {
+			return strings.TrimPrefix(label.Type, ontologyPrefix) == expected
+		}
+		switch {
+		case compare("/ProperName"):
+			org.ProperName = label.Value
+		case compare("/ShortName"):
+			org.ShortName = label.Value
+		case compare("/HiddenLabel"):
+			org.HiddenLabel = label.Value
+		case compare("/FormerName"):
+			formerNames = append(formerNames, label.Value)
+		}
+
+		if !m[label.Value] {
+			m[label.Value] = true
+			uniqLabel = append(uniqLabel, label.Value)
+		}
+	}
+	if len(formerNames) > 0 {
+		org.FormerNames = formerNames
+	}
+	if len(uniqLabel) > 0 {
+		org.Labels = uniqLabel
+	}
 
 	var subsidiaries = []Subsidiary{}
 	for _, item := range conceptsApiResponse.Related {
@@ -241,13 +269,13 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 			org.FinancialInstrument = f
 		}
 	}
-
 	if len(subsidiaries) > 0 {
 		org.Subsidiaries = subsidiaries
 	}
 
-	// TODO: which org has industry classification?
-	org.IndustryClassification = &IndustryClassification{}
+	// TODO: concept API does not have IndustryClassification.
+	// Ignore it for now
+	// org.IndustryClassification
 
 	return org, true, nil
 }

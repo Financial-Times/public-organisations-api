@@ -1,10 +1,12 @@
 package organisations
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -24,8 +26,19 @@ const (
 
 type mockOrganisationDriver struct{}
 
+type mockHTTPClient struct {
+	resp       string
+	statusCode int
+	err        error
+}
+
+func (mhc *mockHTTPClient) Do(req *http.Request) (resp *http.Response, err error) {
+	cb := ioutil.NopCloser(bytes.NewReader([]byte(mhc.resp)))
+	return &http.Response{Body: cb, StatusCode: mhc.statusCode}, mhc.err
+}
+
 func (driver mockOrganisationDriver) Read(id string) (organisation Organisation, found bool, err error) {
-	return Organisation{Thing: &Thing{ID: canonicalUUID, APIURL: ""}}, isFound, nil
+	return Organisation{Thing: Thing{ID: canonicalUUID, APIURL: ""}}, isFound, nil
 }
 
 func (driver mockOrganisationDriver) CheckConnectivity() error {
