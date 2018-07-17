@@ -23,7 +23,6 @@ public class Organisation extends Thing {
 
     public List<String> labels = new ArrayList<>();
     public String profile;
-    public Thing industryClassification;
 	public Thing parentOrganisation;
     public List<Thing> subsidiaries = new ArrayList<>();
     public List<Membership> memberships = new ArrayList<>(); - except membership, which has been removed from the response
@@ -31,22 +30,21 @@ public class Organisation extends Thing {
 */
 type Organisation struct {
 	Thing
-	ProperName             string                  `json:"properName,omitempty"`
-	ShortName              string                  `json:"shortName,omitempty"`
-	HiddenLabel            string                  `json:"hiddenLabel,omitempty"`
-	FormerNames            []string                `json:"formerNames,omitempty"`
-	CountryCode            string                  `json:"countryCode,omitempty"`
-	CountryOfIncorporation string                  `json:"countryOfIncorporation,omitempty"`
-	PostalCode             string                  `json:"postalCode,omitempty"`
-	YearFounded            int                     `json:"yearFounded,omitempty"`
-	Types                  []string                `json:"types"`
-	DirectType             string                  `json:"directType,omitempty"`
-	Labels                 []string                `json:"labels,omitempty"`
-	LegalEntityIdentifier  string                  `json:"leiCode,omitempty"`
-	IndustryClassification *IndustryClassification `json:"industryClassification,omitempty"` //this is a pointer so that the struct is omitted if empty
-	Parent                 *Parent                 `json:"parentOrganisation,omitempty"`
-	Subsidiaries           []Subsidiary            `json:"subsidiaries,omitempty"`
-	FinancialInstrument    *FinancialInstrument    `json:"financialInstrument,omitempty"`
+	ProperName             string               `json:"properName,omitempty"`
+	ShortName              string               `json:"shortName,omitempty"`
+	HiddenLabel            string               `json:"hiddenLabel,omitempty"`
+	FormerNames            []string             `json:"formerNames,omitempty"`
+	CountryCode            string               `json:"countryCode,omitempty"`
+	CountryOfIncorporation string               `json:"countryOfIncorporation,omitempty"`
+	PostalCode             string               `json:"postalCode,omitempty"`
+	YearFounded            int                  `json:"yearFounded,omitempty"`
+	Types                  []string             `json:"types"`
+	DirectType             string               `json:"directType,omitempty"`
+	Labels                 []string             `json:"labels,omitempty"`
+	LegalEntityIdentifier  string               `json:"leiCode,omitempty"`
+	Parent                 *Parent              `json:"parentOrganisation,omitempty"`
+	Subsidiaries           []Subsidiary         `json:"subsidiaries,omitempty"`
+	FinancialInstrument    *FinancialInstrument `json:"financialInstrument,omitempty"`
 }
 
 // Parent is a simplified representation of a parent organisation, used in Organisation API
@@ -58,13 +56,6 @@ type Parent struct {
 
 // Subsidiary is a simplified representation of a subsidiary organisation, used in Organisation API
 type Subsidiary struct {
-	Thing
-	Types      []string `json:"types,omitempty"`
-	DirectType string   `json:"directType,omitempty"`
-}
-
-// IndustryClassification represents the type of Organisation, e.g. a Bank
-type IndustryClassification struct {
 	Thing
 	Types      []string `json:"types,omitempty"`
 	DirectType string   `json:"directType,omitempty"`

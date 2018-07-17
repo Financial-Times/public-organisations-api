@@ -114,12 +114,12 @@ func (h *OrganisationsHandler) GetOrganisation(w http.ResponseWriter, r *http.Re
 	organisation, found, err := h.getOrganisationViaConceptsAPI(uuid, transID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"message": "` + err.Error() + `"}`))
+		w.Write([]byte(`{"message": "failed to return organisation"}`))
 		return
 	}
 	if !found {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte(`{"message":"Organisation not found."}`))
+		w.Write([]byte(`{"message": "organisation not found"}`))
 		return
 	}
 	//if the request was not made for the canonical, but an alternate uuid: redirect
@@ -240,7 +240,7 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 	var subsidiaries = []Subsidiary{}
 	for _, item := range conceptsApiResponse.Related {
 		c := item.Concept
-		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == "/hasParentOrganisation" {
+		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == "/isParentOrganisationOf" {
 			parent := &Parent{}
 			parent.ID = c.ID
 			parent.APIURL = c.ApiURL
@@ -249,7 +249,7 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 			parent.Types = organisationTypes
 			org.Parent = parent
 		}
-		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == "/isParentOrganisationOf" {
+		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == "/hasParentOrganisation" {
 			subsidiary := Subsidiary{}
 			subsidiary.ID = c.ID
 			subsidiary.APIURL = c.ApiURL
@@ -272,10 +272,6 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 	if len(subsidiaries) > 0 {
 		org.Subsidiaries = subsidiaries
 	}
-
-	// TODO: concept API does not have IndustryClassification.
-	// Ignore it for now
-	// org.IndustryClassification
 
 	return org, true, nil
 }
