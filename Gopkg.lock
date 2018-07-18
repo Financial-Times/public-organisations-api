@@ -16,8 +16,8 @@
 [[projects]]
   name = "github.com/Financial-Times/concepts-rw-neo4j"
   packages = ["concepts"]
-  revision = "797b029a0c81306e03229877097b11ccb7ac4c96"
-  version = "1.7.3"
+  revision = "b59be137da38b2ce65b7f085b9d572b370419fc1"
+  version = "1.8.0"
 
 [[projects]]
   name = "github.com/Financial-Times/financial-instruments-rw-neo4j"
@@ -103,6 +103,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/bradfitz/slice"
+  packages = ["."]
+  revision = "d9036e2120b5ddfa53f3ebccd618c4af275f47da"
+
+[[projects]]
+  branch = "master"
   name = "github.com/cyberdelia/go-metrics-graphite"
   packages = ["."]
   revision = "39f87cc3b432bbb898d7c643c0e93cac2bc865ad"
@@ -153,10 +159,10 @@
   version = "v1.0.4"
 
 [[projects]]
+  branch = "master"
   name = "github.com/jmcvetta/neoism"
   packages = ["."]
-  revision = "c37ec30845b63d9f168f55e837c787e08a15e9a6"
-  version = "v1.3.1"
+  revision = "4674154f870d19b356581843f481dccd6792dcc0"
 
 [[projects]]
   branch = "master"
@@ -207,8 +213,17 @@
   version = "v1.1"
 
 [[projects]]
+  name = "github.com/stretchr/objx"
+  packages = ["."]
+  revision = "477a77ecc69700c7cdeb1fa9e129548e1c1c393c"
+  version = "v0.1.1"
+
+[[projects]]
   name = "github.com/stretchr/testify"
-  packages = ["assert"]
+  packages = [
+    "assert",
+    "mock"
+  ]
   revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
   version = "v1.2.2"
 
@@ -221,7 +236,10 @@
 [[projects]]
   branch = "master"
   name = "go4.org"
-  packages = ["osutil"]
+  packages = [
+    "osutil",
+    "reflectutil"
+  ]
   revision = "9599cf28b011184741f249bd9f9330756b506cbc"
 
 [[projects]]
@@ -260,6 +278,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b146f46abe78cba921de882662e8d23fdb22dd3986bba7e364206e374667eaed"
+  inputs-digest = "1fcd65447887a3ac911dacdbf1cb995225b7de7b3e30f42a28b2483b7a271e14"
   solver-name = "gps-cdcl"
   solver-version = 1
