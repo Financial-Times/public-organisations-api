@@ -98,4 +98,5 @@ type Concept struct {
 	ApiURL    string `json:"apiUrl,omitempty"`
 	PrefLabel string `json:"prefLabel,omitempty"`
 	Type      string `json:"type,omitempty"`
+	Figi      string `json:"figiCode,omitempty"`
 }

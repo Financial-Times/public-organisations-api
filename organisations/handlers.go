@@ -10,6 +10,7 @@ import (
 
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 	"github.com/Financial-Times/go-logger"
+	"github.com/Financial-Times/neo-model-utils-go/mapper"
 	"github.com/Financial-Times/service-status-go/gtg"
 	"github.com/Financial-Times/transactionid-utils-go"
 	"github.com/gorilla/handlers"
@@ -88,12 +89,6 @@ func (h *OrganisationsHandler) MethodNotAllowedHandler(w http.ResponseWriter, r 
 const validUUID = "([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
 const ontologyPrefix = "http://www.ft.com/ontology"
 const organisationOntology = ontologyPrefix + "/organisation/Organisation"
-
-var organisationTypes = []string{
-	"http://www.ft.com/ontology/core/Thing",
-	"http://www.ft.com/ontology/concept/Concept",
-	"http://www.ft.com/ontology/organisation/Organisation",
-}
 
 // GetOrganisation is the public API
 func (h *OrganisationsHandler) GetOrganisation(w http.ResponseWriter, r *http.Request) {
@@ -199,7 +194,7 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 	org.ID = conceptsApiResponse.ID
 	org.APIURL = conceptsApiResponse.ApiURL
 	org.PrefLabel = conceptsApiResponse.PrefLabel
-	org.Types = organisationTypes
+	org.Types = mapper.FullTypeHierarchy(conceptsApiResponse.Type)
 	org.DirectType = conceptsApiResponse.Type
 	org.PostalCode = conceptsApiResponse.PostalCode
 	org.CountryCode = conceptsApiResponse.CountryCode
@@ -246,7 +241,7 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 			parent.APIURL = c.ApiURL
 			parent.PrefLabel = c.PrefLabel
 			parent.DirectType = c.Type
-			parent.Types = organisationTypes
+			parent.Types = mapper.FullTypeHierarchy(c.Type)
 			org.Parent = parent
 		}
 		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == "/hasParentOrganisation" {
@@ -255,17 +250,17 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 			subsidiary.APIURL = c.ApiURL
 			subsidiary.PrefLabel = c.PrefLabel
 			subsidiary.DirectType = c.Type
-			subsidiary.Types = organisationTypes
+			subsidiary.Types = mapper.FullTypeHierarchy(c.Type)
 			subsidiaries = append(subsidiaries, subsidiary)
 		}
-		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == "/issuedBy" {
+		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == "/issuedTo" {
 			f := &FinancialInstrument{}
 			f.ID = c.ID
 			f.APIURL = c.ApiURL
 			f.PrefLabel = c.PrefLabel
 			f.DirectType = c.Type
-			f.Types = []string{}
-			f.Figi = "" // TODO: c.Figi?
+			f.Types = mapper.FullTypeHierarchy(c.Type)
+			f.Figi = c.Figi
 			org.FinancialInstrument = f
 		}
 	}
