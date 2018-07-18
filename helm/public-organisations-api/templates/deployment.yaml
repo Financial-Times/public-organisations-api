@@ -51,8 +51,6 @@ spec:
             value: {{ .Values.env.CACHE_DURATION }}
           - name: APP_PORT
             value: "{{ .Values.env.APP_PORT }}"
-          - name: CONCEPTS_API
-            value: {{ .Values.env.CONCEPTS_API }}
         ports: 
         - containerPort: {{ .Values.env.APP_PORT }} 
         livenessProbe: 
