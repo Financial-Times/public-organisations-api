@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/Financial-Times/go-logger"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
@@ -47,6 +48,7 @@ func (mhc *mockHTTPClient) Do(req *http.Request) (resp *http.Response, err error
 }
 
 func TestHandlers(t *testing.T) {
+	logger.InitLogger("test-service", "debug")
 	var mockClient mockHTTPClient
 	router := mux.NewRouter()
 
@@ -104,16 +106,16 @@ func TestHandlers(t *testing.T) {
 		404,
 		`{"message": "organisation not found"}`,
 	}
-	// TODO: Need to test...financial instrument, subsidiaries, parentOrganisation, formerNames, hortNames
-	// successfulRequest := testCase{
-	// 	"Get organisation - Retrieves and transforms correctly",
-	// 	"/organisations/9636919c-838d-11e8-8f42-da24cd01f044",
-	// 	200,
-	// 	getCompleteBrandAsConcept,
-	// 	nil,
-	// 	200,
-	// 	transformedCompleteBrand,
-	// }
+
+	successfulRequest := testCase{
+		"Get organisation - Retrieves and transforms correctly",
+		"/organisations/7c5218a0-3755-463e-abbc-1a1632cfd1da",
+		200,
+		getCompleteOrganisationAsConcept,
+		nil,
+		200,
+		getTransformedCompleteOrganisation,
+	}
 
 	testCases := []testCase{
 		invalidUUID,
@@ -122,7 +124,7 @@ func TestHandlers(t *testing.T) {
 		errorOnInvalidJson,
 		notFound,
 		nonOrganisationsReturnsNotFound,
-		// successfulRequest,
+		successfulRequest,
 	}
 
 	for _, test := range testCases {
@@ -193,4 +195,111 @@ var getPersonAsConcept = `{
 	"apiUrl": "http://api.ft.com/concepts/f92a4ca4-84f9-11e8-8f42-da24cd01f044",
 	"type": "http://www.ft.com/ontology/person/Person",
 	"prefLabel": "Not a organisation"
+}`
+
+var getCompleteOrganisationAsConcept = `{
+	"id": "http://api.ft.com/things/7c5218a0-3755-463e-abbc-1a1632cfd1da",
+	"apiUrl": "http://api.ft.com/concepts/7c5218a0-3755-463e-abbc-1a1632cfd1da",
+	"type": "http://www.ft.com/ontology/organisation/Organisation",
+	"prefLabel": "Nintendo Co Ltd",
+	"alternativeLabels": [
+		{
+			"type": "http://www.ft.com/ontology/FormerName",
+			"value": "Nintendo Playing Card Co., Ltd."
+		},
+		{
+			"type": "http://www.ft.com/ontology/ProperName",
+			"value": "Nintendo Co., Ltd."
+		}
+	],
+	"countryCode": "JP",
+	"countryOfIncorporation": "JP",
+	"leiCode": "353800FEEXU6I9M0ZF27",
+	"postalCode": "601-8116",
+	"yearFounded": 1889,
+	"relatedConcepts": [
+		{
+			"concept": {
+				"id": "http://api.ft.com/things/dfee4b8f-ceee-37ba-ab24-752cf7a9281c",
+				"apiUrl": "http://api.ft.com/concepts/dfee4b8f-ceee-37ba-ab24-752cf7a9281c",
+				"type": "http://www.ft.com/ontology/FinancialInstrument",
+				"prefLabel": "Nintendo Co., Ltd.",
+				"alternativeLabels": [
+					{
+						"type": "http://www.ft.com/ontology/Alias",
+						"value": "Nintendo Co., Ltd."
+					}
+				],
+				"figiCode": "BBG000BLCPP4"
+			},
+			"predicate": "http://www.ft.com/ontology/issuedTo"
+		},
+		{
+			"concept": {
+				"id": "http://api.ft.com/things/1b070fbb-6331-3225-bb57-9108deb67df4",
+				"apiUrl": "http://api.ft.com/concepts/1b070fbb-6331-3225-bb57-9108deb67df4",
+				"type": "http://www.ft.com/ontology/organisation/Organisation",
+				"prefLabel": "Nintendo France SARL",
+				"alternativeLabels": [
+					{
+						"type": "http://www.ft.com/ontology/Alias",
+						"value": "Nintendo France SARL"
+					}
+				],
+				"countryOfIncorporation": "FR",
+				"postalCode": "95031"
+			},
+			"predicate": "http://www.ft.com/ontology/hasParentOrganisation"
+		}
+	]
+}`
+
+var getTransformedCompleteOrganisation = `{
+	"id":"http://api.ft.com/things/7c5218a0-3755-463e-abbc-1a1632cfd1da",
+	"apiUrl":"http://api.ft.com/concepts/7c5218a0-3755-463e-abbc-1a1632cfd1da",
+	"prefLabel":"Nintendo Co Ltd",
+	"properName":"Nintendo Co., Ltd.",
+	"formerNames":[
+		"Nintendo Playing Card Co., Ltd."
+	],
+	"countryCode":"JP",
+	"countryOfIncorporation":"JP",
+	"postalCode":"601-8116",
+	"yearFounded":1889,
+	"types":[
+		"http://www.ft.com/ontology/core/Thing",
+		"http://www.ft.com/ontology/concept/Concept",
+		"http://www.ft.com/ontology/organisation/Organisation"
+	],
+	"directType":"http://www.ft.com/ontology/organisation/Organisation",
+	"labels":[
+		"Nintendo Playing Card Co., Ltd.",
+		"Nintendo Co., Ltd."
+	],
+	"leiCode":"353800FEEXU6I9M0ZF27",
+	"subsidiaries":[
+		{
+			"id":"http://api.ft.com/things/1b070fbb-6331-3225-bb57-9108deb67df4",
+			"apiUrl":"http://api.ft.com/concepts/1b070fbb-6331-3225-bb57-9108deb67df4",
+			"prefLabel":"Nintendo France SARL",
+			"types":[
+				"http://www.ft.com/ontology/core/Thing",
+				"http://www.ft.com/ontology/concept/Concept",
+				"http://www.ft.com/ontology/organisation/Organisation"
+			],
+			"directType":"http://www.ft.com/ontology/organisation/Organisation"
+		}
+	],
+	"financialInstrument":{
+		"id":"http://api.ft.com/things/dfee4b8f-ceee-37ba-ab24-752cf7a9281c",
+		"apiUrl":"http://api.ft.com/concepts/dfee4b8f-ceee-37ba-ab24-752cf7a9281c",
+		"prefLabel":"Nintendo Co., Ltd.",
+		"types":[
+			"http://www.ft.com/ontology/core/Thing",
+			"http://www.ft.com/ontology/concept/Concept",
+			"http://www.ft.com/ontology/FinancialInstrument"
+		],
+		"directType":"http://www.ft.com/ontology/FinancialInstrument",
+		"FIGI":"BBG000BLCPP4"
+	}
 }`
