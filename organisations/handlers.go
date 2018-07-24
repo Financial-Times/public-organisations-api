@@ -30,6 +30,13 @@ type OrganisationsHandler struct {
 var OrganisationDriver Driver
 var CacheControlHeader string
 
+const (
+	validUUID = "([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
+	ontologyPrefix = "http://www.ft.com/ontology"
+	organisationSuffix = "/organisation/Organisation"
+	publicCompanySuffix = "/company/PublicCompany"
+)
+
 func NewHandler(client HTTPClient, conceptsURL string) OrganisationsHandler {
 	return OrganisationsHandler{
 		client,
@@ -85,10 +92,6 @@ func (h *OrganisationsHandler) MethodNotAllowedHandler(w http.ResponseWriter, r 
 	w.WriteHeader(http.StatusMethodNotAllowed)
 	return
 }
-
-const validUUID = "([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
-const ontologyPrefix = "http://www.ft.com/ontology"
-const organisationOntology = ontologyPrefix + "/organisation/Organisation"
 
 // GetOrganisation is the public API
 func (h *OrganisationsHandler) GetOrganisation(w http.ResponseWriter, r *http.Request) {
@@ -186,13 +189,13 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 		return org, false, err
 	}
 
-	if conceptsApiResponse.Type != organisationOntology {
-		logger.WithTransactionID(transID).WithUUID(uuid).Debug("requested concept is not a organisation")
+	if conceptsApiResponse.Type != ontologyPrefix+organisationSuffix && conceptsApiResponse.Type != ontologyPrefix+publicCompanySuffix {
+		logger.WithTransactionID(transID).WithUUID(uuid).Info("requested concept is not a organisation")
 		return org, false, nil
 	}
 
 	org.ID = conceptsApiResponse.ID
-	org.APIURL = conceptsApiResponse.ApiURL
+	org.APIURL = strings.Replace(conceptsApiResponse.ApiURL, "concepts", "organisations", 1)
 	org.PrefLabel = conceptsApiResponse.PrefLabel
 	org.Types = mapper.FullTypeHierarchy(conceptsApiResponse.Type)
 	org.DirectType = conceptsApiResponse.Type
@@ -238,7 +241,7 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == "/isParentOrganisationOf" {
 			parent := &Parent{}
 			parent.ID = c.ID
-			parent.APIURL = c.ApiURL
+			parent.APIURL = strings.Replace(c.ApiURL, "concepts", "organisations", 1)
 			parent.PrefLabel = c.PrefLabel
 			parent.DirectType = c.Type
 			parent.Types = mapper.FullTypeHierarchy(c.Type)
@@ -247,7 +250,7 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == "/hasParentOrganisation" {
 			subsidiary := Subsidiary{}
 			subsidiary.ID = c.ID
-			subsidiary.APIURL = c.ApiURL
+			subsidiary.APIURL = strings.Replace(c.ApiURL, "concepts", "organisations", 1)
 			subsidiary.PrefLabel = c.PrefLabel
 			subsidiary.DirectType = c.Type
 			subsidiary.Types = mapper.FullTypeHierarchy(c.Type)
@@ -256,7 +259,7 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == "/issuedTo" {
 			f := &FinancialInstrument{}
 			f.ID = c.ID
-			f.APIURL = c.ApiURL
+			f.APIURL = strings.Replace(c.ApiURL, "concepts", "things", 1)
 			f.PrefLabel = c.PrefLabel
 			f.DirectType = c.Type
 			f.Types = mapper.FullTypeHierarchy(c.Type)

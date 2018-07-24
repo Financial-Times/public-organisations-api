@@ -42,6 +42,10 @@ type testCase struct {
 	expectedBody string
 }
 
+func init() {
+	logger.InitDefaultLogger("tests")
+}
+
 func (mhc *mockHTTPClient) Do(req *http.Request) (resp *http.Response, err error) {
 	cb := ioutil.NopCloser(bytes.NewReader([]byte(mhc.resp)))
 	return &http.Response{Body: cb, StatusCode: mhc.statusCode}, mhc.err
@@ -210,6 +214,14 @@ var getCompleteOrganisationAsConcept = `{
 		{
 			"type": "http://www.ft.com/ontology/ProperName",
 			"value": "Nintendo Co., Ltd."
+		},
+		{
+			"type": "http://www.ft.com/ontology/ShortName",
+			"value": "Nintendo"
+		},
+		{
+			"type": "http://www.ft.com/ontology/HiddenLabel",
+			"value": "NINTENDO CO., LTD."
 		}
 	],
 	"countryCode": "JP",
@@ -236,6 +248,19 @@ var getCompleteOrganisationAsConcept = `{
 		},
 		{
 			"concept": {
+				"id": "http://api.ft.com/things/335e9e5a-8f2e-11e8-8f42-da24cd01f044",
+				"apiUrl": "http://api.ft.com/organisations/335e9e5a-8f2e-11e8-8f42-da24cd01f044",
+				"type": "http://www.ft.com/ontology/organisation/Organisation",
+				"prefLabel": "Alphabet Inc",
+				"countryCode": "US",
+				"countryOfIncorporation": "US",
+				"postalCode": "94043",
+				"yearFounded": 2015
+			},
+			"predicate": "http://www.ft.com/ontology/isParentOrganisationOf"
+		},
+		{
+			"concept": {
 				"id": "http://api.ft.com/things/1b070fbb-6331-3225-bb57-9108deb67df4",
 				"apiUrl": "http://api.ft.com/concepts/1b070fbb-6331-3225-bb57-9108deb67df4",
 				"type": "http://www.ft.com/ontology/organisation/Organisation",
@@ -256,9 +281,11 @@ var getCompleteOrganisationAsConcept = `{
 
 var getTransformedCompleteOrganisation = `{
 	"id":"http://api.ft.com/things/7c5218a0-3755-463e-abbc-1a1632cfd1da",
-	"apiUrl":"http://api.ft.com/concepts/7c5218a0-3755-463e-abbc-1a1632cfd1da",
+	"apiUrl":"http://api.ft.com/organisations/7c5218a0-3755-463e-abbc-1a1632cfd1da",
 	"prefLabel":"Nintendo Co Ltd",
 	"properName":"Nintendo Co., Ltd.",
+	"shortName":"Nintendo",
+	"hiddenLabel":"NINTENDO CO., LTD.",
 	"formerNames":[
 		"Nintendo Playing Card Co., Ltd."
 	],
@@ -274,13 +301,26 @@ var getTransformedCompleteOrganisation = `{
 	"directType":"http://www.ft.com/ontology/organisation/Organisation",
 	"labels":[
 		"Nintendo Playing Card Co., Ltd.",
-		"Nintendo Co., Ltd."
+		"Nintendo Co., Ltd.",
+		"Nintendo",
+		"NINTENDO CO., LTD."
 	],
 	"leiCode":"353800FEEXU6I9M0ZF27",
+	"parentOrganisation":{
+		"id":"http://api.ft.com/things/335e9e5a-8f2e-11e8-8f42-da24cd01f044",
+		"apiUrl":"http://api.ft.com/organisations/335e9e5a-8f2e-11e8-8f42-da24cd01f044",
+		"prefLabel":"Alphabet Inc",
+		"types":[
+			"http://www.ft.com/ontology/core/Thing",
+			"http://www.ft.com/ontology/concept/Concept",
+			"http://www.ft.com/ontology/organisation/Organisation"
+		],
+		"directType":"http://www.ft.com/ontology/organisation/Organisation"
+	},
 	"subsidiaries":[
 		{
 			"id":"http://api.ft.com/things/1b070fbb-6331-3225-bb57-9108deb67df4",
-			"apiUrl":"http://api.ft.com/concepts/1b070fbb-6331-3225-bb57-9108deb67df4",
+			"apiUrl":"http://api.ft.com/organisations/1b070fbb-6331-3225-bb57-9108deb67df4",
 			"prefLabel":"Nintendo France SARL",
 			"types":[
 				"http://www.ft.com/ontology/core/Thing",
@@ -292,7 +332,7 @@ var getTransformedCompleteOrganisation = `{
 	],
 	"financialInstrument":{
 		"id":"http://api.ft.com/things/dfee4b8f-ceee-37ba-ab24-752cf7a9281c",
-		"apiUrl":"http://api.ft.com/concepts/dfee4b8f-ceee-37ba-ab24-752cf7a9281c",
+		"apiUrl":"http://api.ft.com/things/dfee4b8f-ceee-37ba-ab24-752cf7a9281c",
 		"prefLabel":"Nintendo Co., Ltd.",
 		"types":[
 			"http://www.ft.com/ontology/core/Thing",
