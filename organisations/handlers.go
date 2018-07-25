@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -156,7 +157,22 @@ func gtgCheck(handler func() (string, error)) gtg.Status {
 
 func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transID string) (organisation Organisation, found bool, err error) {
 	org := Organisation{}
-	reqURL := h.conceptsURL + "/concepts/" + uuid
+
+	u, err := url.Parse(h.conceptsURL)
+	if err != nil {
+		msg := fmt.Sprintf("URL of Concepts API is invalid of %s", uuid)
+		logger.WithError(err).WithUUID(uuid).WithTransactionID(transID).Error(msg)
+		return org, false, err
+	}
+
+	u.Path = "/concepts/" + uuid
+	q := u.Query()
+	for _, query := range []string{"broader", "narrower", "related"} {
+		q.Add("showRelationship", query)
+	}
+	u.RawQuery = q.Encode()
+	reqURL := u.String()
+
 	request, err := http.NewRequest("GET", reqURL, nil)
 
 	if err != nil {
