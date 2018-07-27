@@ -144,10 +144,11 @@ workflows:
   nightly:
     triggers:
       - schedule:
-          cron: "11 * * * *"
+          cron: "14 * * * *"
           filters:
             branches:
                 only:
                 - master
+                - feature/load-test
     jobs:
       - loadtest
