@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"regexp"
 	"strings"
 
@@ -32,10 +31,16 @@ var OrganisationDriver Driver
 var CacheControlHeader string
 
 const (
-	validUUID = "([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
-	ontologyPrefix = "http://www.ft.com/ontology"
-	organisationSuffix = "/organisation/Organisation"
+	validUUID           = "([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
+	ontologyPrefix      = "http://www.ft.com/ontology"
+	organisationSuffix  = "/organisation/Organisation"
 	publicCompanySuffix = "/company/PublicCompany"
+	relatedQueryParam   = "?showRelationship=related"
+	isParentPredicate   = "/parentOrganisationOf"
+	hasParentPredicate  = "/subOrganisationOf"
+	issuedPredicate     = "/issued"
+	thingsApiUrl        = "http://api.ft.com/things/"
+	ftThing             = "http://www.ft.com/thing/"
 )
 
 func NewHandler(client HTTPClient, conceptsURL string) OrganisationsHandler {
@@ -158,20 +163,7 @@ func gtgCheck(handler func() (string, error)) gtg.Status {
 func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transID string) (organisation Organisation, found bool, err error) {
 	org := Organisation{}
 
-	u, err := url.Parse(h.conceptsURL)
-	if err != nil {
-		msg := fmt.Sprintf("URL of Concepts API is invalid of %s", uuid)
-		logger.WithError(err).WithUUID(uuid).WithTransactionID(transID).Error(msg)
-		return org, false, err
-	}
-
-	u.Path = "/concepts/" + uuid
-	q := u.Query()
-	for _, query := range []string{"broader", "narrower", "related"} {
-		q.Add("showRelationship", query)
-	}
-	u.RawQuery = q.Encode()
-	reqURL := u.String()
+	reqURL := h.conceptsURL + "/concepts/" + uuid + relatedQueryParam
 
 	request, err := http.NewRequest("GET", reqURL, nil)
 
@@ -210,8 +202,8 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 		return org, false, nil
 	}
 
-	org.ID = conceptsApiResponse.ID
-	org.APIURL = strings.Replace(conceptsApiResponse.ApiURL, "concepts", "organisations", 1)
+	org.ID = convertID(conceptsApiResponse.ID)
+	org.APIURL = convertApiUrl(conceptsApiResponse.ApiURL, "organisations")
 	org.PrefLabel = conceptsApiResponse.PrefLabel
 	org.Types = mapper.FullTypeHierarchy(conceptsApiResponse.Type)
 	org.DirectType = conceptsApiResponse.Type
@@ -229,13 +221,13 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 			return strings.TrimPrefix(label.Type, ontologyPrefix) == expected
 		}
 		switch {
-		case compare("/ProperName"):
+		case compare("/properName"):
 			org.ProperName = label.Value
-		case compare("/ShortName"):
+		case compare("/shortName"):
 			org.ShortName = label.Value
-		case compare("/HiddenLabel"):
+		case compare("/hiddenLabel"):
 			org.HiddenLabel = label.Value
-		case compare("/FormerName"):
+		case compare("/formerName"):
 			formerNames = append(formerNames, label.Value)
 		}
 
@@ -254,28 +246,28 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 	var subsidiaries = []Subsidiary{}
 	for _, item := range conceptsApiResponse.Related {
 		c := item.Concept
-		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == "/isParentOrganisationOf" {
+		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == hasParentPredicate {
 			parent := &Parent{}
-			parent.ID = c.ID
-			parent.APIURL = strings.Replace(c.ApiURL, "concepts", "organisations", 1)
+			parent.ID = convertID(c.ID)
+			parent.APIURL = convertApiUrl(c.ApiURL, "organisations")
 			parent.PrefLabel = c.PrefLabel
 			parent.DirectType = c.Type
 			parent.Types = mapper.FullTypeHierarchy(c.Type)
 			org.Parent = parent
 		}
-		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == "/hasParentOrganisation" {
+		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == isParentPredicate {
 			subsidiary := Subsidiary{}
-			subsidiary.ID = c.ID
-			subsidiary.APIURL = strings.Replace(c.ApiURL, "concepts", "organisations", 1)
+			subsidiary.ID = convertID(c.ID)
+			subsidiary.APIURL = convertApiUrl(c.ApiURL, "organisations")
 			subsidiary.PrefLabel = c.PrefLabel
 			subsidiary.DirectType = c.Type
 			subsidiary.Types = mapper.FullTypeHierarchy(c.Type)
 			subsidiaries = append(subsidiaries, subsidiary)
 		}
-		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == "/issuedTo" {
+		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == issuedPredicate {
 			f := &FinancialInstrument{}
-			f.ID = c.ID
-			f.APIURL = strings.Replace(c.ApiURL, "concepts", "things", 1)
+			f.ID = convertID(c.ID)
+			f.APIURL = convertApiUrl(c.ApiURL, "things")
 			f.PrefLabel = c.PrefLabel
 			f.DirectType = c.Type
 			f.Types = mapper.FullTypeHierarchy(c.Type)
@@ -288,4 +280,12 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 	}
 
 	return org, true, nil
+}
+
+func convertApiUrl(conceptsApiUrl string, desired string) string {
+	return strings.Replace(conceptsApiUrl, "concepts", desired, 1)
+}
+
+func convertID(conceptsApiID string) string {
+	return strings.Replace(conceptsApiID, ftThing, thingsApiUrl, 1)
 }

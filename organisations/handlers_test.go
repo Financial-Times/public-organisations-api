@@ -181,46 +181,46 @@ func transformBody(testBody string) string {
 }
 
 var getBasicOrganisationAsConcept = `{
-	"id": "http://api.ft.com/things/d6b12f0c-bf3f-4045-a07b-1e4e49103fd6",
+	"id": "http://www.ft.com/thing/d6b12f0c-bf3f-4045-a07b-1e4e49103fd6",
 	"apiUrl": "http://api.ft.com/concepts/d6b12f0c-bf3f-4045-a07b-1e4e49103fd6",
 	"type": "http://www.ft.com/ontology/organisation/Organisation",
 	"prefLabel": "Google Inc"
 }`
 
 var getRedirectedOrganisation = `{
-	"id": "http://api.ft.com/things/d6b12f0c-bf3f-4045-a07b-1e4e49103fd6",
+	"id": "http://www.ft.com/thing/d6b12f0c-bf3f-4045-a07b-1e4e49103fd6",
 	"apiUrl": "http://api.ft.com/concepts/d6b12f0c-bf3f-4045-a07b-1e4e49103fd6",
 	"type": "http://www.ft.com/ontology/organisation/Organisation",
 	"prefLabel": "Google Inc"
 }`
 
 var getPersonAsConcept = `{
-	"id": "http://api.ft.com/things/f92a4ca4-84f9-11e8-8f42-da24cd01f044",
+	"id": "http://www.ft.com/thing/f92a4ca4-84f9-11e8-8f42-da24cd01f044",
 	"apiUrl": "http://api.ft.com/concepts/f92a4ca4-84f9-11e8-8f42-da24cd01f044",
 	"type": "http://www.ft.com/ontology/person/Person",
 	"prefLabel": "Not a organisation"
 }`
 
 var getCompleteOrganisationAsConcept = `{
-	"id": "http://api.ft.com/things/7c5218a0-3755-463e-abbc-1a1632cfd1da",
+	"id": "http://www.ft.com/thing/7c5218a0-3755-463e-abbc-1a1632cfd1da",
 	"apiUrl": "http://api.ft.com/concepts/7c5218a0-3755-463e-abbc-1a1632cfd1da",
 	"type": "http://www.ft.com/ontology/organisation/Organisation",
 	"prefLabel": "Nintendo Co Ltd",
 	"alternativeLabels": [
 		{
-			"type": "http://www.ft.com/ontology/FormerName",
+			"type": "http://www.ft.com/ontology/formerName",
 			"value": "Nintendo Playing Card Co., Ltd."
 		},
 		{
-			"type": "http://www.ft.com/ontology/ProperName",
+			"type": "http://www.ft.com/ontology/properName",
 			"value": "Nintendo Co., Ltd."
 		},
 		{
-			"type": "http://www.ft.com/ontology/ShortName",
+			"type": "http://www.ft.com/ontology/shortName",
 			"value": "Nintendo"
 		},
 		{
-			"type": "http://www.ft.com/ontology/HiddenLabel",
+			"type": "http://www.ft.com/ontology/hiddenLabel",
 			"value": "NINTENDO CO., LTD."
 		}
 	],
@@ -244,7 +244,7 @@ var getCompleteOrganisationAsConcept = `{
 				],
 				"figiCode": "BBG000BLCPP4"
 			},
-			"predicate": "http://www.ft.com/ontology/issuedTo"
+			"predicate": "http://www.ft.com/ontology/issued"
 		},
 		{
 			"concept": {
@@ -257,7 +257,7 @@ var getCompleteOrganisationAsConcept = `{
 				"postalCode": "94043",
 				"yearFounded": 2015
 			},
-			"predicate": "http://www.ft.com/ontology/isParentOrganisationOf"
+			"predicate": "http://www.ft.com/ontology/subOrganisationOf"
 		},
 		{
 			"concept": {
@@ -274,7 +274,7 @@ var getCompleteOrganisationAsConcept = `{
 				"countryOfIncorporation": "FR",
 				"postalCode": "95031"
 			},
-			"predicate": "http://www.ft.com/ontology/hasParentOrganisation"
+			"predicate": "http://www.ft.com/ontology/parentOrganisationOf"
 		}
 	]
 }`
