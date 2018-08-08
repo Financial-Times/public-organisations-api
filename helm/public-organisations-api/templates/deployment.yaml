@@ -51,6 +51,8 @@ spec:
             value: {{ .Values.env.CACHE_DURATION }}
           - name: APP_PORT
             value: "{{ .Values.env.APP_PORT }}"
+          - name: CONCEPTS_API
+            value: "http://public-concepts-api:8080"
         ports: 
         - containerPort: {{ .Values.env.APP_PORT }} 
         livenessProbe: 

@@ -142,7 +142,7 @@ func TestNeoReadStructToOrganisationMultipleMemberships(t *testing.T) {
 	assert.Equal("Super, Inc.", org.PrefLabel)
 
 	subsidiary := Subsidiary{}
-	subsidiary.Thing = &Thing{}
+	subsidiary.Thing = Thing{}
 	subsidiary.ID = "http://api.ft.com/things/f21a5cc0-d326-4e62-b84a-d840c2209fee"
 	subsidiary.APIURL = "http://api.ft.com/organisations/f21a5cc0-d326-4e62-b84a-d840c2209fee"
 	subsidiary.Types = []string{"http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/organisation/Organisation"}
@@ -155,7 +155,7 @@ func TestNeoReadStructToOrganisationMultipleMemberships(t *testing.T) {
 		assertListContainsAll(assert, item.Types, "http://www.ft.com/ontology/core/Thing", "http://www.ft.com/ontology/concept/Concept", "http://www.ft.com/ontology/organisation/Organisation")
 		assert.Equal("http://www.ft.com/ontology/organisation/Organisation", item.DirectType)
 	}
-	assertListContainsAll(assert, *org.Labels, "Super", "Super Incorporated", "Super, Inc.", "Super Inc.", "Super Inc")
+	assertListContainsAll(assert, org.Labels, "Super", "Super Incorporated", "Super, Inc.", "Super Inc.", "Super Inc")
 }
 
 func assertSubsidiaries(assert *assert.Assertions, actual []Subsidiary, items ...Subsidiary) {
@@ -429,7 +429,7 @@ func TestRetrieveConceptAsThingWithoutRelationships(t *testing.T) {
 	assert.Equal("http://www.ft.com/ontology/FinancialInstrument", org.FinancialInstrument.DirectType)
 
 	subsidiary := Subsidiary{
-		Thing: &Thing{
+		Thing: Thing{
 			ID:        "http://api.ft.com/things/dc17f0fe-2cbd-476e-8091-33d10ec0670a",
 			APIURL:    "http://api.ft.com/organisations/dc17f0fe-2cbd-476e-8091-33d10ec0670a",
 			PrefLabel: "3C",
@@ -451,7 +451,6 @@ func TestRetrieveConceptAsThingWithoutRelationships(t *testing.T) {
 
 	assert.Equal("http://api.ft.com/things/dd128106-3382-406f-8dfb-f4c69dcbbdfb", org.ID)
 	assert.Equal("http://api.ft.com/organisations/dd128106-3382-406f-8dfb-f4c69dcbbdfb", org.APIURL)
-
 
 }
 

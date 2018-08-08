@@ -60,12 +60,6 @@ type neoReadStruct struct {
 		DirectType string
 		PrefLabel  string
 	}
-	Ind struct {
-		ID         string
-		Types      []string
-		DirectType string
-		PrefLabel  string
-	}
 	Sub []struct {
 		ID         string
 		Types      []string
@@ -99,12 +93,6 @@ type neoNewFormatReadStruct struct {
 		LegalEntityIdentifier string
 	}
 	Parent []struct {
-		ID         string
-		Types      []string
-		DirectType string
-		PrefLabel  string
-	}
-	Ind []struct {
 		ID         string
 		Types      []string
 		DirectType string
@@ -148,13 +136,11 @@ func (pcw CypherDriver) ReadNewFormat(uuid string) (organisation Organisation, f
 			MATCH (t:Thing{uuid:{uuid}})
 			MATCH (t)-[:EQUIVALENT_TO]->(canonical:Organisation)
 			OPTIONAL MATCH (canonical)<-[:EQUIVALENT_TO]-(source:Organisation)
-			OPTIONAL MATCH (source)-[:HAS_CLASSIFICATION]->(industryClassification:IndustryClassification)
 			OPTIONAL MATCH (source)-[:SUB_ORGANISATION_OF]->(parentOrganisation:Organisation)
 			OPTIONAL MATCH (source)<-[:SUB_ORGANISATION_OF]-(subOrganisation:Organisation)
 			OPTIONAL MATCH (source)<-[:ISSUED_BY]-(financialInstrument:FinancialInstrument)
 			WITH
 				canonical,
-				industryClassification,
 				parentOrganisation,
 				subOrganisation,
 				financialInstrument,
@@ -164,11 +150,6 @@ func (pcw CypherDriver) ReadNewFormat(uuid string) (organisation Organisation, f
 					source.prefLabel ASC
 			WITH
 				canonical,
-				{
-					id: industryClassification.uuid,
-					types: labels(industryClassification),
-					prefLabel: industryClassification.prefLabel
-				} as ind,
 				{
 					legalEntityIdentifier: canonical.leiCode
 				} as lei,
@@ -204,7 +185,6 @@ func (pcw CypherDriver) ReadNewFormat(uuid string) (organisation Organisation, f
 					postalCode: canonical.postalCode,
 					yearFounded: canonical.yearFounded,
 					parent: collect(parent),
-					ind: collect(ind),
 					fi: collect(fi),
 					sub: collect(sub)
 				} as rs
@@ -240,12 +220,6 @@ func (pcw CypherDriver) ReadNewFormat(uuid string) (organisation Organisation, f
 		}
 		cleanReadStruct.Parent = parent
 	}
-	for _, ind := range complexReadStruct.Ind {
-		if ind.ID == "" {
-			continue
-		}
-		cleanReadStruct.Ind = ind
-	}
 	for _, sub := range complexReadStruct.Sub {
 		if sub.ID == "" {
 			continue
@@ -272,24 +246,21 @@ func (pcw CypherDriver) ReadOldFormat(uuid string) (organisation Organisation, f
 		Statement: `
 		MATCH (identifier:UPPIdentifier{value:{uuid}})
 		MATCH (identifier)-[:IDENTIFIES]->(o:Organisation)
-		OPTIONAL MATCH (o)-[:HAS_CLASSIFICATION]->(ind:IndustryClassification)
-		WITH o, { id:ind.uuid, types:labels(ind), prefLabel:ind.prefLabel} as ind
-		WITH o, ind
 		OPTIONAL MATCH (lei:LegalEntityIdentifier)-[:IDENTIFIES]->(o)
-		WITH o, ind, { legalEntityIdentifier:lei.value } as lei
-		WITH o, ind, lei
+		WITH o, { legalEntityIdentifier:lei.value } as lei
+		WITH o, lei
 		OPTIONAL MATCH (o)-[:SUB_ORGANISATION_OF]->(parent:Organisation)
-		WITH o, ind, lei, { id:parent.uuid, types:labels(parent), prefLabel:parent.prefLabel} as parent
-		WITH o, ind, lei, parent
+		WITH o, lei, { id:parent.uuid, types:labels(parent), prefLabel:parent.prefLabel} as parent
+		WITH o, lei, parent
 		OPTIONAL MATCH (o)<-[:ISSUED_BY]-(fi:FinancialInstrument)<-[:IDENTIFIES]-(figi:FIGIIdentifier)
-		WITH o, ind, lei, parent, {id:fi.uuid, types:labels(fi), prefLabel:fi.prefLabel, figi:figi.value} as fi
-		WITH o, ind, lei, parent, fi
-		WITH o, ind, lei, parent, fi
+		WITH o, lei, parent, {id:fi.uuid, types:labels(fi), prefLabel:fi.prefLabel, figi:figi.value} as fi
+		WITH o, lei, parent, fi
+		WITH o, lei, parent, fi
 		OPTIONAL MATCH (o)<-[:SUB_ORGANISATION_OF]-(sub:Organisation)
-		WITH o, ind, lei, parent, fi, sub, size((:Content)-[:MENTIONS]->(sub)) as annCounts ORDER BY annCounts DESC, o.prefLabel ASC
-		WITH o, ind, lei, parent, fi, { id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel, annCount:annCounts } as sub
-		WITH o, ind, lei, parent, fi, collect(sub) as sub
-		return {id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases, lei:lei, parent:parent, ind:ind, sub:sub, fi:fi} as rs`,
+		WITH o, lei, parent, fi, sub, size((:Content)-[:MENTIONS]->(sub)) as annCounts ORDER BY annCounts DESC, o.prefLabel ASC
+		WITH o, lei, parent, fi, { id:sub.uuid, types:labels(sub), prefLabel:sub.prefLabel, annCount:annCounts } as sub
+		WITH o, lei, parent, fi, collect(sub) as sub
+		return {id:o.uuid, types:labels(o), prefLabel:o.prefLabel, labels:o.aliases, lei:lei, parent:parent, sub:sub, fi:fi} as rs`,
 		Parameters: neoism.Props{"uuid": uuid},
 		Result:     &results,
 	}
@@ -308,7 +279,7 @@ func (pcw CypherDriver) ReadOldFormat(uuid string) (organisation Organisation, f
 
 func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 	public := Organisation{}
-	public.Thing = &Thing{}
+	public.Thing = Thing{}
 	public.ID = mapper.IDURL(neo.ID)
 	public.APIURL = mapper.APIURL(neo.ID, neo.Types, env)
 	public.Types = mapper.TypeURIs(neo.Types)
@@ -323,26 +294,16 @@ func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 	public.PostalCode = neo.PostalCode
 	public.YearFounded = neo.YearFounded
 	if len(neo.Labels) > 0 {
-		public.Labels = &neo.Labels
+		public.Labels = neo.Labels
 	}
 
 	if neo.Lei.LegalEntityIdentifier != "" {
 		public.LegalEntityIdentifier = neo.Lei.LegalEntityIdentifier
 	}
 
-	if neo.Ind.ID != "" {
-		public.IndustryClassification = &IndustryClassification{}
-		public.IndustryClassification.Thing = &Thing{}
-		public.IndustryClassification.ID = mapper.IDURL(neo.Ind.ID)
-		public.IndustryClassification.APIURL = mapper.APIURL(neo.Ind.ID, neo.Ind.Types, env)
-		public.IndustryClassification.Types = mapper.TypeURIs(neo.Ind.Types)
-		public.IndustryClassification.DirectType = filterToMostSpecificType(neo.Ind.Types)
-		public.IndustryClassification.PrefLabel = neo.Ind.PrefLabel
-	}
-
 	if neo.Fi.ID != "" {
 		public.FinancialInstrument = &FinancialInstrument{}
-		public.FinancialInstrument.Thing = &Thing{}
+		public.FinancialInstrument.Thing = Thing{}
 		public.FinancialInstrument.ID = mapper.IDURL(neo.Fi.ID)
 		public.FinancialInstrument.APIURL = mapper.APIURL(neo.Fi.ID, neo.Fi.Types, env)
 		public.FinancialInstrument.Types = mapper.TypeURIs(neo.Fi.Types)
@@ -353,7 +314,7 @@ func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 
 	if neo.Parent.ID != "" {
 		public.Parent = &Parent{}
-		public.Parent.Thing = &Thing{}
+		public.Parent.Thing = Thing{}
 		public.Parent.ID = mapper.IDURL(neo.Parent.ID)
 		public.Parent.APIURL = mapper.APIURL(neo.Parent.ID, neo.Parent.Types, env)
 		public.Parent.Types = mapper.TypeURIs(neo.Parent.Types)
@@ -367,7 +328,7 @@ func neoReadStructToOrganisation(neo neoReadStruct, env string) Organisation {
 		public.Subsidiaries = make([]Subsidiary, len(neo.Sub))
 		for idx, neoSub := range neo.Sub {
 			subsidiary := Subsidiary{}
-			subsidiary.Thing = &Thing{}
+			subsidiary.Thing = Thing{}
 			subsidiary.ID = mapper.IDURL(neoSub.ID)
 			subsidiary.APIURL = mapper.APIURL(neoSub.ID, neoSub.Types, env)
 			subsidiary.Types = mapper.TypeURIs(neoSub.Types)
