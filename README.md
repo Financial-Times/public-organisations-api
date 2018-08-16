@@ -1,6 +1,8 @@
 # Public API for Organisation (public-organisation-api)
 __Provides a public API for Organisation stored in a Neo4J graph database__
 
+Organisations are being migrated to be served from the new [Public Concepts API](https://github.com/Financial-Times/public-concepts-api) and as such this API will eventually be deprecated. From July 2018 requests to this service will be redirected via the concepts api then transformed to match the existing contract and returned.
+
 ## Build & deployment etc:
 _NB You will need to create a tagged release in order to build
 * [Build and Deploy](https://upp-k8s-jenkins.in.ft.com/job/k8s-deployment/job/apps-deployment/job/public-organisations-api-auto-deploy/)
