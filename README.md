@@ -27,7 +27,8 @@ Or using [httpie](https://github.com/jkbrzt/httpie)
 * `http GET http://localhost:8080/organisation/143ba45c-2fb3-35bc-b227-a6ed80b5c517`
 
 ## API definition
-Based on the following [google doc](https://docs.google.com/document/d/1SC4Uskl-VD78y0lg5H2Gq56VCmM4OFHofZM-OvpsOFo/edit#heading=h.qjo76xuvpj83)
+* Based on the following [google doc](https://docs.google.com/document/d/1SC4Uskl-VD78y0lg5H2Gq56VCmM4OFHofZM-OvpsOFo/edit#heading=h.qjo76xuvpj83)
+* See the [api](_ft/api.yml) Swagger file for endpoints definitions
 
 ## Healthchecks
 Healthchecks: [http://localhost:8080/__health](http://localhost:8080/__health)
