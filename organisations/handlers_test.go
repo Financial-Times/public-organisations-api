@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/Financial-Times/go-logger"
-	"github.com/gorilla/mux"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/Financial-Times/go-logger"
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -111,6 +112,16 @@ func TestHandlers(t *testing.T) {
 		`{"message": "organisation not found"}`,
 	}
 
+	deprecatedConcept := testCase{
+		"Get organisation - Retrieves and transforms correctly a deprecated organisation",
+		"/organisations/6fc8fbac-b4ee-11e8-a790-6c96cfdf3997",
+		200,
+		getCompleteDeprecatedOrganisationAsConcept,
+		nil,
+		200,
+		getTransformedCompleteDeprecatedOrganisation,
+	}
+
 	successfulRequest := testCase{
 		"Get organisation - Retrieves and transforms correctly",
 		"/organisations/7c5218a0-3755-463e-abbc-1a1632cfd1da",
@@ -129,6 +140,7 @@ func TestHandlers(t *testing.T) {
 		notFound,
 		nonOrganisationsReturnsNotFound,
 		successfulRequest,
+		deprecatedConcept,
 	}
 
 	for _, test := range testCases {
@@ -342,4 +354,147 @@ var getTransformedCompleteOrganisation = `{
 		"directType":"http://www.ft.com/ontology/FinancialInstrument",
 		"FIGI":"BBG000BLCPP4"
 	}
+}`
+
+var getCompleteDeprecatedOrganisationAsConcept = `{
+	"id": "http://www.ft.com/thing/6fc8fbac-b4ee-11e8-a790-6c96cfdf3997",
+	"apiUrl": "http://api.ft.com/concepts/6fc8fbac-b4ee-11e8-a790-6c96cfdf3997",
+	"type": "http://www.ft.com/ontology/organisation/Organisation",
+	"prefLabel": "Nintendo Co Ltd",
+	"alternativeLabels": [
+		{
+			"type": "http://www.ft.com/ontology/formerName",
+			"value": "Nintendo Playing Card Co., Ltd."
+		},
+		{
+			"type": "http://www.ft.com/ontology/properName",
+			"value": "Nintendo Co., Ltd."
+		},
+		{
+			"type": "http://www.ft.com/ontology/shortName",
+			"value": "Nintendo"
+		},
+		{
+			"type": "http://www.ft.com/ontology/hiddenLabel",
+			"value": "NINTENDO CO., LTD."
+		}
+	],
+	"countryCode": "JP",
+	"countryOfIncorporation": "JP",
+	"leiCode": "353800FEEXU6I9M0ZF27",
+	"postalCode": "601-8116",
+	"yearFounded": 1889,
+	"isDeprecated": true,
+	"relatedConcepts": [
+		{
+			"concept": {
+				"id": "http://api.ft.com/things/dfee4b8f-ceee-37ba-ab24-752cf7a9281c",
+				"apiUrl": "http://api.ft.com/concepts/dfee4b8f-ceee-37ba-ab24-752cf7a9281c",
+				"type": "http://www.ft.com/ontology/FinancialInstrument",
+				"prefLabel": "Nintendo Co., Ltd.",
+				"alternativeLabels": [
+					{
+						"type": "http://www.ft.com/ontology/Alias",
+						"value": "Nintendo Co., Ltd."
+					}
+				],
+				"figiCode": "BBG000BLCPP4"
+			},
+			"predicate": "http://www.ft.com/ontology/issued"
+		},
+		{
+			"concept": {
+				"id": "http://api.ft.com/things/335e9e5a-8f2e-11e8-8f42-da24cd01f044",
+				"apiUrl": "http://api.ft.com/organisations/335e9e5a-8f2e-11e8-8f42-da24cd01f044",
+				"type": "http://www.ft.com/ontology/organisation/Organisation",
+				"prefLabel": "Alphabet Inc",
+				"countryCode": "US",
+				"countryOfIncorporation": "US",
+				"postalCode": "94043",
+				"yearFounded": 2015
+			},
+			"predicate": "http://www.ft.com/ontology/subOrganisationOf"
+		},
+		{
+			"concept": {
+				"id": "http://api.ft.com/things/1b070fbb-6331-3225-bb57-9108deb67df4",
+				"apiUrl": "http://api.ft.com/concepts/1b070fbb-6331-3225-bb57-9108deb67df4",
+				"type": "http://www.ft.com/ontology/organisation/Organisation",
+				"prefLabel": "Nintendo France SARL",
+				"alternativeLabels": [
+					{
+						"type": "http://www.ft.com/ontology/Alias",
+						"value": "Nintendo France SARL"
+					}
+				],
+				"countryOfIncorporation": "FR",
+				"postalCode": "95031"
+			},
+			"predicate": "http://www.ft.com/ontology/parentOrganisationOf"
+		}
+	]
+}`
+
+var getTransformedCompleteDeprecatedOrganisation = `{
+	"id":"http://api.ft.com/things/6fc8fbac-b4ee-11e8-a790-6c96cfdf3997",
+	"apiUrl":"http://api.ft.com/organisations/6fc8fbac-b4ee-11e8-a790-6c96cfdf3997",
+	"prefLabel":"Nintendo Co Ltd",
+	"properName":"Nintendo Co., Ltd.",
+	"shortName":"Nintendo",
+	"hiddenLabel":"NINTENDO CO., LTD.",
+	"formerNames":["Nintendo Playing Card Co., Ltd."],
+	"countryCode":"JP",
+	"countryOfIncorporation":"JP",
+	"postalCode":"601-8116",
+	"yearFounded":1889,
+	"types":[
+		"http://www.ft.com/ontology/core/Thing",
+		"http://www.ft.com/ontology/concept/Concept",
+		"http://www.ft.com/ontology/organisation/Organisation"
+	],
+	"directType":"http://www.ft.com/ontology/organisation/Organisation",
+	"labels":[
+		"Nintendo Playing Card Co., Ltd.",
+		"Nintendo Co., Ltd.",
+		"Nintendo",
+		"NINTENDO CO., LTD."
+	],
+	"leiCode":"353800FEEXU6I9M0ZF27",
+	"parentOrganisation":{
+		"id":"http://api.ft.com/things/335e9e5a-8f2e-11e8-8f42-da24cd01f044",
+		"apiUrl":"http://api.ft.com/organisations/335e9e5a-8f2e-11e8-8f42-da24cd01f044",
+		"prefLabel":"Alphabet Inc",
+		"types":[
+			"http://www.ft.com/ontology/core/Thing",
+			"http://www.ft.com/ontology/concept/Concept",
+			"http://www.ft.com/ontology/organisation/Organisation"
+		],
+		"directType":"http://www.ft.com/ontology/organisation/Organisation"
+	},
+	"subsidiaries":[
+		{
+			"id":"http://api.ft.com/things/1b070fbb-6331-3225-bb57-9108deb67df4",
+			"apiUrl":"http://api.ft.com/organisations/1b070fbb-6331-3225-bb57-9108deb67df4",
+			"prefLabel":"Nintendo France SARL",
+			"types":[
+				"http://www.ft.com/ontology/core/Thing",
+				"http://www.ft.com/ontology/concept/Concept",
+				"http://www.ft.com/ontology/organisation/Organisation"
+			],
+			"directType":"http://www.ft.com/ontology/organisation/Organisation"
+		}
+	],
+	"financialInstrument":{
+		"id":"http://api.ft.com/things/dfee4b8f-ceee-37ba-ab24-752cf7a9281c",
+		"apiUrl":"http://api.ft.com/things/dfee4b8f-ceee-37ba-ab24-752cf7a9281c",
+		"prefLabel":"Nintendo Co., Ltd.",
+		"types":[
+			"http://www.ft.com/ontology/core/Thing",
+			"http://www.ft.com/ontology/concept/Concept",
+			"http://www.ft.com/ontology/FinancialInstrument"
+		],
+		"directType":"http://www.ft.com/ontology/FinancialInstrument",
+		"FIGI":"BBG000BLCPP4"
+	},
+	"isDeprecated":true
 }`

@@ -225,6 +225,7 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 	org.CountryOfIncorporation = conceptsApiResponse.CountryOfIncorporation
 	org.LegalEntityIdentifier = conceptsApiResponse.LeiCode
 	org.YearFounded = conceptsApiResponse.YearFounded
+	org.IsDeprecated = conceptsApiResponse.IsDeprecated
 
 	formerNames := []string{}
 	m := make(map[string]bool)

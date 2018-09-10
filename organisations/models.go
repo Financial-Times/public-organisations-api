@@ -45,6 +45,7 @@ type Organisation struct {
 	Parent                 *Parent              `json:"parentOrganisation,omitempty"`
 	Subsidiaries           []Subsidiary         `json:"subsidiaries,omitempty"`
 	FinancialInstrument    *FinancialInstrument `json:"financialInstrument,omitempty"`
+	IsDeprecated           bool                 `json:"isDeprecated,omitempty"`
 }
 
 // Parent is a simplified representation of a parent organisation, used in Organisation API
@@ -86,6 +87,7 @@ type ConceptApiResponse struct {
 	PostalCode             string           `json:"postalCode,omitempty"`
 	YearFounded            int              `json:"yearFounded,omitempty"`
 	AlternativeLabels      []TypedValue     `json:"alternativeLabels,omitempty"`
+	IsDeprecated           bool             `json:"isDeprecated,omitempty"`
 }
 
 type RelatedConcept struct {
