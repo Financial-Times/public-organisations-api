@@ -1,0 +1,118 @@
+swagger: "2.0"
+info:
+  description: "Public Organisations API gives access to the UPP representation of a organisation"
+  version: "2.0.1"
+  title: "Public Organisations API"
+  contact:
+    name: Universal Publishing
+    email: Universal.Publishing.Platform@ft.com
+  license:
+    name: Apache-2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0
+host: api.ft.com
+schemes:
+  - https
+basePath: /
+paths:
+  /organisations/{uuid}:
+    get:
+      summary: Retrieves an Organisation for the given UUID.
+      description: Using the UUID extracted from the url is used for searching the wanted organisation.
+      tags:
+        - Public API
+      produces:
+        - application/json; charset=UTF-8
+      parameters:
+        - in: path
+          name: uuid
+          type: string
+          required: true
+          x-example: 100483aa-47c3-41c9-9f53-9a5aa5450fd3
+          description: UUID of an organisation
+      responses:
+        200:
+          description: Returns the Organisation concept if it's found.
+          examples:
+            application/json; charset=UTF-8:
+              id: http://api.ft.com/things/100483aa-47c3-41c9-9f53-9a5aa5450fd3
+              apiUrl: http://api.ft.com/organisations/100483aa-47c3-41c9-9f53-9a5aa5450fd3
+              prefLabel: The Spot
+              properName: The Spot Co. Ltd.
+              countryOfIncorporation: GB
+              types:
+              - http://www.ft.com/ontology/core/Thing
+              - http://www.ft.com/ontology/concept/Concept
+              - http://www.ft.com/ontology/organisation/Organisation
+              directType: http://www.ft.com/ontology/organisation/Organisation
+              labels:
+              - The Spot Co. Ltd.
+              - The Spot
+        400:
+          description: Bad request if the uuid path parameter has an unexpected format.
+        404:
+          description: Not Found if there is no organisation record found for the given uuid.
+        500:
+          description: Internal Server Error if there was an issue processing the records.
+        503:
+          description: Service Unavailable if the communication with downstream services cannot be performed.
+
+  /__health:
+    get:
+      summary: Healthchecks
+      description: Runs application healthchecks and returns FT Healthcheck style json.
+      produces:
+        - application/json
+      tags:
+        - Health
+      responses:
+        200:
+          description: Should always return 200 along with the output of the healthchecks - regardless of whether the healthchecks failed or not. Please inspect the overall `ok` property to see whether or not the application is healthy.
+          examples:
+            application/json:
+              checks:
+                - businessImpact: "No Business Impact."
+                  checkOutput: "OK"
+                  lastUpdated: "2018-09-04T07:54:23.117495772Z"
+                  name: "Neo4j Connectivity"
+                  ok: true
+                  panicGuide: "https://dewey.in.ft.com/view/system/public-brands-api"
+                  severity: 1
+                  technicalSummary: "Cannot connect to Neo4j. If this check fails, check that the Neo4J cluster is responding.  "
+              description: "Public API for serving information on Brands within UPP"
+              name: "Public Brands API"
+              ok: true
+              schemaVersion: 1
+
+
+
+  /__build-info:
+    get:
+      summary: Build Information
+      description: Returns application build info, such as the git repository and revision, the golang version it was built with, and the app release version.
+      produces:
+       - application/json; charset=UTF-8
+      tags:
+        - Info
+      responses:
+        200:
+          description: Outputs build information as described in the summary.
+          examples:
+            application/json; charset=UTF-8:
+              version: 2.0.0
+              repository: https://github.com/Financial-Times/public-organisations-api.git
+              revision: c5c39c45eee2bf50fc68f8507a47acb91a14edd5
+              builder: go version go1.10.3 linux/amd64
+              dateTime: '20180808122759'
+
+
+  /__gtg:
+    get:
+      summary: Good To Go
+      description: Lightly healthchecks the application, and returns a 200 if it's Good-To-Go.
+      tags:
+        - Health
+      responses:
+        200:
+           description: The application is healthy enough to perform all its functions correctly - i.e. good to go.
+        503:
+           description: See the /__health endpoint for more detailed information.

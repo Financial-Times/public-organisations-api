@@ -53,6 +53,40 @@ jobs:
       - run:
           name: Build Dockerfile
           command: docker build .
+  dredd:
+    working_directory: /go/src/github.com/Financial-Times/public-organisations-api
+    docker:
+      - image: bankrs/golang-dredd:go1.10.0-dredd5.0.0
+        environment:
+          GOPATH: /go
+          CONCEPTS_API: http://localhost:9000
+      - image: peteclarkft/ersatz:stable
+      - image: neo4j:3.2.2-enterprise
+        environment:
+          NEO4J_AUTH: none
+          NEO4J_HEAP_MEMORY: 256
+          NEO4J_CACHE_MEMORY: 256M
+    steps:
+      - checkout
+      - run:
+          name: External Dependencies
+          command: |
+            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+            go get -u github.com/mattn/goveralls
+            go get -u github.com/jstemmer/go-junit-report
+      - run:
+          name: Load ersatz-fixtures.yml to ersatz image
+          command: "curl -X POST --data-binary @_ft/ersatz-fixtures.yml -H \"Content-type: text/x-yaml\" http://localhost:9000/__configure"
+      - run:
+          name: Import libraries
+          command: dep ensure -v -vendor-only
+      - run:
+          name: Go Build
+          command: go build -v
+      - run:
+          name: Dredd API Testing
+          command: dredd
+
 #  loadtest:
 #    working_directory: /go/src/github.com/Financial-Times/public-organisations-api
 #    docker:
