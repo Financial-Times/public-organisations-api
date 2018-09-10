@@ -172,6 +172,7 @@ workflows:
   tests_and_docker:
     jobs:
       - build
+      - dredd
       - docker_build:
           requires:
             - build
