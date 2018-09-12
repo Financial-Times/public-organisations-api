@@ -121,7 +121,7 @@ func runServer(port string, cacheDuration string, env string, publicConceptsApiU
 		HealthCheck: fthealth.HealthCheck{
 			SystemCode:  "public-org-api",
 			Name:        "PublicOrganisationsRead Healthcheck",
-			Description: "Checks for accessing neo4j",
+			Description: "Checks for the downstream services' health",
 			Checks:      []fthealth.Check{handler.HealthCheck()},
 		},
 		Timeout: 10 * time.Second,
