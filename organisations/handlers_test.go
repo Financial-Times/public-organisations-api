@@ -15,16 +15,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var (
-	server           *httptest.Server
-	organisationsURL string
-	isFound          bool
-)
-
 const (
 	expectedCacheControlHeader string = "special header"
-	canonicalUUID              string = "00000000-0000-002a-0000-00000000002a"
-	alternateUUID              string = "00000000-0000-002a-0000-00000000002b"
 )
 
 type mockHTTPClient struct {
