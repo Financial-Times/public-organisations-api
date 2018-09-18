@@ -1,0 +1,28 @@
+version: "1.0.0"
+fixtures:
+  /concepts/100483aa-47c3-41c9-9f53-9a5aa5450fd3:
+    get:
+      status: 200
+      produces:
+        - application/json
+      headers:
+        content-type: application/json
+      body:
+        id: http://www.ft.com/thing/100483aa-47c3-41c9-9f53-9a5aa5450fd3
+        apiUrl: http://api.ft.com/concepts/100483aa-47c3-41c9-9f53-9a5aa5450fd3
+        type: http://www.ft.com/ontology/organisation/Organisation
+        prefLabel: The Spot
+        alternativeLabels:
+        - type: http://www.w3.org/2008/05/skos-xl#altLabel
+          value: The Spot Co. Ltd.
+        - type: http://www.w3.org/2008/05/skos-xl#altLabel
+          value: The Spot
+        - type: http://www.ft.com/ontology/properName
+          value: The Spot Co. Ltd.
+        countryOfIncorporation: GB
+  /__health:
+    get:
+      status: 200
+  /__gtg:
+    get:
+      status: 200

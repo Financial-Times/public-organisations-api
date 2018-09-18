@@ -27,7 +27,6 @@ type OrganisationsHandler struct {
 }
 
 // OrganisationDriver for cypher queries
-var OrganisationDriver Driver
 var CacheControlHeader string
 
 const (
@@ -64,23 +63,37 @@ func (h *OrganisationsHandler) RegisterHandlers(router *mux.Router) {
 // HealthCheck does something
 func (h *OrganisationsHandler) HealthCheck() fthealth.Check {
 	return fthealth.Check{
-		ID:               "neo4j-check",
+		ID:               "public-concepts-api-check",
 		BusinessImpact:   "Unable to respond to Public Organisations api requests",
-		Name:             "Check connectivity to Neo4j",
+		Name:             "Check connectivity to public-concepts-api",
 		PanicGuide:       "https://dewey.ft.com/public-org-api.html",
 		Severity:         2,
-		TechnicalSummary: "Cannot connect to Neo4j a instance with at least one organisation loaded in it",
+		TechnicalSummary: "Not being able to communicate with public-concepts-api means that requests for organisations cannot be performed.",
 		Checker:          h.Checker,
 	}
 }
 
 // Checker does more stuff
 func (h *OrganisationsHandler) Checker() (string, error) {
-	err := OrganisationDriver.CheckConnectivity()
-	if err == nil {
-		return "Connectivity to neo4j is ok", err
+	req, err := http.NewRequest("GET", h.conceptsURL+"/__gtg", nil)
+	if err != nil {
+		return "", err
 	}
-	return "Error connecting to neo4j", err
+
+	req.Header.Add("User-Agent", "UPP public-organisations-api")
+
+	resp, err := h.client.Do(req)
+	if err != nil {
+		return "", err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("health check returned a non-200 HTTP status: %v", resp.StatusCode)
+	}
+	return "Public Concepts API is healthy", nil
+
 }
 
 // Ping says pong
@@ -212,6 +225,7 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 	org.CountryOfIncorporation = conceptsApiResponse.CountryOfIncorporation
 	org.LegalEntityIdentifier = conceptsApiResponse.LeiCode
 	org.YearFounded = conceptsApiResponse.YearFounded
+	org.IsDeprecated = conceptsApiResponse.IsDeprecated
 
 	formerNames := []string{}
 	m := make(map[string]bool)

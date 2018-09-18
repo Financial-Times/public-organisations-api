@@ -9,7 +9,6 @@ import (
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 	"github.com/Financial-Times/go-logger"
 	"github.com/Financial-Times/http-handlers-go/httphandlers"
-	"github.com/Financial-Times/neo-utils-go/neoutils"
 	"github.com/Financial-Times/public-organisations-api/organisations"
 	status "github.com/Financial-Times/service-status-go/httphandlers"
 
@@ -40,12 +39,6 @@ func main() {
 		Value:  "public-organisation-api",
 		Desc:   "System Code of the application",
 		EnvVar: "APP_SYSTEM_CODE",
-	})
-	neoURL := app.String(cli.StringOpt{
-		Name:   "neo-url",
-		Value:  "http://localhost:7474/db/data",
-		Desc:   "neo4j endpoint URL",
-		EnvVar: "NEO_URL",
 	})
 	port := app.String(cli.StringOpt{
 		Name:   "port",
@@ -101,8 +94,8 @@ func main() {
 	app.Action = func() {
 		baseftrwapp.OutputMetricsIfRequired(*graphiteTCPAddress, *graphitePrefix, *logMetrics)
 
-		log.Infof("public-organisations-api will listen on port: %s, connecting to: %s", *port, *neoURL)
-		runServer(*neoURL, *port, *cacheDuration, *env, *publicConceptsApiURL)
+		log.Infof("public-organisations-api will listen on port: %s", *port)
+		runServer(*port, *cacheDuration, *env, *publicConceptsApiURL)
 
 	}
 	log.SetFormatter(&log.TextFormatter{DisableColors: true})
@@ -111,32 +104,13 @@ func main() {
 	app.Run(os.Args)
 }
 
-func runServer(neoURL string, port string, cacheDuration string, env string, publicConceptsApiURL string) {
+func runServer(port string, cacheDuration string, env string, publicConceptsApiURL string) {
 
 	if duration, durationErr := time.ParseDuration(cacheDuration); durationErr != nil {
 		log.Fatalf("Failed to parse cache duration string, %v", durationErr)
 	} else {
 		organisations.CacheControlHeader = fmt.Sprintf("max-age=%s, public", strconv.FormatFloat(duration.Seconds(), 'f', 0, 64))
 	}
-
-	conf := neoutils.ConnectionConfig{
-		BatchSize:     1024,
-		Transactional: false,
-		HTTPClient: &http.Client{
-			Transport: &http.Transport{
-				MaxIdleConnsPerHost: 100,
-			},
-			Timeout: 1 * time.Minute,
-		},
-		BackgroundConnect: true,
-	}
-	db, err := neoutils.Connect(neoURL, &conf)
-
-	if err != nil {
-		log.Fatalf("Error connecting to neo4j %s", err)
-	}
-
-	organisations.OrganisationDriver = organisations.NewCypherDriver(db, env)
 
 	servicesRouter := mux.NewRouter()
 
@@ -147,7 +121,7 @@ func runServer(neoURL string, port string, cacheDuration string, env string, pub
 		HealthCheck: fthealth.HealthCheck{
 			SystemCode:  "public-org-api",
 			Name:        "PublicOrganisationsRead Healthcheck",
-			Description: "Checks for accessing neo4j",
+			Description: "Checks for the downstream services' health",
 			Checks:      []fthealth.Check{handler.HealthCheck()},
 		},
 		Timeout: 10 * time.Second,

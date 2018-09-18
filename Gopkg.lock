@@ -14,22 +14,10 @@
   version = "1.0.3"
 
 [[projects]]
-  name = "github.com/Financial-Times/concepts-rw-neo4j"
-  packages = ["concepts"]
-  revision = "b59be137da38b2ce65b7f085b9d572b370419fc1"
-  version = "1.8.0"
-
-[[projects]]
-  name = "github.com/Financial-Times/financial-instruments-rw-neo4j"
-  packages = ["financialinstruments"]
-  revision = "2dd53f7729a145e8e491cf327aa0efdbcf5351bf"
-  version = "0.0.9"
-
-[[projects]]
   name = "github.com/Financial-Times/go-fthealth"
   packages = ["v1_1"]
-  revision = "1b007e2b37b7936dfb6671fa17e5a29fd35a08ea"
-  version = "0.4.0"
+  revision = "3d8eb430d5b5e1f3a3c53e817504e796a7d6cc9f"
+  version = "0.5.0"
 
 [[projects]]
   name = "github.com/Financial-Times/go-logger"
@@ -44,12 +32,6 @@
   version = "0.1.2"
 
 [[projects]]
-  name = "github.com/Financial-Times/memberships-rw-neo4j"
-  packages = ["memberships"]
-  revision = "8fdd9e058d262aa2676b40af8475218ad21bb246"
-  version = "2.0.1"
-
-[[projects]]
   name = "github.com/Financial-Times/neo-model-utils-go"
   packages = ["mapper"]
   revision = "aea1e95c83055aaed6761c5e546400dd383fb220"
@@ -58,26 +40,8 @@
 [[projects]]
   name = "github.com/Financial-Times/neo-utils-go"
   packages = ["neoutils"]
-  revision = "bbb7b5cc0660864223be41a599f6339d41e52fba"
-  version = "1.0.3"
-
-[[projects]]
-  name = "github.com/Financial-Times/organisations-rw-neo4j"
-  packages = ["organisations"]
-  revision = "133edf7e4483acc6143a3e70a1c4707cd336056e"
-  version = "0.6.0"
-
-[[projects]]
-  name = "github.com/Financial-Times/people-rw-neo4j"
-  packages = ["people"]
-  revision = "057a4f5e85be738dc73930a7a45244b2bcc27860"
-  version = "2.0.2"
-
-[[projects]]
-  name = "github.com/Financial-Times/roles-rw-neo4j"
-  packages = ["roles"]
-  revision = "756d7ae8b40e01ff3a3371e26bc4001f6423bb86"
-  version = "0.2.0"
+  revision = "1fe6ae2f38f38429be7b7d37252db41df5576cdd"
+  version = "1.0.4"
 
 [[projects]]
   name = "github.com/Financial-Times/service-status-go"
@@ -103,12 +67,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/bradfitz/slice"
-  packages = ["."]
-  revision = "d9036e2120b5ddfa53f3ebccd618c4af275f47da"
-
-[[projects]]
-  branch = "master"
   name = "github.com/cyberdelia/go-metrics-graphite"
   packages = ["."]
   revision = "39f87cc3b432bbb898d7c643c0e93cac2bc865ad"
@@ -116,8 +74,8 @@
 [[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
-  revision = "346938d642f2ec3594ed81d874461961cd0faa76"
-  version = "v1.1.0"
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
 
 [[projects]]
   name = "github.com/gorilla/context"
@@ -128,8 +86,8 @@
 [[projects]]
   name = "github.com/gorilla/handlers"
   packages = ["."]
-  revision = "90663712d74cb411cbef281bc1e08c19d1a76145"
-  version = "v1.3.0"
+  revision = "7e0847f9db758cdebd26c149d0ae9d5d0b9c98ce"
+  version = "v1.4.0"
 
 [[projects]]
   name = "github.com/gorilla/mux"
@@ -138,10 +96,10 @@
   version = "v1.6.2"
 
 [[projects]]
-  branch = "master"
   name = "github.com/hashicorp/go-version"
   packages = ["."]
-  revision = "270f2f71b1ee587f3b609f00f422b76a6b28f348"
+  revision = "b5a281d3160aa11950a6182bd9a9dc2cb1e02d50"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/jawher/mow.cli"
@@ -159,10 +117,10 @@
   version = "v1.0.4"
 
 [[projects]]
-  branch = "master"
   name = "github.com/jmcvetta/neoism"
   packages = ["."]
-  revision = "4674154f870d19b356581843f481dccd6792dcc0"
+  revision = "c37ec30845b63d9f168f55e837c787e08a15e9a6"
+  version = "v1.3.1"
 
 [[projects]]
   branch = "master"
@@ -183,12 +141,6 @@
   version = "v0.1.0"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/mitchellh/hashstructure"
-  packages = ["."]
-  revision = "2bca23e0e452137f789efbc8610126fd8b94f73b"
-
-[[projects]]
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
@@ -203,56 +155,32 @@
 [[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
-  version = "v1.0.5"
-
-[[projects]]
-  name = "github.com/spaolacci/murmur3"
-  packages = ["."]
-  revision = "9f5d223c60793748f04a9d5b4b4eacddfc1f755d"
-  version = "v1.1"
-
-[[projects]]
-  name = "github.com/stretchr/objx"
-  packages = ["."]
-  revision = "477a77ecc69700c7cdeb1fa9e129548e1c1c393c"
-  version = "v0.1.1"
+  revision = "3e01752db0189b9157070a0e1668a620f9a85da2"
+  version = "v1.0.6"
 
 [[projects]]
   name = "github.com/stretchr/testify"
-  packages = [
-    "assert",
-    "mock"
-  ]
+  packages = ["assert"]
   revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
   version = "v1.2.2"
 
 [[projects]]
-  name = "github.com/ugorji/go"
-  packages = ["codec"]
-  revision = "b4c50a2b199d93b13dc15e78929cfb23bfdf21ab"
-  version = "v1.1.1"
-
-[[projects]]
   branch = "master"
   name = "go4.org"
-  packages = [
-    "osutil",
-    "reflectutil"
-  ]
-  revision = "9599cf28b011184741f249bd9f9330756b506cbc"
+  packages = ["osutil"]
+  revision = "417644f6feb5ed3a356ca5d6d8e3a3fac7dfd33f"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "a2144134853fc9a27a7b1e3eb4f19f1a76df13c9"
+  revision = "0709b304e793a5edb4a2c0145f281ecdc20838a4"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
   packages = ["context"]
-  revision = "d0887baf81f4598189d4e12a37c6da86f0bba4d0"
+  revision = "161cd47e91fd58ac17490ef4d742dc98bb4cf60e"
 
 [[projects]]
   branch = "master"
@@ -261,7 +189,7 @@
     "unix",
     "windows"
   ]
-  revision = "ac767d655b305d4e9612f5f6e33120b9176c4ad4"
+  revision = "d0be0721c37eeb5299f245a996a483160fc36940"
 
 [[projects]]
   name = "gopkg.in/jmcvetta/napping.v3"
@@ -278,6 +206,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1fcd65447887a3ac911dacdbf1cb995225b7de7b3e30f42a28b2483b7a271e14"
+  inputs-digest = "d9b0bfc2e4f1cb8a4458b2f22f85483bf9c3ef4453c9c0adb83af4781ee55c0d"
   solver-name = "gps-cdcl"
   solver-version = 1
