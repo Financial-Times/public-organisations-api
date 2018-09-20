@@ -33,15 +33,6 @@ spec:
         image: "{{ .Values.image.repository }}:{{ .Chart.Version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
-          - name: GRAPHITE_ADDRESS
-            valueFrom:
-              configMapKeyRef:
-                name: global-config
-                key: graphite.address
-          - name: GRAPHITE_PREFIX
-            value: "coco.services.k8s.{{ .Values.service.name }}"
-          - name: LOG_METRICS
-            value: "{{ .Values.env.LOG_METRICS }}"
           - name: CACHE_DURATION
             value: {{ .Values.env.CACHE_DURATION }}
           - name: APP_PORT
