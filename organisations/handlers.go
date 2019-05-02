@@ -199,12 +199,15 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 
 	conceptsApiResponse := ConceptApiResponse{}
 	body, err := ioutil.ReadAll(resp.Body)
-	defer resp.Body.Close()
+
 	if err != nil {
 		msg := fmt.Sprintf("failed to read response body: %v", resp.Body)
 		logger.WithError(err).WithUUID(uuid).WithTransactionID(transID).Error(msg)
 		return org, false, err
 	}
+
+	defer resp.Body.Close()
+
 	if err = json.Unmarshal(body, &conceptsApiResponse); err != nil {
 		msg := fmt.Sprintf("failed to unmarshal response body: %v", body)
 		logger.WithError(err).WithUUID(uuid).WithTransactionID(transID).Error(msg)
