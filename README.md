@@ -9,14 +9,12 @@ _NB You will need to create a tagged release in order to build
 
 
 ## Installation & running locally
-* `go get -u github.com/Financial-Times/public-organisation-api`
-* `cd $GOPATH/src/github.com/Financial-Times/public-organisation-api`
+        go get -u github.com/Financial-Times/public-organisation-api
+        cd $GOPATH/src/github.com/Financial-Times/public-organisation-api
+        dep ensure -v -vendor-only
+        go test ./...
+        go install
 
-* `go get github.com/kardianos/govendor`
-* `govendor sync`
-
-* `go test ./...`
-* `go install`
 * `$GOPATH/bin/public-organisation-api --neo-url={neo4jUrl} --port={port} --log-level={DEBUG|INFO|WARN|ERROR} --cache-duration{e.g. 22h10m3s}`
 _Optional arguments are:
 --neo-url defaults to http://localhost:7474/db/data, which is the out of box url for a local neo4j instance.
