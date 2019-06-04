@@ -6,7 +6,7 @@ import (
 	"os"
 
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
-	"github.com/Financial-Times/go-logger"
+	logger "github.com/Financial-Times/go-logger"
 	"github.com/Financial-Times/http-handlers-go/httphandlers"
 	"github.com/Financial-Times/public-organisations-api/organisations"
 	status "github.com/Financial-Times/service-status-go/httphandlers"
@@ -16,8 +16,8 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/jawher/mow.cli"
-	"github.com/rcrowley/go-metrics"
+	cli "github.com/jawher/mow.cli"
+	metrics "github.com/rcrowley/go-metrics"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -32,7 +32,7 @@ var httpClient = http.Client{
 }
 
 func main() {
-	app := cli.App("public-organisations-api-neo4j", "A public RESTful API for accessing organisations in neo4j")
+	app := cli.App("public-organisations-api", "A public RESTful API for accessing organisations in Neo4j")
 	appSystemCode := app.String(cli.StringOpt{
 		Name:   "app-system-code",
 		Value:  "public-organisation-api",
@@ -64,7 +64,7 @@ func main() {
 	})
 	publicConceptsApiURL := app.String(cli.StringOpt{
 		Name:   "publicConceptsApiURL",
-		Value:  "http://localhost:8080",
+		Value:  "http://localhost:8081",
 		Desc:   "Public concepts API endpoint URL.",
 		EnvVar: "CONCEPTS_API",
 	})
