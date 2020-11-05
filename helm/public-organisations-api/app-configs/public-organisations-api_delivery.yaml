@@ -1,7 +1,0 @@
-# Values used for the deployed application.
-replicaCount: 2
-service:
-  name: public-organisations-api
-env:
-  CACHE_DURATION: 24h
-  APP_PORT: 8080
