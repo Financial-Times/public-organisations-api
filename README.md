@@ -49,3 +49,4 @@ Healthchecks: [http://localhost:8080/__health](http://localhost:8080/__health)
  
  NOTE: The `/__build-info` and `/__gtg` endpoints are not logged as they are called very often from the healthchecking services and this information is not needed in the logs or Splunk.
 
+test
