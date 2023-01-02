@@ -11,3 +11,4 @@ Compiled source #
 *.vscode
 *.iml
 vendor/*/
+.git/
