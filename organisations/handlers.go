@@ -8,9 +8,9 @@ import (
 	"regexp"
 	"strings"
 
+	ontology "github.com/Financial-Times/cm-graph-ontology"
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 	logger "github.com/Financial-Times/go-logger"
-	"github.com/Financial-Times/neo-model-utils-go/mapper"
 	"github.com/Financial-Times/service-status-go/gtg"
 	transactionidutils "github.com/Financial-Times/transactionid-utils-go"
 	"github.com/gorilla/handlers"
@@ -158,7 +158,7 @@ func (h *OrganisationsHandler) GetOrganisation(w http.ResponseWriter, r *http.Re
 	}
 }
 
-//GoodToGo returns a 503 if the healthcheck fails - suitable for use from varnish to check availability of a node
+// GoodToGo returns a 503 if the healthcheck fails - suitable for use from varnish to check availability of a node
 func (h *OrganisationsHandler) GTG() gtg.Status {
 	statusCheck := func() gtg.Status {
 		return gtgCheck(h.Checker)
@@ -174,6 +174,7 @@ func gtgCheck(handler func() (string, error)) gtg.Status {
 }
 
 func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transID string) (organisation Organisation, found bool, err error) {
+	log := logger.WithTransactionID(transID).WithUUID(uuid)
 	org := Organisation{}
 
 	reqURL := h.conceptsURL + "/concepts/" + uuid + relatedQueryParam
@@ -182,7 +183,7 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 
 	if err != nil {
 		msg := fmt.Sprintf("failed to create request to %s", reqURL)
-		logger.WithError(err).WithUUID(uuid).WithTransactionID(transID).Error(msg)
+		log.WithError(err).Error(msg)
 		return org, false, err
 	}
 
@@ -190,7 +191,7 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 	resp, err := h.client.Do(request)
 	if err != nil {
 		msg := fmt.Sprintf("request to %s was unsuccessful", reqURL)
-		logger.WithError(err).WithUUID(uuid).WithTransactionID(transID).Error(msg)
+		log.WithError(err).Error(msg)
 		return org, false, err
 	}
 	defer resp.Body.Close()
@@ -204,25 +205,31 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 
 	if err != nil {
 		msg := fmt.Sprintf("failed to read response body: %v", resp.Body)
-		logger.WithError(err).WithUUID(uuid).WithTransactionID(transID).Error(msg)
+		log.WithError(err).Error(msg)
 		return org, false, err
 	}
 
 	if err = json.Unmarshal(body, &conceptsApiResponse); err != nil {
 		msg := fmt.Sprintf("failed to unmarshal response body: %v", body)
-		logger.WithError(err).WithUUID(uuid).WithTransactionID(transID).Error(msg)
+		log.WithError(err).Error(msg)
 		return org, false, err
 	}
 
 	if conceptsApiResponse.Type != ontologyPrefix+organisationSuffix && conceptsApiResponse.Type != ontologyPrefix+publicCompanySuffix {
-		logger.WithTransactionID(transID).WithUUID(uuid).Info("requested concept is not a organisation")
+		log.Info("requested concept is not a organisation")
 		return org, false, nil
+	}
+
+	types, err := ontology.FullTypeHierarchy(conceptsApiResponse.Type)
+	if err != nil {
+		log.WithError(err).WithField("type", conceptsApiResponse.Type).Error("getting type hierarchy")
+		return org, false, fmt.Errorf("getting type hierarchy: %w", err)
 	}
 
 	org.ID = convertID(conceptsApiResponse.ID)
 	org.APIURL = convertApiUrl(conceptsApiResponse.ApiURL, "organisations")
 	org.PrefLabel = conceptsApiResponse.PrefLabel
-	org.Types = mapper.FullTypeHierarchy(conceptsApiResponse.Type)
+	org.Types = types
 	org.DirectType = conceptsApiResponse.Type
 	org.PostalCode = conceptsApiResponse.PostalCode
 	org.CountryCode = conceptsApiResponse.CountryCode
@@ -264,13 +271,25 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 	var subsidiaries = []Subsidiary{}
 	for _, item := range conceptsApiResponse.Related {
 		c := item.Concept
+
+		types, err := ontology.FullTypeHierarchy(c.Type)
+		if err != nil {
+			log.WithError(err).
+				WithFields(map[string]interface{}{
+					"type":        conceptsApiResponse.Type,
+					"relatedUUID": c.ID,
+				}).
+				Error("getting type hierarchy for related concept")
+			return Organisation{}, false, fmt.Errorf("getting type hierarchy: %w", err)
+		}
+
 		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == hasParentPredicate {
 			parent := &Parent{}
 			parent.ID = convertID(c.ID)
 			parent.APIURL = convertApiUrl(c.ApiURL, "organisations")
 			parent.PrefLabel = c.PrefLabel
 			parent.DirectType = c.Type
-			parent.Types = mapper.FullTypeHierarchy(c.Type)
+			parent.Types = types
 			org.Parent = parent
 		}
 		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == isParentPredicate {
@@ -279,7 +298,7 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 			subsidiary.APIURL = convertApiUrl(c.ApiURL, "organisations")
 			subsidiary.PrefLabel = c.PrefLabel
 			subsidiary.DirectType = c.Type
-			subsidiary.Types = mapper.FullTypeHierarchy(c.Type)
+			subsidiary.Types = types
 			subsidiaries = append(subsidiaries, subsidiary)
 		}
 		if strings.TrimPrefix(item.Predicate, ontologyPrefix) == issuedPredicate {
@@ -288,7 +307,7 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 			f.APIURL = convertApiUrl(c.ApiURL, "things")
 			f.PrefLabel = c.PrefLabel
 			f.DirectType = c.Type
-			f.Types = mapper.FullTypeHierarchy(c.Type)
+			f.Types = types
 			f.Figi = c.Figi
 			org.FinancialInstrument = f
 		}
