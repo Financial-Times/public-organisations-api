@@ -32,7 +32,6 @@ type Organisation struct {
 	Thing
 	ProperName             string               `json:"properName,omitempty"`
 	ShortName              string               `json:"shortName,omitempty"`
-	HiddenLabel            string               `json:"hiddenLabel,omitempty"`
 	FormerNames            []string             `json:"formerNames,omitempty"`
 	CountryCode            string               `json:"countryCode,omitempty"`
 	CountryOfIncorporation string               `json:"countryOfIncorporation,omitempty"`

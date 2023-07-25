@@ -250,8 +250,6 @@ func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transI
 			org.ProperName = label.Value
 		case compare("/shortName"):
 			org.ShortName = label.Value
-		case compare("/hiddenLabel"):
-			org.HiddenLabel = label.Value
 		case compare("/formerName"):
 			formerNames = append(formerNames, label.Value)
 		}
