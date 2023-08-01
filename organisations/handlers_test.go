@@ -222,10 +222,6 @@ var getCompleteOrganisationAsConcept = `{
 		{
 			"type": "http://www.ft.com/ontology/shortName",
 			"value": "Nintendo"
-		},
-		{
-			"type": "http://www.ft.com/ontology/hiddenLabel",
-			"value": "NINTENDO CO., LTD."
 		}
 	],
 	"countryCode": "JP",
@@ -289,7 +285,6 @@ var getTransformedCompleteOrganisation = `{
 	"prefLabel":"Nintendo Co Ltd",
 	"properName":"Nintendo Co., Ltd.",
 	"shortName":"Nintendo",
-	"hiddenLabel":"NINTENDO CO., LTD.",
 	"formerNames":[
 		"Nintendo Playing Card Co., Ltd."
 	],
@@ -306,8 +301,7 @@ var getTransformedCompleteOrganisation = `{
 	"labels":[
 		"Nintendo Playing Card Co., Ltd.",
 		"Nintendo Co., Ltd.",
-		"Nintendo",
-		"NINTENDO CO., LTD."
+		"Nintendo"
 	],
 	"leiCode":"353800FEEXU6I9M0ZF27",
 	"parentOrganisation":{
@@ -365,10 +359,6 @@ var getCompleteDeprecatedOrganisationAsConcept = `{
 		{
 			"type": "http://www.ft.com/ontology/shortName",
 			"value": "Nintendo"
-		},
-		{
-			"type": "http://www.ft.com/ontology/hiddenLabel",
-			"value": "NINTENDO CO., LTD."
 		}
 	],
 	"countryCode": "JP",
@@ -433,7 +423,6 @@ var getTransformedCompleteDeprecatedOrganisation = `{
 	"prefLabel":"Nintendo Co Ltd",
 	"properName":"Nintendo Co., Ltd.",
 	"shortName":"Nintendo",
-	"hiddenLabel":"NINTENDO CO., LTD.",
 	"formerNames":["Nintendo Playing Card Co., Ltd."],
 	"countryCode":"JP",
 	"countryOfIncorporation":"JP",
@@ -448,8 +437,7 @@ var getTransformedCompleteDeprecatedOrganisation = `{
 	"labels":[
 		"Nintendo Playing Card Co., Ltd.",
 		"Nintendo Co., Ltd.",
-		"Nintendo",
-		"NINTENDO CO., LTD."
+		"Nintendo"
 	],
 	"leiCode":"353800FEEXU6I9M0ZF27",
 	"parentOrganisation":{
