@@ -5,9 +5,8 @@ go 1.22
 require (
 	github.com/Financial-Times/cm-graph-ontology v1.2.0
 	github.com/Financial-Times/go-fthealth v0.0.0-20180807113633-3d8eb430d5b5
-	github.com/Financial-Times/go-logger v0.0.0-20180323124113-febee6537e90
 	github.com/Financial-Times/go-logger/v2 v2.0.1
-	github.com/Financial-Times/http-handlers-go v0.0.0-20180517120644-2c20324ab887
+	github.com/Financial-Times/http-handlers-go/v2 v2.3.1
 	github.com/Financial-Times/service-status-go v0.0.0-20160323111542-3f5199736a3d
 	github.com/Financial-Times/transactionid-utils-go v1.0.0
 	github.com/gorilla/handlers v1.4.0
@@ -19,7 +18,6 @@ require (
 )
 
 require (
-	github.com/Financial-Times/http-handlers-go/v2 v2.3.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dchest/uniuri v0.0.0-20200228104902-7aecb25e1fe5 // indirect
 	github.com/google/uuid v1.3.0 // indirect
