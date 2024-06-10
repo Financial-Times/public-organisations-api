@@ -6,6 +6,7 @@ import (
 	"os"
 
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
+	"github.com/Financial-Times/go-logger/v2"
 	"github.com/Financial-Times/http-handlers-go/v2/httphandlers"
 	"github.com/Financial-Times/public-organisations-api/v3/organisations"
 	status "github.com/Financial-Times/service-status-go/httphandlers"
