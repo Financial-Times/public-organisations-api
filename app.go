@@ -6,8 +6,7 @@ import (
 	"os"
 
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
-	logger "github.com/Financial-Times/go-logger"
-	"github.com/Financial-Times/http-handlers-go/httphandlers"
+	"github.com/Financial-Times/http-handlers-go/v2/httphandlers"
 	"github.com/Financial-Times/public-organisations-api/v3/organisations"
 	status "github.com/Financial-Times/service-status-go/httphandlers"
 
@@ -69,13 +68,13 @@ func main() {
 		EnvVar: "CONCEPTS_API",
 	})
 
-	logger.InitLogger(*appSystemCode, *logLevel)
-	logger.Infof("[Startup] public-organisations-api is starting ")
+	ftLogger := logger.NewUPPLogger(*appSystemCode, *logLevel)
+	ftLogger.Infof("[Startup] public-organisations-api is starting ")
 
 	app.Action = func() {
 
 		log.Infof("public-organisations-api will listen on port: %s", *port)
-		runServer(*port, *cacheDuration, *env, *publicConceptsApiURL)
+		runServer(*port, *cacheDuration, *env, *publicConceptsApiURL, ftLogger)
 
 	}
 	log.SetFormatter(&log.TextFormatter{DisableColors: true})
@@ -84,7 +83,7 @@ func main() {
 	app.Run(os.Args)
 }
 
-func runServer(port string, cacheDuration string, env string, publicConceptsApiURL string) {
+func runServer(port string, cacheDuration string, env string, publicConceptsApiURL string, ftLogger *logger.UPPLogger) {
 
 	if duration, durationErr := time.ParseDuration(cacheDuration); durationErr != nil {
 		log.Fatalf("Failed to parse cache duration string, %v", durationErr)
@@ -94,7 +93,7 @@ func runServer(port string, cacheDuration string, env string, publicConceptsApiU
 
 	servicesRouter := mux.NewRouter()
 
-	handler := organisations.NewHandler(&httpClient, publicConceptsApiURL)
+	handler := organisations.NewHandler(&httpClient, publicConceptsApiURL, ftLogger)
 
 	// Healthchecks and standards first
 	healthCheck := fthealth.TimedHealthCheck{
@@ -113,7 +112,7 @@ func runServer(port string, cacheDuration string, env string, publicConceptsApiU
 	handler.RegisterHandlers(servicesRouter)
 
 	var monitoringRouter http.Handler = servicesRouter
-	monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(log.StandardLogger(), monitoringRouter)
+	monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(ftLogger, monitoringRouter)
 	monitoringRouter = httphandlers.HTTPMetricsHandler(metrics.DefaultRegistry, monitoringRouter)
 
 	// The following endpoints should not be monitored or logged (varnish calls one of these every second, depending on config)

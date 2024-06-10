@@ -10,7 +10,7 @@ import (
 
 	ontology "github.com/Financial-Times/cm-graph-ontology"
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
-	logger "github.com/Financial-Times/go-logger"
+	logger "github.com/Financial-Times/go-logger/v2"
 	"github.com/Financial-Times/service-status-go/gtg"
 	transactionidutils "github.com/Financial-Times/transactionid-utils-go"
 	"github.com/gorilla/handlers"
@@ -24,6 +24,7 @@ type HTTPClient interface {
 type OrganisationsHandler struct {
 	client      HTTPClient
 	conceptsURL string
+	logger      *logger.UPPLogger
 }
 
 // OrganisationDriver for cypher queries
@@ -42,15 +43,16 @@ const (
 	ftThing             = "http://www.ft.com/thing/"
 )
 
-func NewHandler(client HTTPClient, conceptsURL string) OrganisationsHandler {
+func NewHandler(client HTTPClient, conceptsURL string, ftLogger *logger.UPPLogger) OrganisationsHandler {
 	return OrganisationsHandler{
 		client,
 		conceptsURL,
+		ftLogger,
 	}
 }
 
 func (h *OrganisationsHandler) RegisterHandlers(router *mux.Router) {
-	logger.Info("Registering handlers")
+	h.logger.Info("Registering handlers")
 	mh := handlers.MethodHandler{
 		"GET": http.HandlerFunc(h.GetOrganisation),
 	}
@@ -122,7 +124,7 @@ func (h *OrganisationsHandler) GetOrganisation(w http.ResponseWriter, r *http.Re
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	if uuid == "" || !uuidMatcher.MatchString(uuid) {
 		msg := fmt.Sprintf(`uuid '%s' is either missing or invalid`, uuid)
-		logger.WithTransactionID(transID).WithUUID(uuid).Error(msg)
+		h.logger.WithTransactionID(transID).WithUUID(uuid).Error(msg)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(`{"message": "` + msg + `"}`))
 		return
@@ -174,7 +176,7 @@ func gtgCheck(handler func() (string, error)) gtg.Status {
 }
 
 func (h *OrganisationsHandler) getOrganisationViaConceptsAPI(uuid string, transID string) (organisation Organisation, found bool, err error) {
-	log := logger.WithTransactionID(transID).WithUUID(uuid)
+	log := h.logger.WithTransactionID(transID).WithUUID(uuid)
 	org := Organisation{}
 
 	reqURL := h.conceptsURL + "/concepts/" + uuid + relatedQueryParam
