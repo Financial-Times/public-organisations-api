@@ -51,11 +51,6 @@ func main() {
 		Desc:   "Log level to use",
 		EnvVar: "LOG_LEVEL",
 	})
-	env := app.String(cli.StringOpt{
-		Name:  "env",
-		Value: "local",
-		Desc:  "environment this app is running in",
-	})
 	cacheDuration := app.String(cli.StringOpt{
 		Name:   "cache-duration",
 		Value:  "30s",
@@ -75,7 +70,7 @@ func main() {
 	app.Action = func() {
 
 		log.Infof("public-organisations-api will listen on port: %s", *port)
-		runServer(*port, *cacheDuration, *env, *publicConceptsAPIURL, ftLogger)
+		runServer(*port, *cacheDuration, *publicConceptsAPIURL, ftLogger)
 
 	}
 	log.SetFormatter(&log.TextFormatter{DisableColors: true})
@@ -84,7 +79,7 @@ func main() {
 	app.Run(os.Args)
 }
 
-func runServer(port string, cacheDuration string, env string, publicConceptsAPIURL string, ftLogger *logger.UPPLogger) {
+func runServer(port string, cacheDuration string, publicConceptsAPIURL string, ftLogger *logger.UPPLogger) {
 
 	if duration, durationErr := time.ParseDuration(cacheDuration); durationErr != nil {
 		log.Fatalf("Failed to parse cache duration string, %v", durationErr)
