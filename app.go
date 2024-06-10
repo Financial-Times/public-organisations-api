@@ -62,7 +62,7 @@ func main() {
 		Desc:   "Duration Get requests should be cached for. e.g. 2h45m would set the max-age value to '7440' seconds",
 		EnvVar: "CACHE_DURATION",
 	})
-	publicConceptsApiURL := app.String(cli.StringOpt{
+	publicConceptsAPIURL := app.String(cli.StringOpt{
 		Name:   "publicConceptsApiURL",
 		Value:  "http://localhost:8081",
 		Desc:   "Public concepts API endpoint URL.",
@@ -75,7 +75,7 @@ func main() {
 	app.Action = func() {
 
 		log.Infof("public-organisations-api will listen on port: %s", *port)
-		runServer(*port, *cacheDuration, *env, *publicConceptsApiURL, ftLogger)
+		runServer(*port, *cacheDuration, *env, *publicConceptsAPIURL, ftLogger)
 
 	}
 	log.SetFormatter(&log.TextFormatter{DisableColors: true})
@@ -84,7 +84,7 @@ func main() {
 	app.Run(os.Args)
 }
 
-func runServer(port string, cacheDuration string, env string, publicConceptsApiURL string, ftLogger *logger.UPPLogger) {
+func runServer(port string, cacheDuration string, env string, publicConceptsAPIURL string, ftLogger *logger.UPPLogger) {
 
 	if duration, durationErr := time.ParseDuration(cacheDuration); durationErr != nil {
 		log.Fatalf("Failed to parse cache duration string, %v", durationErr)
@@ -94,7 +94,7 @@ func runServer(port string, cacheDuration string, env string, publicConceptsApiU
 
 	servicesRouter := mux.NewRouter()
 
-	handler := organisations.NewHandler(&httpClient, publicConceptsApiURL, ftLogger)
+	handler := organisations.NewHandler(&httpClient, publicConceptsAPIURL, ftLogger)
 
 	// Healthchecks and standards first
 	healthCheck := fthealth.TimedHealthCheck{
