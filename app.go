@@ -80,7 +80,6 @@ func main() {
 }
 
 func runServer(port string, cacheDuration string, publicConceptsAPIURL string, ftLogger *logger.UPPLogger) {
-
 	if duration, durationErr := time.ParseDuration(cacheDuration); durationErr != nil {
 		log.Fatalf("Failed to parse cache duration string, %v", durationErr)
 	} else {
