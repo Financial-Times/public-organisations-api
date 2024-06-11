@@ -18,7 +18,6 @@ import (
 	"github.com/gorilla/mux"
 	cli "github.com/jawher/mow.cli"
 	metrics "github.com/rcrowley/go-metrics"
-	log "github.com/sirupsen/logrus"
 )
 
 var httpClient = http.Client{
@@ -69,19 +68,17 @@ func main() {
 
 	app.Action = func() {
 
-		log.Infof("public-organisations-api will listen on port: %s", *port)
+		ftLogger.Infof("public-organisations-api will listen on port: %s", *port)
 		runServer(*port, *cacheDuration, *publicConceptsAPIURL, ftLogger)
 
 	}
-	log.SetFormatter(&log.TextFormatter{DisableColors: true})
-	log.SetLevel(log.InfoLevel)
-	log.Infof("Application started with args %s", os.Args)
+	ftLogger.Infof("Application started with args %s", os.Args)
 	app.Run(os.Args)
 }
 
 func runServer(port string, cacheDuration string, publicConceptsAPIURL string, ftLogger *logger.UPPLogger) {
 	if duration, durationErr := time.ParseDuration(cacheDuration); durationErr != nil {
-		log.Fatalf("Failed to parse cache duration string, %v", durationErr)
+		ftLogger.Fatalf("Failed to parse cache duration string, %v", durationErr)
 	} else {
 		organisations.CacheControlHeader = fmt.Sprintf("max-age=%s, public", strconv.FormatFloat(duration.Seconds(), 'f', 0, 64))
 	}
@@ -122,7 +119,7 @@ func runServer(port string, cacheDuration string, publicConceptsAPIURL string, f
 	http.Handle("/", monitoringRouter)
 
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
-		log.Fatalf("Unable to start server: %v", err)
+		ftLogger.Fatalf("Unable to start server: %v", err)
 	}
 
 }
