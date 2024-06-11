@@ -42,10 +42,7 @@ To run the tests:
 Healthchecks: [http://localhost:8080/__health](http://localhost:8080/__health)
 
 ### Logging
-* The application uses logrus, the logfile is initilised in `main.go`. 
-* Logging requires an env app parameter for all enviroments other than local. 
-* Logs are written to a file.
-* When the application is run locally, logging is written into the console. If you want to log locally to file, you need to pass in an env parameter that is different than local.
+* The application uses [go-logger](https://github.com/Financial-Times/go-logger) 
  
  NOTE: The `/__build-info` and `/__gtg` endpoints are not logged as they are called very often from the healthchecking services and this information is not needed in the logs or Splunk.
 
