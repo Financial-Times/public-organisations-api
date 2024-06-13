@@ -6,8 +6,8 @@ import (
 	"os"
 
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
-	logger "github.com/Financial-Times/go-logger"
-	"github.com/Financial-Times/http-handlers-go/httphandlers"
+	"github.com/Financial-Times/go-logger/v2"
+	"github.com/Financial-Times/http-handlers-go/v2/httphandlers"
 	"github.com/Financial-Times/public-organisations-api/v3/organisations"
 	status "github.com/Financial-Times/service-status-go/httphandlers"
 
@@ -18,7 +18,6 @@ import (
 	"github.com/gorilla/mux"
 	cli "github.com/jawher/mow.cli"
 	metrics "github.com/rcrowley/go-metrics"
-	log "github.com/sirupsen/logrus"
 )
 
 var httpClient = http.Client{
@@ -51,50 +50,42 @@ func main() {
 		Desc:   "Log level to use",
 		EnvVar: "LOG_LEVEL",
 	})
-	env := app.String(cli.StringOpt{
-		Name:  "env",
-		Value: "local",
-		Desc:  "environment this app is running in",
-	})
 	cacheDuration := app.String(cli.StringOpt{
 		Name:   "cache-duration",
 		Value:  "30s",
 		Desc:   "Duration Get requests should be cached for. e.g. 2h45m would set the max-age value to '7440' seconds",
 		EnvVar: "CACHE_DURATION",
 	})
-	publicConceptsApiURL := app.String(cli.StringOpt{
+	publicConceptsAPIURL := app.String(cli.StringOpt{
 		Name:   "publicConceptsApiURL",
 		Value:  "http://localhost:8081",
 		Desc:   "Public concepts API endpoint URL.",
 		EnvVar: "CONCEPTS_API",
 	})
 
-	logger.InitLogger(*appSystemCode, *logLevel)
-	logger.Infof("[Startup] public-organisations-api is starting ")
+	ftLogger := logger.NewUPPLogger(*appSystemCode, *logLevel)
+	ftLogger.Infof("[Startup] public-organisations-api is starting ")
 
 	app.Action = func() {
 
-		log.Infof("public-organisations-api will listen on port: %s", *port)
-		runServer(*port, *cacheDuration, *env, *publicConceptsApiURL)
+		ftLogger.Infof("public-organisations-api will listen on port: %s", *port)
+		runServer(*port, *cacheDuration, *publicConceptsAPIURL, ftLogger)
 
 	}
-	log.SetFormatter(&log.TextFormatter{DisableColors: true})
-	log.SetLevel(log.InfoLevel)
-	log.Infof("Application started with args %s", os.Args)
+	ftLogger.Infof("Application started with args %s", os.Args)
 	app.Run(os.Args)
 }
 
-func runServer(port string, cacheDuration string, env string, publicConceptsApiURL string) {
-
+func runServer(port string, cacheDuration string, publicConceptsAPIURL string, ftLogger *logger.UPPLogger) {
 	if duration, durationErr := time.ParseDuration(cacheDuration); durationErr != nil {
-		log.Fatalf("Failed to parse cache duration string, %v", durationErr)
+		ftLogger.Fatalf("Failed to parse cache duration string, %v", durationErr)
 	} else {
 		organisations.CacheControlHeader = fmt.Sprintf("max-age=%s, public", strconv.FormatFloat(duration.Seconds(), 'f', 0, 64))
 	}
 
 	servicesRouter := mux.NewRouter()
 
-	handler := organisations.NewHandler(&httpClient, publicConceptsApiURL)
+	handler := organisations.NewHandler(&httpClient, publicConceptsAPIURL, ftLogger)
 
 	// Healthchecks and standards first
 	healthCheck := fthealth.TimedHealthCheck{
@@ -113,7 +104,7 @@ func runServer(port string, cacheDuration string, env string, publicConceptsApiU
 	handler.RegisterHandlers(servicesRouter)
 
 	var monitoringRouter http.Handler = servicesRouter
-	monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(log.StandardLogger(), monitoringRouter)
+	monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(ftLogger, monitoringRouter)
 	monitoringRouter = httphandlers.HTTPMetricsHandler(metrics.DefaultRegistry, monitoringRouter)
 
 	// The following endpoints should not be monitored or logged (varnish calls one of these every second, depending on config)
@@ -128,7 +119,7 @@ func runServer(port string, cacheDuration string, env string, publicConceptsApiU
 	http.Handle("/", monitoringRouter)
 
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
-		log.Fatalf("Unable to start server: %v", err)
+		ftLogger.Fatalf("Unable to start server: %v", err)
 	}
 
 }

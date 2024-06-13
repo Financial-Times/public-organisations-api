@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Financial-Times/go-logger"
+	"github.com/Financial-Times/go-logger/v2"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 )
@@ -36,7 +36,7 @@ type testCase struct {
 }
 
 func init() {
-	logger.InitDefaultLogger("tests")
+
 }
 
 func (mhc *mockHTTPClient) Do(req *http.Request) (resp *http.Response, err error) {
@@ -45,7 +45,7 @@ func (mhc *mockHTTPClient) Do(req *http.Request) (resp *http.Response, err error
 }
 
 func TestHandlers(t *testing.T) {
-	logger.InitLogger("test-service", "debug")
+	log := logger.NewUPPInfoLogger("tests")
 	var mockClient mockHTTPClient
 	router := mux.NewRouter()
 
@@ -139,7 +139,7 @@ func TestHandlers(t *testing.T) {
 		mockClient.resp = test.clientBody
 		mockClient.statusCode = test.clientCode
 		mockClient.err = test.clientError
-		bh := NewHandler(&mockClient, "localhost:8080/concepts")
+		bh := NewHandler(&mockClient, "localhost:8080/concepts", log)
 		bh.RegisterHandlers(router)
 
 		rr := httptest.NewRecorder()
@@ -157,6 +157,7 @@ func TestHandlers(t *testing.T) {
 }
 
 func TestHeadersOKOnFoundForCanonicalNode(t *testing.T) {
+	log := logger.NewUPPInfoLogger("tests")
 	var mockClient mockHTTPClient
 	mockClient.resp = getBasicOrganisationAsConcept
 	mockClient.statusCode = 200
@@ -165,7 +166,7 @@ func TestHeadersOKOnFoundForCanonicalNode(t *testing.T) {
 	CacheControlHeader = expectedCacheControlHeader
 
 	router := mux.NewRouter()
-	bh := NewHandler(&mockClient, "localhost:8080/concepts")
+	bh := NewHandler(&mockClient, "localhost:8080/concepts", log)
 	bh.RegisterHandlers(router)
 
 	rec := httptest.NewRecorder()
